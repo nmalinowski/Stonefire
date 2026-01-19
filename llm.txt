@@ -1,0 +1,16 @@
+# LLM Hints & Indexing (short discoverable file)
+# Point users/agents to the full guidance file for extraction/citation rules
+# Replace example.com with your canonical domain
+
+version: 1.1
+site: https://stonefire.malinowskiconsulting.com/
+full: https://stonefire.malinowskiconsulting.com/docs/llm-full.txt
+preferred_citation: "Stonefire (2026). Stonefire — Prehistoric Trading Card Game. https://stonefire.malinowskiconsulting.com/"
+update_frequency: monthly
+contact: nathan@malinowskiconsulting.com
+license: GNU-GPLv3
+agent_instructions: .github/copilot-instructions.md
+changelog: |
+  2026-01-18 — Added `.github/copilot-instructions.md` and clarified debugging & deployment notes.
+notes: |
+  This is a short LLM helper file intended to point to the canonical, richer docs file. For full usage/citation rules see /docs/llm-full.txt

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Stonefire — Free Prehistoric Strategy Trading Card Game | Play in Browser</title>
+    <meta name="description"
+        content="Stonefire is a free browser-based prehistoric strategy trading-card game. Build decks and outplay your opponent with factions like Triassic, Jurassic, and Cretaceous.">
+    <link rel="canonical" href="https://stonefire.malinowskiconsulting.com/">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content="Stonefire — Prehistoric Strategy Trading Card Game">
+    <meta property="og:description"
+        content="Play Stonefire — a free browser trading-card game with prehistoric factions. No download, instant play.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stonefire.malinowskiconsulting.com/">
+    <meta property="og:site_name" content="Stonefire">
+    <meta property="og:image" content="https://stonefire.malinowskiconsulting.com/assets/icons/triassic.svg">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Stonefire — Prehistoric Trading Card Game">
+    <meta name="twitter:description"
+        content="Free browser-based prehistoric strategy trading-card game. Build decks, battle online.">
+    <meta name="twitter:image" content="https://stonefire.malinowskiconsulting.com/assets/icons/triassic.svg">
+
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+    <link rel="icon" href="/assets/icons/triassic.svg" type="image/svg+xml">
+
+    <!-- Minimal utilities for accessibility-only classes -->
+    <style>
+        .visually-hidden {
+            position: absolute !important;
+            height: 1px;
+            width: 1px;
+            overflow: hidden;
+            clip: rect(1px, 1px, 1px, 1px);
+            white-space: nowrap;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        .skip-link:focus {
+            position: static;
+            width: auto;
+            height: auto;
+            left: auto;
+            top: auto;
+            background: #fff;
+            padding: 0.5rem;
+            z-index: 1000;
+        }
+    </style>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "name": "Stonefire",
+          "url": "https://stonefire.malinowskiconsulting.com/",
+          "logo": "https://stonefire.malinowskiconsulting.com/assets/icons/triassic.svg"
+        },
+        {
+          "@type": "WebSite",
+          "url": "https://stonefire.malinowskiconsulting.com/",
+          "name": "Stonefire",
+          "publisher": { "@type": "Organization", "name": "Stonefire" }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://stonefire.malinowskiconsulting.com/" }
+          ]
+        },
+        {
+          "@type": "VideoGame",
+          "name": "Stonefire",
+          "url": "https://stonefire.malinowskiconsulting.com/",
+          "description": "Stonefire is a free browser-based prehistoric strategy trading-card game.",
+          "image": "https://stonefire.malinowskiconsulting.com/assets/icons/triassic.svg",
+          "applicationCategory": "StrategyGame",
+          "operatingSystem": "Web"
+        }
+      ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/board.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Stonefire">
+    <link rel="apple-touch-icon" href="/assets/icons/triassic.svg">
+    <!-- PostHog Analytics -->
+    <script>
+        !function (t, e) {
+            var o, n, p, r;
+            e.__SV || (window.posthog && window.posthog.__loaded) || (window.posthog = e, e._i = [], e.init = function (i, s, a) {
+                function g(t, e) {
+                    var o = e.split(".");
+                    2 == o.length && (t = t[o[0]], e = o[1]),
+                        t[e] = function () {
+                            t.push([e].concat(Array.prototype.slice.call(arguments, 0)))
+                        }
+                }
+                (p = t.createElement("script")).type = "text/javascript",
+                    p.crossOrigin = "anonymous",
+                    p.async = !0,
+                    p.src = s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") + "/static/array.js",
+                    (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r);
+                var u = e;
+                for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) {
+                    var e = "posthog";
+                    return "posthog" !== a && (e += "." + a),
+                        t || (e += " (stub)"),
+                        e
+                }, u.people.toString = function () {
+                    return u.toString(1) + ".people (stub)"
+                }, o = "init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "), n = 0; n < o.length; n++)
+                    g(u, o[n]);
+                e._i.push([i, s, a])
+            }, e.__SV = 1)
+        }(document, window.posthog || []);
+        posthog.init('phc_j4vMIYBY3drWWubZXCzsLx1KBLX1vVH8qvjrlb4Ak68', {
+            api_host: 'https://us.i.posthog.com',
+            defaults: '2025-11-30',
+            person_profiles: 'identified_only'
+        })
+    </script>
+</head>
+
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <header id="site-header" role="banner">
+        <div class="header-inner">
+            <div class="header-brand">
+                <span class="header-logo">🦖</span>
+                <span class="header-title">Stonefire ☄️</span>
+            </div>
+            <h1 class="visually-hidden">Stonefire — Prehistoric Trading Card Game</h1>
+            <nav aria-label="Primary" role="navigation">
+                <button id="navToggle" aria-expanded="false" aria-controls="primaryNav" class="nav-toggle">☰</button>
+                <ul id="primaryNav" class="primary-nav">
+                    <li><a href="rules.html" title="Rules and How to Play">Rules</a></li>
+                    <li><a href="about.html" title="About Stonefire">About</a></li>
+                    <li><a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener"
+                            target="_blank">Source</a></li>
+                </ul>
+                <button id="fullscreenBtn" class="fullscreen-btn" aria-label="Toggle fullscreen mode"
+                    title="Maximize game">⛶</button>
+                <button id="installBtn" class="install-btn" aria-hidden="true" hidden
+                    aria-label="Install Stonefire web app">Install</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Exit fullscreen button (shown only in fullscreen mode) -->
+    <button id="exitFullscreenBtn" class="exit-fullscreen-btn" aria-label="Exit fullscreen mode">✕ Exit</button>
+
+    <main id="main" role="main">
+        <!-- Rotate overlay: shown on narrow portrait devices to suggest rotating for best play experience -->
+        <div id="rotate-overlay" class="rotate-overlay hidden" role="dialog" aria-hidden="true">
+            <div class="rotate-content">
+                <div class="rotate-icon">🔄</div>
+                <h2>Rotate your device</h2>
+                <p>For the best experience, rotate to landscape. Tap "Continue" to play in portrait.</p>
+                <div style="display:flex;gap:0.5rem;margin-top:1rem;justify-content:center;">
+                    <button id="rotate-continue" class="btn-primary">Continue</button>
+                    <button id="rotate-dismiss" class="btn-primary">Dismiss</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-container">
+            <!-- Enemy Area -->
+            <div id="enemy-info" class="player-info enemy">
+                <div class="health-display">
+                    <span class="health-icon">❤</span>
+                    <span id="enemy-health" class="health-value">30</span>
+                </div>
+                <div class="mana-display">
+                    <span class="mana-icon">💎</span>
+                    <span id="enemy-mana" class="mana-value">1/1</span>
+                </div>
+                <div id="enemy-deck" class="deck-counter">
+                    <span class="deck-icon">📚</span>
+                    <span id="enemy-deck-count">30</span>
+                </div>
+            </div>
+
+            <!-- Enemy Hand -->
+            <div id="enemy-hand" class="hand enemy-hand">
+                <!-- Cards rendered here (face down) -->
+            </div>
+
+            <!-- Enemy Board -->
+            <div id="enemy-board" class="board enemy-board">
+                <div class="board-slots">
+                    <div class="board-slot" data-slot="0"></div>
+                    <div class="board-slot" data-slot="1"></div>
+                    <div class="board-slot" data-slot="2"></div>
+                    <div class="board-slot" data-slot="3"></div>
+                    <div class="board-slot" data-slot="4"></div>
+                    <div class="board-slot" data-slot="5"></div>
+                    <div class="board-slot" data-slot="6"></div>
+                </div>
+            </div>
+
+            <!-- Center Divider / Turn Indicator -->
+            <div id="turn-indicator">
+                <span id="turn-text">Your Turn</span>
+                <span id="turn-number">Turn 1</span>
+            </div>
+
+            <!-- Player Board -->
+            <div id="player-board" class="board player-board">
+                <div class="board-slots">
+                    <div class="board-slot" data-slot="0"></div>
+                    <div class="board-slot" data-slot="1"></div>
+                    <div class="board-slot" data-slot="2"></div>
+                    <div class="board-slot" data-slot="3"></div>
+                    <div class="board-slot" data-slot="4"></div>
+                    <div class="board-slot" data-slot="5"></div>
+                    <div class="board-slot" data-slot="6"></div>
+                </div>
+            </div>
+
+            <!-- Player Hand -->
+            <div id="player-hand" class="hand player-hand">
+                <!-- Cards rendered here -->
+            </div>
+
+            <!-- Player Area -->
+            <div id="player-info" class="player-info player">
+                <div class="health-display">
+                    <span class="health-icon">❤</span>
+                    <span id="player-health" class="health-value">30</span>
+                </div>
+                <div class="mana-display">
+                    <span class="mana-icon">💎</span>
+                    <span id="player-mana" class="mana-value">1/1</span>
+                </div>
+                <div id="player-deck" class="deck-counter">
+                    <span class="deck-icon">📚</span>
+                    <span id="player-deck-count">30</span>
+                </div>
+                <button id="end-turn-btn" class="end-turn-btn">End Turn</button>
+            </div>
+
+            <!-- Hero Portraits (clickable for targeting) -->
+            <div id="enemy-hero" class="hero-portrait enemy-hero">
+                <div class="hero-avatar">🦖</div>
+            </div>
+            <div id="player-hero" class="hero-portrait player-hero">
+                <div class="hero-avatar">🦕</div>
+            </div>
+
+            <!-- Game Over Overlay -->
+            <div id="game-over-overlay" class="overlay hidden">
+                <div class="overlay-content">
+                    <h2 id="game-over-text">Victory!</h2>
+                    <button id="restart-btn" class="btn-primary">Play Again</button>
+                </div>
+            </div>
+
+            <!-- Faction Selector Overlay -->
+            <div id="faction-selector" class="overlay hidden">
+                <div class="overlay-content">
+                    <h2>Choose factions</h2>
+                    <p style="margin-bottom:1rem;">Changing factions will restart the game.</p>
+                    <div class="faction-grid" style="display:flex;gap:1rem;justify-content:center;margin-bottom:1rem;">
+                        <div class="faction-panel">
+                            <h3 style="margin-bottom:0.5rem;">Player</h3>
+                            <div class="faction-options player-options"
+                                style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
+                                <button class="btn-primary faction-btn" data-target="player"
+                                    data-faction="TRIASSIC"><img class="faction-icon" src="assets/icons/triassic.svg"
+                                        alt="Triassic faction icon" loading="lazy"> Triassic</button>
+                                <button class="btn-primary faction-btn" data-target="player"
+                                    data-faction="JURASSIC"><img class="faction-icon" src="assets/icons/jurassic.svg"
+                                        alt="Jurassic faction icon" loading="lazy"> Jurassic</button>
+                                <button class="btn-primary faction-btn" data-target="player"
+                                    data-faction="CRETACEOUS"><img class="faction-icon"
+                                        src="assets/icons/cretaceous.svg" alt="Cretaceous faction icon" loading="lazy">
+                                    Cretaceous</button>
+                                <button class="btn-primary faction-btn" data-target="player"
+                                    data-faction="PRIMORDIAL"><img class="faction-icon"
+                                        src="assets/icons/primordial.svg" alt="Primordial faction icon" loading="lazy">
+                                    Primordial</button>
+                                <button class="btn-primary faction-btn" data-target="player" data-faction="ICE_AGE"><img
+                                        class="faction-icon" src="assets/icons/ice_age.svg" alt="Ice Age faction icon"
+                                        loading="lazy"> Ice Age</button>
+                                <button class="btn-primary faction-btn" data-target="player" data-faction="NEUTRAL"><img
+                                        class="faction-icon" src="assets/icons/neutral.svg" alt="Neutral faction icon"
+                                        loading="lazy"> Neutral</button>
+                            </div>
+                        </div>
+
+                        <div class="faction-panel">
+                            <h3 style="margin-bottom:0.5rem;">Enemy</h3>
+                            <div class="faction-options enemy-options"
+                                style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
+                                <button class="btn-primary faction-btn" data-target="enemy" data-faction="TRIASSIC"><img
+                                        class="faction-icon" src="assets/icons/triassic.svg" alt="Triassic faction icon"
+                                        loading="lazy"> Triassic</button>
+                                <button class="btn-primary faction-btn" data-target="enemy" data-faction="JURASSIC"><img
+                                        class="faction-icon" src="assets/icons/jurassic.svg" alt="Jurassic faction icon"
+                                        loading="lazy"> Jurassic</button>
+                                <button class="btn-primary faction-btn" data-target="enemy"
+                                    data-faction="CRETACEOUS"><img class="faction-icon"
+                                        src="assets/icons/cretaceous.svg" alt="Cretaceous faction icon" loading="lazy">
+                                    Cretaceous</button>
+                                <button class="btn-primary faction-btn" data-target="enemy"
+                                    data-faction="PRIMORDIAL"><img class="faction-icon"
+                                        src="assets/icons/primordial.svg" alt="Primordial faction icon" loading="lazy">
+                                    Primordial</button>
+                                <button class="btn-primary faction-btn" data-target="enemy" data-faction="ICE_AGE"><img
+                                        class="faction-icon" src="assets/icons/ice_age.svg" alt="Ice Age faction icon"
+                                        loading="lazy"> Ice Age</button>
+                                <button class="btn-primary faction-btn" data-target="enemy" data-faction="NEUTRAL"><img
+                                        class="faction-icon" src="assets/icons/neutral.svg" alt="Neutral faction icon"
+                                        loading="lazy"> Neutral</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:0.75rem;justify-content:center;">
+                        <button id="faction-apply" class="btn-primary">Apply</button>
+                        <button id="faction-cancel" class="btn-primary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Faction Confirm Overlay -->
+            <div id="faction-confirm" class="overlay hidden">
+                <div class="overlay-content">
+                    <h2>Confirm faction selection</h2>
+                    <div style="display:flex;gap:1rem;justify-content:center;align-items:center;margin:1rem 0;">
+                        <div style="text-align:center;">
+                            <h4>Player</h4>
+                            <div id="confirm-player-icon" class="confirm-hero"></div>
+                            <div id="confirm-player-label"></div>
+                        </div>
+                        <div style="text-align:center;">
+                            <h4>Enemy</h4>
+                            <div id="confirm-enemy-icon" class="confirm-hero"></div>
+                            <div id="confirm-enemy-label"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:0.75rem;justify-content:center;">
+                        <button id="faction-confirm-apply" class="btn-primary">Confirm & Restart</button>
+                        <button id="faction-confirm-cancel" class="btn-primary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Setup modal (shown on first visit) -->
+            <div id="game-setup" class="overlay hidden" aria-hidden="true">
+                <div class="overlay-content setup-content">
+                    <h2>Game Setup</h2>
+                    <div class="setup-steps">
+                        <div class="setup-step" data-step="1">
+                            <label for="player-name" style="display:block;margin-bottom:0.5rem;font-weight:700;">What's
+                                your name?</label>
+                            <input id="player-name" type="text" placeholder="Enter your name"
+                                style="padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);width:100%;max-width:320px;">
+                            <div style="margin-top:0.75rem;">
+                                <button id="setup-name-next" class="btn-primary">Next</button>
+                            </div>
+                        </div>
+
+                        <div class="setup-step hidden" data-step="2">
+                            <p style="margin-bottom:0.5rem;font-weight:700;">Choose your faction</p>
+                            <div class="faction-options setup-player-options"
+                                style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:0.5rem;">
+                                <button class="btn-primary setup-faction-btn" data-faction="TRIASSIC">Triassic</button>
+                                <button class="btn-primary setup-faction-btn" data-faction="JURASSIC">Jurassic</button>
+                                <button class="btn-primary setup-faction-btn"
+                                    data-faction="CRETACEOUS">Cretaceous</button>
+                                <button class="btn-primary setup-faction-btn"
+                                    data-faction="PRIMORDIAL">Primordial</button>
+                                <button class="btn-primary setup-faction-btn" data-faction="ICE_AGE">Ice Age</button>
+                                <button class="btn-primary setup-faction-btn" data-faction="NEUTRAL">Neutral</button>
+                            </div>
+                            <div><button id="setup-player-next" class="btn-primary" disabled>Next</button></div>
+                        </div>
+
+                        <div class="setup-step hidden" data-step="3">
+                            <p style="margin-bottom:0.5rem;font-weight:700;">Choose opponent's faction</p>
+                            <div class="faction-options setup-enemy-options"
+                                style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:0.5rem;">
+                                <button class="btn-primary setup-faction-btn" data-faction="TRIASSIC">Triassic</button>
+                                <button class="btn-primary setup-faction-btn" data-faction="JURASSIC">Jurassic</button>
+                                <button class="btn-primary setup-faction-btn"
+                                    data-faction="CRETACEOUS">Cretaceous</button>
+                                <button class="btn-primary setup-faction-btn"
+                                    data-faction="PRIMORDIAL">Primordial</button>
+                                <button class="btn-primary setup-faction-btn" data-faction="ICE_AGE">Ice Age</button>
+                                <button class="btn-primary setup-faction-btn" data-faction="NEUTRAL">Neutral</button>
+                            </div>
+                            <div><button id="setup-enemy-next" class="btn-primary" disabled>Next</button></div>
+                        </div>
+
+                        <div class="setup-step hidden" data-step="4">
+                            <p style="margin-bottom:0.5rem;font-weight:700;">Ready to start?</p>
+                            <div id="setup-summary" style="margin-bottom:0.75rem;text-align:center;"></div>
+                            <div><button id="setup-start" class="btn-primary">Start Game</button></div>
+                        </div>
+                    </div>
+                    <div style="margin-top:0.75rem;text-align:center;"><button id="setup-cancel"
+                            class="btn-secondary">Cancel</button></div>
+                </div>
+            </div>
+
+            <!-- Attack Arrow (for visual feedback) -->
+            <svg id="attack-arrow" class="attack-arrow hidden">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#ff4444" />
+                    </marker>
+                </defs>
+                <line id="arrow-line" stroke="#ff4444" stroke-width="3" marker-end="url(#arrowhead)" />
+            </svg>
+
+            <!-- Floating Damage Numbers Container -->
+            <div id="damage-numbers"></div>
+        </div>
+
+
+
+        <noscript class="no-js-warning">This site requires JavaScript to run the game. Some functionality is unavailable
+            without JavaScript.</noscript>
+    </main>
+
+    <footer id="site-footer">
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="/privacy.html">Privacy</a>
+                <a href="/terms.html">Terms</a>
+                <a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener"
+                    target="_blank">GitHub Repository</a>
+            </div>
+            <div class="footer-middle">
+                <span>Made with</span>
+                <svg class="heart-icon" viewbox="0 0 24 24" fill="currentColor" width="20" height="20">
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                <span>in</span>
+                <img src="assets/icons/texas.svg" alt="Texas" class="texas-icon" width="24" height="24" loading="lazy">
+                <span>
+                    <strong>Texas</strong>
+                </span>
+            </div>
+            <div class="footer-copy">
+                <div class="footer-links">
+                    <span>© 2025-2026 <a href="https://www.malinowskiconsulting.com">Malinowski Consulting,
+                            LLC</a></span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

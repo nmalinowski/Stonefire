@@ -1,0 +1,9 @@
+# Allow full crawling by default; update to restrict private directories if needed
+# Last updated: 2026-01-18
+User-agent: *
+Disallow:
+
+# Sitemap reference
+Sitemap: https://stonefire.malinowskiconsulting.com/sitemap.xml
+
+# If you add staging/admin or other non-public areas, add Disallow rules here.

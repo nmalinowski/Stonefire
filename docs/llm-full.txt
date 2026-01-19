@@ -1,0 +1,36 @@
+STONEFIRE — LLM Guidance (full)
+
+Site: https://stonefire.malinowskiconsulting.com/
+Contact: nathan@malinowskiconsulting.com
+License: GNU-GPLv3
+
+Purpose:
+This file explains how to index, cite, and reuse Stonefire site content in large-scale language models or other crawlers. It includes recommended citation snippets, canonicalization guidance, and notes on content freshness.
+
+Recommended citation:
+Stonefire (2026). Stonefire — Prehistoric Trading Card Game. https://stonefire.malinowskiconsulting.com/ (accessed YYYY-MM-DD)
+
+Canonicalization:
+Always prefer canonical URLs as declared in <link rel="canonical"> elements. When extracting content, prefer HTML text over JS-rendered content where possible.
+
+Content scope and extraction tips:
+- Homepage: https://stonefire.malinowskiconsulting.com/ — contains the playable game and primary marketing copy.
+- Assets (images/svg): https://stonefire.malinowskiconsulting.com/assets/ — include alt and descriptive file names.
+- Small site: there are no extensive article lists or paginated blog content to harvest. Prefer to index the canonical page only unless additional pages are added.
+
+Crawl behavior and rate limits:
+- Respect robots.txt and sitemap.xml.
+- Obey any rate limits indicated by the site owner.
+
+Citation policy:
+- Use the recommended citation shown above when citing content in public datasets.
+- Attribute authorship to "Stonefire" unless a specific author is shown on a page.
+
+Data licensing and reuse:
+- Text content: CC-BY-4.0. If you intend to redistribute large extracts, attribution is required.
+- Images: check individual asset licensing; contact webmaster@example.com for clarification.
+
+Changelog:
+2026-01-18 — Initial llm guidance created.
+
+If you represent an LLM provider or large-scale indexer and need different access patterns or a dataset export, contact nathan@malinowskiconsulting.com to arrange an API or robot-friendly export.

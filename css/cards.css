@@ -1,0 +1,357 @@
+/* Stonefire - Card Component Styles */
+
+/* Base Card */
+.card {
+    position: relative;
+    width: var(--card-width);
+    height: var(--card-height);
+    border-radius: 8px;
+    background: var(--bg-medium);
+    border: 2px solid var(--bg-light);
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    overflow: hidden;
+    user-select: none;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-card-hover);
+}
+
+/* Card Face Down (Enemy Hand) */
+.card.face-down {
+    background:
+        repeating-linear-gradient(
+            45deg,
+            var(--bg-medium),
+            var(--bg-medium) 10px,
+            var(--bg-light) 10px,
+            var(--bg-light) 20px
+        );
+    border-color: var(--jurassic-red);
+    cursor: default;
+}
+
+.card.face-down::after {
+    content: '?';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    color: var(--text-secondary);
+    opacity: 0.3;
+}
+
+/* Card Structure */
+.card-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Card Mana Cost */
+.card-cost {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--mana-available) 0%, #3d7ab8 100%);
+    border: 2px solid #2980b9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    z-index: 5;
+}
+
+/* Card Art Area */
+.card-art {
+    height: 55%;
+    background: var(--bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Faction Gradient Overlays */
+.card.faction-triassic .card-art {
+    background: linear-gradient(135deg, var(--triassic-green) 0%, #2d5a31 100%);
+}
+
+.card.faction-jurassic .card-art {
+    background: linear-gradient(135deg, var(--jurassic-red) 0%, #5a2323 100%);
+}
+
+.card.faction-cretaceous .card-art {
+    background: linear-gradient(135deg, var(--cretaceous-blue) 0%, #253a5a 100%);
+}
+
+.card.faction-primordial .card-art {
+    background: linear-gradient(135deg, var(--primordial-purple) 0%, #3f235a 100%);
+}
+
+.card.faction-iceage .card-art {
+    background: linear-gradient(135deg, var(--ice-age-white) 0%, #6a7a8a 100%);
+}
+
+/* Card Name */
+.card-name {
+    padding: var(--spacing-xs);
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Card Text/Abilities */
+.card-text {
+    flex: 1;
+    padding: var(--spacing-xs);
+    font-size: 0.6rem;
+    text-align: center;
+    color: var(--text-secondary);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card Stats (Attack/Health) - Creatures Only */
+.card-stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 var(--spacing-xs) var(--spacing-xs);
+}
+
+.card-attack, .card-health {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.card-attack {
+    background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+    border: 2px solid #b7950b;
+    color: white;
+}
+
+.card-health {
+    background: linear-gradient(135deg, var(--health-full) 0%, var(--health-damaged) 100%);
+    border: 2px solid #a93226;
+    color: white;
+}
+
+/* Spell Cards */
+.card.type-spell .card-stats {
+    display: none;
+}
+
+.card.type-spell .card-art {
+    height: 50%;
+}
+
+.card.type-spell .card-text {
+    flex: 1;
+}
+
+/* Relic Cards */
+.card.type-relic {
+    border-color: var(--accent-gold);
+}
+
+.card.type-relic .card-art {
+    height: 50%;
+}
+
+/* Keyword Badges */
+.card-keywords {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 4;
+}
+
+.keyword-badge {
+    font-size: 0.5rem;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.keyword-badge.guard {
+    background: var(--ice-age-white);
+    color: var(--bg-dark);
+}
+
+.keyword-badge.charge {
+    background: var(--accent-red);
+    color: white;
+}
+
+.keyword-badge.venomous {
+    background: #27ae60;
+    color: white;
+}
+
+/* Playable Card Highlight */
+.card.playable {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 10px rgba(39, 174, 96, 0.4);
+}
+
+/* Unplayable Card (not enough mana) */
+.card.unplayable {
+    filter: brightness(0.7);
+}
+
+.card.unplayable .card-cost {
+    background: linear-gradient(135deg, #7f8c8d 0%, #5d6d7e 100%);
+    border-color: #5d6d7e;
+}
+
+/* Dragging State */
+.card.dragging {
+    opacity: 0.8;
+    transform: scale(1.1) rotate(5deg);
+    z-index: 1000;
+    cursor: grabbing;
+}
+
+/* Card Preview (larger view on hover) */
+.card-preview {
+    position: fixed;
+    width: 200px;
+    height: 280px;
+    z-index: 500;
+    pointer-events: none;
+    transform: scale(0);
+    transition: transform var(--transition-fast);
+}
+
+.card-preview.visible {
+    transform: scale(1);
+}
+
+.card-preview .card {
+    width: 100%;
+    height: 100%;
+}
+
+.card-preview .card-name {
+    font-size: 1rem;
+}
+
+.card-preview .card-text {
+    font-size: 0.85rem;
+    padding: var(--spacing-sm);
+}
+
+.card-preview .card-cost {
+    width: 40px;
+    height: 40px;
+    font-size: 1.4rem;
+}
+
+.card-preview .card-attack,
+.card-preview .card-health {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+}
+
+/* Board Card (smaller) */
+.board-slot .card {
+    width: 100%;
+    height: 100%;
+}
+
+.board-slot .card .card-cost {
+    width: 22px;
+    height: 22px;
+    font-size: 0.8rem;
+}
+
+.board-slot .card .card-art {
+    height: 50%;
+    font-size: 2rem;
+}
+
+.board-slot .card .card-name {
+    font-size: 0.55rem;
+    padding: 2px;
+}
+
+.board-slot .card .card-text {
+    display: none;
+}
+
+.board-slot .card .card-attack,
+.board-slot .card .card-health {
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+}
+
+/* Animation: Card entering hand */
+@keyframes card-draw {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card.drawing {
+    animation: card-draw 0.4s ease-out;
+}
+
+/* Animation: Card being played */
+@keyframes card-play {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.card.playing {
+    animation: card-play 0.3s ease-out;
+}

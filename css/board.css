@@ -1,0 +1,256 @@
+/* Stonefire - Board Layout Styles */
+
+/* Hand Areas */
+.hand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    min-height: 160px;
+    position: relative;
+    width: 100%;
+}
+
+.enemy-hand {
+    padding-top: var(--spacing-xs);
+}
+
+.player-hand {
+    padding-bottom: var(--spacing-xs);
+}
+
+/* Hand cards fan effect */
+.player-hand .card {
+    transition: all var(--transition-normal);
+}
+
+.player-hand .card:hover {
+    transform: translateY(-20px) scale(1.1);
+    z-index: 100;
+}
+
+/* Board Areas */
+.board {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    position: relative;
+    width: 100%;
+}
+
+.enemy-board {
+    align-items: flex-end;
+    background: linear-gradient(to bottom, rgba(139, 58, 58, 0.1) 0%, transparent 100%);
+}
+
+.player-board {
+    align-items: flex-start;
+    background: linear-gradient(to top, rgba(74, 124, 78, 0.1) 0%, transparent 100%);
+}
+
+/* Board Slots */
+.board-slots {
+    display: flex;
+    gap: var(--spacing-lg);
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 24px;
+}
+
+.board-slot {
+    width: var(--card-width-board);
+    height: var(--card-height-board);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.board-slot.valid-target {
+    border-color: var(--accent-green);
+    background: rgba(39, 174, 96, 0.1);
+    box-shadow: inset 0 0 15px rgba(39, 174, 96, 0.2);
+}
+
+.board-slot.hover-target {
+    border-color: var(--accent-gold);
+    background: rgba(212, 175, 55, 0.15);
+    transform: scale(1.02);
+}
+
+/* Creature on Board */
+.board-slot .card {
+    width: 100%;
+    height: 100%;
+}
+
+.board-slot .card.can-attack {
+    cursor: pointer;
+}
+
+.board-slot .card.can-attack::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border: 2px solid var(--accent-green);
+    border-radius: 10px;
+    animation: pulse-ready 1.5s infinite;
+}
+
+.board-slot .card.selected {
+    transform: scale(1.05);
+    z-index: 50;
+}
+
+.board-slot .card.selected::after {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+    animation: none;
+}
+
+.board-slot .card.summoning-sick {
+    filter: brightness(0.8);
+}
+
+.board-slot .card.summoning-sick::before {
+    content: 'Zzz';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    z-index: 5;
+}
+
+/* Target Indicators */
+.card.targetable {
+    cursor: crosshair;
+}
+
+.card.targetable::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border: 2px solid var(--accent-red);
+    border-radius: 10px;
+    animation: pulse-target 1s infinite;
+}
+
+/* Hovered target (more prominent than just targetable) */
+.card.hover-target {
+    box-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
+    transform: translateY(-3px);
+    z-index: 6;
+}
+
+.hero-portrait.hover-target {
+    box-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
+    transform: scale(1.05);
+    border-color: var(--accent-red);
+}
+
+/* Guard Visual */
+.card.has-guard::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border: 3px solid var(--ice-age-white);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(168, 180, 192, 0.2) 0%, transparent 100%);
+}
+
+/* Drop Zone Indicators */
+.board.drop-active .board-slot:empty {
+    border-color: var(--accent-gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+/* Creature Stats on Board */
+.board-slot .card .card-stats {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-xs);
+}
+
+/* Attack/Health Changes */
+.stat-buffed {
+    color: var(--accent-green) !important;
+}
+
+.stat-damaged {
+    color: var(--accent-red) !important;
+}
+
+/* Animations */
+@keyframes pulse-ready {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes pulse-target {
+    0%, 100% {
+        opacity: 0.5;
+        box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .board-slots {
+        gap: var(--spacing-sm);
+    }
+
+    .board-slot {
+        width: 80px;
+        height: 105px;
+    }
+}
+
+@media (max-width: 900px) {
+    .board-slot {
+        width: 70px;
+        height: 95px;
+    }
+
+    .hand {
+        min-height: 130px;
+    }
+}
+
+@media (max-width: 600px) {
+    .board-slots {
+        gap: var(--spacing-sm);
+        justify-content: flex-start;
+        padding: 0 1rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .board-slot {
+        flex: 0 0 auto;
+        width: 64px;
+        height: 88px;
+    }
+
+    .hand { min-height: 100px; }
+}

@@ -1,0 +1,385 @@
+/* Stonefire - Animation Styles */
+
+/* Card Play Animation */
+@keyframes card-to-board {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.3);
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.card.entering-board {
+    animation: card-to-board 0.4s ease-out;
+}
+
+/* Attack Animation */
+@keyframes attack-lunge {
+    0% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-20px) scale(1.1);
+    }
+    60% {
+        transform: translateY(30px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.card.attacking {
+    animation: attack-lunge 0.4s ease-in-out;
+    z-index: 100;
+}
+
+/* Enemy Attack Animation (reverse direction) */
+@keyframes attack-lunge-enemy {
+    0% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(20px) scale(1.1);
+    }
+    60% {
+        transform: translateY(-30px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.enemy-board .card.attacking {
+    animation: attack-lunge-enemy 0.4s ease-in-out;
+}
+
+/* Damage Received */
+@keyframes damage-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    20% {
+        transform: translateX(-8px);
+    }
+    40% {
+        transform: translateX(8px);
+    }
+    60% {
+        transform: translateX(-5px);
+    }
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+.card.taking-damage {
+    animation: damage-shake 0.3s ease-out;
+}
+
+/* Death Animation */
+@keyframes creature-death {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.1);
+        filter: brightness(2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+}
+
+.card.dying {
+    animation: creature-death 0.5s ease-out forwards;
+}
+
+/* Floating Damage Number */
+@keyframes damage-float {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-30px) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.8);
+    }
+}
+
+.damage-number {
+    position: absolute;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent-red);
+    text-shadow:
+        2px 2px 0 var(--bg-dark),
+        -2px -2px 0 var(--bg-dark),
+        2px -2px 0 var(--bg-dark),
+        -2px 2px 0 var(--bg-dark);
+    animation: damage-float 1s ease-out forwards;
+    pointer-events: none;
+    z-index: 300;
+}
+
+.damage-number.heal {
+    color: var(--accent-green);
+}
+
+/* Hero Damage */
+@keyframes hero-damage {
+    0%, 100% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(0.9);
+        filter: brightness(1.5) saturate(2);
+    }
+    75% {
+        transform: scale(1.05);
+    }
+}
+
+.hero-portrait.taking-damage {
+    animation: hero-damage 0.4s ease-out;
+}
+
+/* Turn Start Banner */
+@keyframes turn-banner {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.05);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10%) scale(0.9);
+    }
+}
+
+.turn-banner {
+    position: fixed;
+    top: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    background: rgba(12, 13, 20, 0.85);
+    padding: 0.5rem 1rem;
+    border: 2px solid rgba(212, 175, 55, 0.9);
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+    animation: turn-banner 1.5s ease-out forwards;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Spell Cast Effect */
+@keyframes spell-cast {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+.spell-effect {
+    position: fixed;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.6) 0%, transparent 70%);
+    animation: spell-cast 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 400;
+}
+
+/* Card Glow Effects */
+@keyframes card-glow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+    }
+}
+
+.card.glowing {
+    animation: card-glow 1.5s ease-in-out infinite;
+}
+
+/* Mana Crystal Fill */
+@keyframes mana-fill {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.mana-crystal.filling {
+    animation: mana-fill 0.3s ease-out;
+}
+
+/* Fade In */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Slide In From Bottom */
+@keyframes slideInBottom {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in-bottom {
+    animation: slideInBottom 0.4s ease-out;
+}
+
+/* Buff Applied */
+@keyframes buff-applied {
+    0% {
+        box-shadow: 0 0 0 rgba(39, 174, 96, 0);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(39, 174, 96, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(39, 174, 96, 0.3);
+    }
+}
+
+.card.buffed {
+    animation: buff-applied 0.5s ease-out;
+}
+
+/* Win/Lose Screen */
+@keyframes victory-text {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-10deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(5deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+.overlay-content h1.victory {
+    animation: victory-text 0.8s ease-out;
+    color: var(--accent-gold);
+}
+
+.overlay-content h1.defeat {
+    animation: victory-text 0.8s ease-out;
+    color: var(--accent-red);
+}
+
+/* Pulse for Interactive Elements */
+@keyframes interactive-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.03);
+    }
+}
+
+.interactive-hint {
+    animation: interactive-pulse 1s ease-in-out infinite;
+}
+
+/* Card Burn (overdraw) */
+@keyframes card-burn {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: brightness(1);
+    }
+    30% {
+        filter: brightness(2) sepia(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-100px) rotate(15deg);
+        filter: brightness(0);
+    }
+}
+
+.card.burning {
+    animation: card-burn 0.8s ease-out forwards;
+}
+
+/* Loading Spinner */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--bg-light);
+    border-top-color: var(--accent-gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}

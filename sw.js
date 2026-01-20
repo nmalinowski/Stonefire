@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stonefire-v1';
+const CACHE_NAME = 'stonefire-v7';
 const OFFLINE_URL = '/offline.html';
 
 const ASSETS = [
@@ -29,6 +29,11 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Only handle GET requests (POST, etc. can't be cached)
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match(OFFLINE_URL))

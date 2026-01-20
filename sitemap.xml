@@ -37,5 +37,4 @@
     <priority>0.2</priority>
   </url>
   <!-- Add additional site URLs here. For dynamic sites, generate this file automatically in build/CI with exact URLs and lastmod dates. -->
-  <!-- Generated/updated: 2026-01-18 — includes LLM guidance at /docs/llm-full.txt -->
 </urlset>

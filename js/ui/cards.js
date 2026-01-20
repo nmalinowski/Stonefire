@@ -205,7 +205,9 @@ export function showCardPreview(card, x, y) {
 
     // Trigger animation
     requestAnimationFrame(() => {
-        activePreview.classList.add('visible');
+        if (activePreview) {
+            activePreview.classList.add('visible');
+        }
     });
 }
 

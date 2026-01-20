@@ -298,6 +298,29 @@ function gameReducer(state, action) {
             return newState;
         }
 
+        case ActionTypes.SUMMON_CREATURE: {
+            const newState = deepClone(state);
+            const player = newState[payload.player];
+
+            // Check board space
+            if (player.board.length >= 7) return state;
+
+            // Add creature directly to board
+            const creature = {
+                ...payload.creature,
+                instanceId: payload.creature.instanceId || `token_${Date.now()}`,
+                currentAttack: payload.creature.attack,
+                currentHealth: payload.creature.health,
+                maxHealth: payload.creature.health,
+                canAttack: payload.creature.keywords?.includes('charge'),
+                hasAttacked: false,
+                summoningSick: !payload.creature.keywords?.includes('charge')
+            };
+            player.board.push(creature);
+
+            return newState;
+        }
+
         case ActionTypes.ATTACK: {
             const newState = deepClone(state);
             const { attackerId, targetId, attackerPlayer } = payload;
@@ -356,11 +379,13 @@ function gameReducer(state, action) {
 
             if (targetId === 'hero') {
                 const player = newState[targetPlayer];
-                player.health = Math.min(player.maxHealth, player.health + amount);
+                // Allow health to exceed maxHealth (no cap)
+                player.health = player.health + amount;
             } else {
                 const creature = findCreature(newState, targetPlayer, targetId);
                 if (creature) {
-                    creature.currentHealth = Math.min(creature.maxHealth, creature.currentHealth + amount);
+                    // Allow health to exceed maxHealth (no cap)
+                    creature.currentHealth = creature.currentHealth + amount;
                 }
             }
 
@@ -427,7 +452,8 @@ function gameReducer(state, action) {
             const newState = deepClone(state);
             const player = newState[payload.player];
 
-            player.health = Math.max(0, Math.min(player.maxHealth, payload.health));
+            // Allow health to exceed maxHealth, but not go below 0
+            player.health = Math.max(0, payload.health);
 
             if (player.health <= 0) {
                 newState.gameOver = true;
@@ -523,6 +549,11 @@ export const actions = {
     destroyCreature: (player, creatureId) => ({
         type: ActionTypes.DESTROY_CREATURE,
         payload: { player, creatureId }
+    }),
+
+    summonCreature: (player, creature) => ({
+        type: ActionTypes.SUMMON_CREATURE,
+        payload: { player, creature }
     }),
 
     modifyCreature: (player, creatureId, changes) => ({

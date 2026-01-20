@@ -70,7 +70,7 @@ function cacheElements() {
 
         // Faction selector
         factionSelector: document.getElementById('faction-selector'),
-        factionButtons: document.querySelectorAll('.faction-btn'),
+        factionButtons: document.querySelectorAll('.faction-selector-card'),
         factionApply: document.getElementById('faction-apply'),
         factionCancel: document.getElementById('faction-cancel'),
 
@@ -388,14 +388,14 @@ function onFactionButtonClick(e) {
     const faction = btn.dataset.faction;
 
     // Deselect any previously selected button for this target
-    document.querySelectorAll(`.faction-btn[data-target="${target}"]`).forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll(`.faction-selector-card[data-target="${target}"]`).forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
 }
 
 function onFactionApply() {
     // Read selected buttons
-    const playerBtn = document.querySelector('.faction-btn[data-target="player"].selected');
-    const enemyBtn = document.querySelector('.faction-btn[data-target="enemy"].selected');
+    const playerBtn = document.querySelector('.faction-selector-card[data-target="player"].selected');
+    const enemyBtn = document.querySelector('.faction-selector-card[data-target="enemy"].selected');
 
     const playerFaction = playerBtn ? playerBtn.dataset.faction : 'CRETACEOUS';
     const enemyFaction = enemyBtn ? enemyBtn.dataset.faction : 'JURASSIC';

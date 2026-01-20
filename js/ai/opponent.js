@@ -21,8 +21,10 @@ const AI_CONFIG = {
  */
 export async function runAITurn() {
     const state = store.getState();
+    console.log('[AI] runAITurn called, activePlayer:', state.activePlayer, 'gameOver:', state.gameOver);
 
     if (state.activePlayer !== 'enemy' || state.gameOver) {
+        console.log('[AI] Skipping - not enemy turn or game over');
         return;
     }
 
@@ -31,6 +33,7 @@ export async function runAITurn() {
 
     // Check for lethal first
     if (hasLethal(state, 'enemy')) {
+        console.log('[AI] Has lethal! Executing...');
         await executeLethal();
         return;
     }
@@ -39,6 +42,8 @@ export async function runAITurn() {
     let madeMove = true;
     let iterations = 0;
     const maxIterations = 20; // Safety limit
+
+    console.log('[AI] Starting main loop, hand size:', state.enemy.hand.length, 'mana:', state.enemy.mana);
 
     while (madeMove && iterations < maxIterations) {
         madeMove = false;
@@ -52,6 +57,7 @@ export async function runAITurn() {
         // Try to play cards
         const cardPlayed = await tryPlayCard();
         if (cardPlayed) {
+            console.log('[AI] Played a card');
             madeMove = true;
             await wait(AI_CONFIG.ACTION_DELAY);
             continue;
@@ -60,6 +66,7 @@ export async function runAITurn() {
         // Try to make attacks
         const attacked = await tryAttack();
         if (attacked) {
+            console.log('[AI] Made an attack');
             madeMove = true;
             await wait(AI_CONFIG.ACTION_DELAY);
             continue;
@@ -67,6 +74,7 @@ export async function runAITurn() {
     }
 
     // End turn
+    console.log('[AI] Ending turn after', iterations, 'iterations');
     await wait(AI_CONFIG.ACTION_DELAY);
 
     const finalState = store.getState();
@@ -171,7 +179,9 @@ async function tryPlayCard() {
     const state = store.getState();
     const hand = state.enemy.hand;
     const mana = state.enemy.mana;
-    const boardSpace = 7 - state.enemy.board.length;
+    const boardSpace = 7 - state.enemy.board.filter(c => c).length;
+
+    console.log('[AI] tryPlayCard - hand:', hand.length, 'cards, mana:', mana, 'boardSpace:', boardSpace);
 
     // Get playable cards
     const playableCards = hand.filter(card => {
@@ -179,6 +189,8 @@ async function tryPlayCard() {
         if (card.type === 'creature' && boardSpace <= 0) return false;
         return true;
     });
+
+    console.log('[AI] Playable cards:', playableCards.length, playableCards.map(c => c.name));
 
     if (playableCards.length === 0) return false;
 
@@ -391,9 +403,19 @@ async function tryAttack() {
 export function initAI() {
     events.on('TURN_STARTED', async ({ player }) => {
         if (player === 'enemy') {
+            console.log('[AI] Enemy turn started, AI will act soon...');
             // Add slight delay before AI starts thinking
             await wait(500);
-            runAITurn();
+            try {
+                await runAITurn();
+            } catch (error) {
+                console.error('[AI] Error during AI turn:', error);
+                // Ensure turn ends even if AI errors
+                const state = store.getState();
+                if (state.activePlayer === 'enemy' && !state.gameOver) {
+                    endTurn();
+                }
+            }
         }
     });
 }

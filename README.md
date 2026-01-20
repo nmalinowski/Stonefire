@@ -41,7 +41,16 @@ Reduce your opponent's health from 30 to 0.
 | **Guard** | Enemies must attack this creature first |
 | **Venomous** | Destroys any creature this damages |
 | **Armored X** | Reduces incoming damage by X |
-| **Extinct** | Triggers an effect when this creature dies |
+
+### Triggered Abilities
+| Ability | When It Triggers |
+|---------|------------------|
+| **Battlecry** | When the creature is played from hand |
+| **Extinct** | When the creature dies |
+| **On Turn Start/End** | At the start/end of a turn |
+| **On Draw** | When a card is drawn |
+| **On Summon** | When a creature enters the board |
+| **On Damage** | When this creature takes damage |
 
 ## Controls
 
@@ -98,6 +107,16 @@ stonefire/
 - **Event System**: Pub/sub pattern for game events
 - **Rendering**: State-driven DOM updates
 - **AI**: Heuristic-based decision making with board evaluation
+
+## TODO
+- Replace placeholder emoji's with custom card art
+- User profile for saved preferences and progress tracking
+- Achievements
+- Campaign/story mode
+- Card collection/unlocking, Deck builder UI + Custom Decks
+- Multiple AI personalities
+- Sound effects
+- Online multiplayer (WebSocket server)?? Maybe
 
 ## Browser Support
 

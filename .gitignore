@@ -20,7 +20,11 @@ Gemfile.lock
 # Ignore Mac system files
 .DS_Store
 
+
+
 # Ignore AI AGENT files
+.claude/*
+.playwright-mcp/*
 *CLAUDE.md
 *AGENTS.md
 *copilot-instructions.md

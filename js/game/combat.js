@@ -4,6 +4,7 @@
  */
 
 import { store, actions, events } from './state.js';
+import { checkTriggeredEffects } from './effects.js';
 
 /**
  * Resolve combat between attacker and defender
@@ -81,6 +82,24 @@ function resolveCreatureAttack(attackerPlayer, attacker, targetPlayer, defender)
         defenderDamage,
         defender.instanceId
     ));
+
+    // Check for TAKES_DAMAGE triggered abilities (e.g., Kentrosaurus)
+    if (attackerDamage > 0) {
+        checkTriggeredEffects('TAKES_DAMAGE', {
+            player: targetPlayer,
+            creature: { player: targetPlayer, id: defender.instanceId },
+            attacker: { player: attackerPlayer, id: attacker.instanceId },
+            damage: attackerDamage
+        });
+    }
+    if (defenderDamage > 0) {
+        checkTriggeredEffects('TAKES_DAMAGE', {
+            player: attackerPlayer,
+            creature: { player: attackerPlayer, id: attacker.instanceId },
+            attacker: { player: targetPlayer, id: defender.instanceId },
+            damage: defenderDamage
+        });
+    }
 
     // Check for Venomous keyword
     checkVenomous(attackerPlayer, attacker, targetPlayer, defender, attackerDamage);

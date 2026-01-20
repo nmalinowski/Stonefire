@@ -12,6 +12,22 @@
     width: 100%;
 }
 
+/* Smooth card positioning when hand changes */
+.hand .card {
+    animation: cardSettle 0.15s ease-out;
+}
+
+@keyframes cardSettle {
+    from {
+        opacity: 0.8;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .enemy-hand {
     padding-top: var(--spacing-xs);
 }
@@ -70,6 +86,7 @@
     align-items: center;
     justify-content: center;
     transition: all var(--transition-fast);
+    box-sizing: border-box;
 }
 
 .board-slot.valid-target {
@@ -88,6 +105,7 @@
 .board-slot .card {
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
 }
 
 .board-slot .card.can-attack {
@@ -145,13 +163,11 @@
 /* Hovered target (more prominent than just targetable) */
 .card.hover-target {
     box-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
-    transform: translateY(-3px);
     z-index: 6;
 }
 
 .hero-portrait.hover-target {
     box-shadow: 0 0 30px rgba(231, 76, 60, 0.8);
-    transform: scale(1.05);
     border-color: var(--accent-red);
 }
 
@@ -211,6 +227,13 @@
     50% {
         opacity: 1;
         box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+    }
+}
+
+/* Desktop: prevent content shift by maintaining stable hand width */
+@media (min-width: 901px) {
+    .player-hand {
+        min-width: calc(10 * var(--card-width) + 9 * var(--spacing-md));
     }
 }
 

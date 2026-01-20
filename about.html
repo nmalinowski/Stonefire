@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,38 +9,64 @@
   <link rel="canonical" href="https://stonefire.malinowskiconsulting.com/about.html">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1a1a2e">
-  <link rel="stylesheet" href="/css/main.css">
+  <link rel="icon" href="/assets/icons/triassic.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/main.css?v=20260121">
 </head>
-<body>
 
-  <main style="padding:6rem 1rem; max-width:900px;margin:0 auto;color:var(--text-primary);">
-    <h1 style="color:var(--accent-gold);">About Stonefire</h1>
-    <p>Stonefire is a small, browser-first trading-card game built with vanilla JavaScript and thoughtful UX for mobile and desktop.</p>
-    <a href="/" style="display:inline-block;margin-top:2rem;color:var(--accent-blue);">← Return to Stonefire</a>
+<body class="static-page">
+  <header id="site-header" role="banner">
+    <div class="header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">🦖</span>
+        <span class="header-title">Stonefire ☄️</span>
+      </a>
+      <nav aria-label="Primary" role="navigation">
+        <ul class="primary-nav">
+          <li><a href="rules.html" title="Rules and How to Play">Rules</a></li>
+          <li><a href="about.html" title="About Stonefire" class="active">About</a></li>
+          <li><a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener" target="_blank">Source</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="about-container">
+    <h1>About Stonefire</h1>
+    <p>Stonefire is a small, browser-first trading-card game built with vanilla JavaScript and thoughtful UX for mobile
+      and desktop.</p>
+    <a href="/" class="back-link">← Return to Stonefire</a>
   </main>
-    <!-- Shared footer -->
-    <footer style="background:var(--bg-light); color:var(--text-primary); padding:2rem; text-align:center;">
-        <p>© 2025 - 2026 Malinowski Consulting, LLC – Digital Transformation &amp; AI Solutions</p>
-        <p>
-            <a href="tel:2626138904" style="color:inherit; text-decoration:none; font-weight:600;">Give us a call! +1
-                262-613-8904</a>
-            | League City, TX |
-            <a href="/privacy.html" style="color:inherit; text-decoration:underline; opacity:0.9;">Privacy Policy</a>
-            |
-            <a href="/terms.html" style="color:inherit; text-decoration:underline; opacity:0.9;">Terms of Service</a>
-        </p>
-        <div class="made-in-texas"
-            style="display:flex;gap:0.5rem;align-items:center;justify-content:center;margin-top:0.5rem;">
-            <span>Made with</span>
-            <svg class="heart-icon" viewbox="0 0 24 24" fill="currentColor" width="20" height="20">
-                <path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-            </svg>
-            <span>in</span>
-            <img src="/assets/icons/texas.svg" alt="Texas" width="24" height="24" loading="lazy">
-            <span><strong>Texas</strong></span>
+
+  <footer id="site-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="/rules.html">Rules</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+        <a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener"
+          target="_blank">GitHub Repository</a>
+      </div>
+      <div class="footer-middle">
+        <span>Made with</span>
+        <svg class="heart-icon" viewbox="0 0 24 24" fill="currentColor" width="20" height="20">
+          <path
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+        <span>in</span>
+        <img src="assets/icons/texas.svg" alt="Texas" class="texas-icon" width="24" height="24" loading="lazy">
+        <span>
+          <strong>Texas</strong>
+        </span>
+      </div>
+      <div class="footer-copy">
+        <div class="footer-links">
+          <span>© 2025-2026 <a href="https://www.malinowskiconsulting.com">Malinowski Consulting,
+              LLC</a></span>
         </div>
-    </footer>
+      </div>
+    </div>
+  </footer>
   <script type="module" src="/js/main.js"></script>
 </body>
+
 </html>

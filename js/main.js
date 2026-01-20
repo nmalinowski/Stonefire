@@ -9,128 +9,7 @@ import { initRenderer, render, hideGameOver, hideFactionSelector, setHeroFaction
 import { initInput } from './ui/input.js';
 import { initAI } from './ai/opponent.js';
 import { createStarterDeck, createBalancedDeck, Faction } from './data/cards.js';
-
-/**
- * Game Setup modal (first-visit flow)
- */
-function showGameSetup() {
-    const modal = document.getElementById('game-setup');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    modal.setAttribute('aria-hidden', 'false');
-    const steps = Array.from(modal.querySelectorAll('.setup-step'));
-    let current = 1;
-
-    const nameInput = document.getElementById('player-name');
-    const nameNext = document.getElementById('setup-name-next');
-    const playerNext = document.getElementById('setup-player-next');
-    const enemyNext = document.getElementById('setup-enemy-next');
-    const startBtn = document.getElementById('setup-start');
-    const cancelBtn = document.getElementById('setup-cancel');
-
-    const setupFactions = { player: null, enemy: null };
-
-    function showStep(n) {
-        steps.forEach(s => s.classList.add('hidden'));
-        const s = modal.querySelector(`.setup-step[data-step="${n}"]`);
-        if (s) s.classList.remove('hidden');
-        current = n;
-    }
-
-    // Prefill name if present
-    const storedName = localStorage.getItem('stonefire.playerName') || '';
-    if (nameInput) nameInput.value = storedName;
-
-    if (nameNext) {
-        nameNext.addEventListener('click', () => {
-            const name = (nameInput.value || '').trim();
-            if (!name) { nameInput.focus(); return; }
-            localStorage.setItem('stonefire.playerName', name);
-            showStep(2);
-        });
-    }
-
-    // faction button behavior (works for both player and enemy lists)
-    modal.querySelectorAll('.setup-faction-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const faction = btn.dataset.faction;
-            const parent = btn.closest('.setup-step');
-            // clear selections in this parent
-            parent.querySelectorAll('.setup-faction-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-
-            if (parent.dataset.step === '2') {
-                setupFactions.player = faction;
-                if (playerNext) playerNext.disabled = false;
-            } else if (parent.dataset.step === '3') {
-                setupFactions.enemy = faction;
-                if (enemyNext) enemyNext.disabled = false;
-            }
-        });
-    });
-
-    if (playerNext) {
-        playerNext.addEventListener('click', () => {
-            if (!setupFactions.player) return;
-            showStep(3);
-        });
-    }
-
-    if (enemyNext) {
-        enemyNext.addEventListener('click', () => {
-            if (!setupFactions.enemy) return;
-            // populate summary
-            const summary = document.getElementById('setup-summary');
-            const name = localStorage.getItem('stonefire.playerName') || 'Player';
-            if (summary) {
-                summary.innerHTML = `<div><strong>${name}</strong> — ${setupFactions.player}</div><div style="margin-top:0.5rem;">Opponent — ${setupFactions.enemy}</div>`;
-            }
-            showStep(4);
-        });
-    }
-
-    if (startBtn) {
-        startBtn.addEventListener('click', () => {
-            // persist factions
-            const payload = { player: setupFactions.player || 'CRETACEOUS', enemy: setupFactions.enemy || 'JURASSIC' };
-            try { localStorage.setItem('stonefire.factions', JSON.stringify(payload)); } catch (e) {}
-            localStorage.setItem('stonefire.setupComplete', '1');
-            modal.classList.add('hidden');
-            modal.setAttribute('aria-hidden', 'true');
-            // begin the game using existing SELECT_FACTION flow
-            events.emit('SELECT_FACTION', { playerFaction: payload.player, enemyFaction: payload.enemy });
-        });
-    }
-
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            modal.classList.add('hidden');
-            modal.setAttribute('aria-hidden', 'true');
-            // If user cancels entire setup, fall back to sensible defaults and start game
-            localStorage.setItem('stonefire.setupComplete', '1');
-            const playerFaction = 'CRETACEOUS';
-            const enemyFaction = 'JURASSIC';
-            events.emit('SELECT_FACTION', { playerFaction, enemyFaction });
-        });
-    }
-
-    // show step 1 initially (or skip to 2 if name exists)
-    if (nameInput && nameInput.value.trim()) {
-        showStep(2);
-    } else {
-        showStep(1);
-    }
-
-    // Close on Escape
-    const escHandler = (ev) => {
-        if (ev.key === 'Escape') {
-            modal.classList.add('hidden');
-            modal.setAttribute('aria-hidden', 'true');
-            document.removeEventListener('keydown', escHandler);
-        }
-    };
-    document.addEventListener('keydown', escHandler);
-}
+import { initWizard, showWizard } from './ui/wizard.js';
 
 /**
  * Initialize the game
@@ -147,11 +26,14 @@ function init() {
     // Set up event listeners
     setupEventListeners();
 
-    // Show the game setup modal on first load unless already completed
+    // Initialize wizard
+    initWizard();
+
+    // Show the game setup wizard on first load unless already completed
     const setupComplete = localStorage.getItem('stonefire.setupComplete');
     const storedFactions = (function() { try { return JSON.parse(localStorage.getItem('stonefire.factions') || 'null'); } catch(e){return null;} })();
     if (!setupComplete) {
-        showGameSetup();
+        showWizard();
     } else {
         // Auto-start with stored factions or sensible defaults
         const playerFaction = (storedFactions && storedFactions.player) ? storedFactions.player : 'CRETACEOUS';
@@ -424,5 +306,165 @@ function initUIEnhancements() {
     window.addEventListener('resize', checkOrientation);
     window.addEventListener('orientationchange', checkOrientation);
     checkOrientation();
+
+    // Auto-fullscreen on mobile landscape
+    let pendingFullscreen = false;
+
+    function requestNativeFullscreen() {
+        if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {
+                // Native fullscreen not available, CSS fallback is already applied
+            });
+        }
+        pendingFullscreen = false;
+    }
+
+    function handleFullscreenGesture() {
+        if (pendingFullscreen) {
+            requestNativeFullscreen();
+            document.removeEventListener('touchstart', handleFullscreenGesture);
+            document.removeEventListener('click', handleFullscreenGesture);
+        }
+    }
+
+    function checkMobileLandscape() {
+        const isMobileLandscape = window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches;
+        if (isMobileLandscape) {
+            document.body.classList.add('fullscreen-mode');
+
+            // Request native fullscreen - needs user gesture
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                // Try immediately (works if triggered by user gesture like orientationchange from physical rotation)
+                document.documentElement.requestFullscreen().catch(() => {
+                    // If immediate request fails, wait for next user interaction
+                    pendingFullscreen = true;
+                    document.addEventListener('touchstart', handleFullscreenGesture, { once: true });
+                    document.addEventListener('click', handleFullscreenGesture, { once: true });
+                });
+            }
+        } else {
+            document.body.classList.remove('fullscreen-mode');
+            pendingFullscreen = false;
+            // Exit native fullscreen when returning to portrait
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+    }
+
+    window.addEventListener('resize', checkMobileLandscape);
+    window.addEventListener('orientationchange', checkMobileLandscape);
+    checkMobileLandscape();
+
+    // Card magnification for mobile - tap to see larger card
+    initCardMagnification();
+}
+
+/**
+ * Card magnification system
+ * Hover over a card to see it full-size in an overlay (doesn't block clicks)
+ */
+function initCardMagnification() {
+    // Create magnification overlay if it doesn't exist
+    let overlay = document.querySelector('.card-magnify-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'card-magnify-overlay';
+        overlay.innerHTML = '<div class="magnified-card-container"></div>';
+        document.body.appendChild(overlay);
+    }
+
+    const container = overlay.querySelector('.magnified-card-container');
+    let hideTimeout = null;
+
+    function showMagnifiedCard(card) {
+        if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+        }
+
+        // Clone the card for display
+        const clone = card.cloneNode(true);
+        clone.classList.add('magnified-card');
+        clone.classList.remove('can-attack', 'selected', 'targetable', 'hover-target');
+
+        container.innerHTML = '';
+        container.appendChild(clone);
+        overlay.classList.add('active');
+    }
+
+    function hideMagnifiedCard() {
+        // Small delay before hiding to prevent flicker
+        hideTimeout = setTimeout(() => {
+            overlay.classList.remove('active');
+            container.innerHTML = '';
+        }, 100);
+    }
+
+    // Close on escape
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape' && overlay.classList.contains('active')) {
+            overlay.classList.remove('active');
+            container.innerHTML = '';
+        }
+    });
+
+    // Hover handlers (delegated) - only for HAND cards, not board cards
+    document.addEventListener('mouseenter', (ev) => {
+        const isMobile = window.matchMedia('(max-height: 500px) and (orientation: landscape)').matches ||
+                         window.matchMedia('(max-width: 600px)').matches;
+        if (!isMobile) return;
+
+        // ev.target might be a text node, so check it's an Element
+        if (!(ev.target instanceof Element)) return;
+        // Only magnify hand cards, not board cards (board cards need to be clickable for attacks)
+        const card = ev.target.closest('.player-hand .card');
+        if (card) {
+            showMagnifiedCard(card);
+        }
+    }, true);
+
+    document.addEventListener('mouseleave', (ev) => {
+        // ev.target might be a text node, so check it's an Element
+        if (!(ev.target instanceof Element)) return;
+        const card = ev.target.closest('.player-hand .card');
+        if (card) {
+            hideMagnifiedCard();
+        }
+    }, true);
+
+    // For touch devices: long-press to magnify (only hand cards)
+    let longPressTimer = null;
+    let longPressCard = null;
+
+    document.addEventListener('touchstart', (ev) => {
+        // ev.target might be a text node, so check it's an Element
+        if (!(ev.target instanceof Element)) return;
+        // Only magnify hand cards, not board cards
+        const card = ev.target.closest('.player-hand .card');
+        if (!card) return;
+
+        longPressCard = card;
+        longPressTimer = setTimeout(() => {
+            showMagnifiedCard(card);
+        }, 500); // 500ms long press
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+        longPressCard = null;
+        hideMagnifiedCard();
+    }, { passive: true });
+
+    document.addEventListener('touchmove', () => {
+        // Cancel long press if user moves finger
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    }, { passive: true });
 }
 

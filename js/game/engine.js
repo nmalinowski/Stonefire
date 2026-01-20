@@ -17,10 +17,43 @@ export const CONFIG = {
     MAX_HAND_SIZE: 10
 };
 
+// Track if event listeners are registered
+let listenersRegistered = false;
+
+/**
+ * Register event listeners for triggered abilities
+ */
+function registerTriggerListeners() {
+    if (listenersRegistered) return;
+    listenersRegistered = true;
+
+    // CARD_DRAWN trigger (for Oviraptor etc.)
+    events.on('DRAW_CARD', (payload) => {
+        const state = store.getState();
+        if (state.gameOver) return;
+        console.log('[DEBUG] DRAW_CARD event, triggering CARD_DRAWN effects');
+        checkTriggeredEffects('CARD_DRAWN', { player: payload.player });
+    });
+
+    // CREATURE_SUMMONED trigger (for Dire Wolf etc.)
+    events.on('CREATURE_SUMMONED', (payload) => {
+        const state = store.getState();
+        if (state.gameOver) return;
+        console.log('[DEBUG] CREATURE_SUMMONED event, triggering effects');
+        checkTriggeredEffects('CREATURE_SUMMONED', {
+            player: payload.player,
+            creature: payload.creature
+        });
+    });
+}
+
 /**
  * Initialize and start a new game
  */
 export function startGame(playerDeck, enemyDeck) {
+    // Register event listeners for triggered abilities
+    registerTriggerListeners();
+
     // Reset the store
     store.reset();
 
@@ -78,6 +111,7 @@ export function startTurn(player) {
     // Check for triggered effects at turn start
     checkTriggeredEffects('TURN_START', { player });
 
+    console.log('[ENGINE] Emitting TURN_STARTED for:', player);
     events.emit('TURN_STARTED', { player, state: store.getState() });
 }
 
@@ -154,7 +188,18 @@ export function playCard(player, cardId, target = null) {
 
     // Check for battlecry triggers
     if (card.type === 'creature' && card.battlecry) {
-        processEffect(card.battlecry, player, target);
+        console.log('[DEBUG] Battlecry detected for', card.name, ':', card.battlecry);
+        // For 'self' targeting effects, pass the played creature as the target
+        let battlecryTarget = target;
+        if (!target && (card.battlecry.target === 'self' ||
+            (card.battlecry.type === 'multiple' && card.battlecry.effects?.some(e => e.target === 'self')))) {
+            battlecryTarget = { player: player, id: card.instanceId };
+            console.log('[DEBUG] Self-targeting battlecry, target set to:', battlecryTarget);
+        }
+        console.log('[DEBUG] Processing battlecry effect with target:', battlecryTarget);
+        processEffect(card.battlecry, player, battlecryTarget);
+    } else if (card.type === 'creature') {
+        console.log('[DEBUG] Creature played without battlecry:', card.name, 'battlecry prop:', card.battlecry);
     }
 
     // Clear any selection
@@ -245,7 +290,8 @@ export function checkDeaths() {
 
         deadCreatures.forEach(creature => {
             // Trigger Extinct effects before removing
-            if (creature.keywords?.includes('extinct') && creature.extinctEffect) {
+            if (creature.extinctEffect) {
+                console.log('[DEBUG] Extinct effect triggered for', creature.name);
                 processEffect(creature.extinctEffect, playerKey, null);
             }
 

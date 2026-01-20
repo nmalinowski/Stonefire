@@ -4,38 +4,290 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Rules - Stonefire</title>
-  <meta name="description" content="How to play Stonefire — rules and mechanics.">
+  <meta name="description" content="Complete rules and card mechanics guide for Stonefire - the prehistoric trading card game.">
   <link rel="canonical" href="https://stonefire.malinowskiconsulting.com/rules.html">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#1a1a2e">
-  <link rel="stylesheet" href="/css/main.css">
+  <link rel="icon" href="/assets/icons/triassic.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/main.css?v=20260121">
 </head>
-<body>
+<body class="static-page">
+  <header id="site-header" role="banner">
+    <div class="header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">🦖</span>
+        <span class="header-title">Stonefire ☄️</span>
+      </a>
+      <nav aria-label="Primary" role="navigation">
+        <ul class="primary-nav">
+          <li><a href="rules.html" title="Rules and How to Play" class="active">Rules</a></li>
+          <li><a href="about.html" title="About Stonefire">About</a></li>
+          <li><a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener" target="_blank">Source</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
-  <main style="padding:6rem 1rem; max-width:900px;margin:0 auto;color:var(--text-primary);">
-    <h1 style="color:var(--accent-gold);">How to Play Stonefire</h1>
-    <p>Stonefire is a turn-based card game. Each player starts with 30 health, a deck and mana which increases.</p>
-    <h2>Turn Structure</h2>
+  <main class="rules-container">
+    <h1>How to Play Stonefire</h1>
+
+    <p>Stonefire is a turn-based trading card game set in a prehistoric world. Build a deck from powerful dinosaurs and ancient creatures, then battle against the AI opponent to reduce their hero to 0 health.</p>
+
+    <h2>Game Basics</h2>
+
+    <h3>Setup</h3>
+    <ul>
+      <li>Each player starts with <strong>30 health</strong></li>
+      <li>Each player has a deck of <strong>50 cards</strong></li>
+      <li>Draw <strong>4 cards</strong> at the start of the game</li>
+      <li>The board has <strong>7 slots</strong> for creatures on each side</li>
+    </ul>
+
+    <h3>Turn Structure</h3>
     <ol>
-      <li>Draw a card</li>
-      <li>Gain mana</li>
-      <li>Play cards and attack</li>
-      <li>End turn</li>
+      <li><strong>Start of Turn:</strong> Gain +1 maximum mana (up to 10), refill your mana, draw a card</li>
+      <li><strong>Main Phase:</strong> Play cards from your hand and attack with your creatures</li>
+      <li><strong>End Turn:</strong> Click the "End Turn" button to pass to your opponent</li>
     </ol>
-    <h2>Victory</h2>
-    <p>Reduce the opponent's hero to 0 health.</p>
-    <a href="/" style="display:inline-block;margin-top:2rem;color:var(--accent-blue);">← Return to Stonefire</a>
+
+    <h3>Victory Condition</h3>
+    <p>Reduce your opponent's hero to <strong>0 health</strong> to win the game. If a player has no cards left to draw and their hand is empty, they lose.</p>
+
+    <h2>Combat</h2>
+
+    <h3>Attacking</h3>
+    <ol>
+      <li>Click on one of your creatures that can attack (shown with a green glow)</li>
+      <li>Click on an enemy creature or the enemy hero</li>
+      <li>Both creatures deal their Attack damage to each other simultaneously</li>
+      <li>Creatures reduced to 0 or less Health are destroyed</li>
+    </ol>
+
+    <h3>Combat Rules</h3>
+    <ul>
+      <li><strong>Summoning Sickness:</strong> Creatures cannot attack the turn they're played (unless they have Charge)</li>
+      <li><strong>Guard Priority:</strong> If the enemy has a creature with Guard, you must attack it first</li>
+      <li><strong>Simultaneous Damage:</strong> Both creatures in combat deal damage at the same time</li>
+      <li><strong>Armored Reduction:</strong> Armored creatures take X less damage from attacks</li>
+      <li><strong>Venomous Kills:</strong> Any damage from a Venomous creature instantly kills the target creature</li>
+    </ul>
+
+    <h2>Strategy Tips</h2>
+
+    <div class="tip-box">
+      <h4>Mana Efficiency</h4>
+      <p>Try to use all your mana each turn. Playing a 2-cost and 3-cost card on turn 5 is better than just playing one 4-cost card and wasting 1 mana.</p>
+    </div>
+
+    <div class="tip-box">
+      <h4>Board Control</h4>
+      <p>Trading your creatures into enemy creatures to clear the board is often better than attacking the enemy hero directly. A creature left alive will deal damage every turn!</p>
+    </div>
+
+    <div class="tip-box">
+      <h4>Guard Usage</h4>
+      <p>Place Guard creatures when you need protection. They're essential when you're at low health or have valuable creatures you want to protect.</p>
+    </div>
+
+    <div class="tip-box">
+      <h4>Value Trades</h4>
+      <p>Use Venomous creatures to kill large threats. A 2-mana Venomous creature killing an 8-mana creature is a huge value advantage!</p>
+    </div>
+
+    <h2>Card Anatomy</h2>
+
+    <div class="card-anatomy">
+      <div class="card-diagram">
+        <div class="cost">3</div>
+        <div class="art">🦖</div>
+        <div class="name">Herrerasaurus</div>
+        <div class="text">Charge</div>
+        <div class="stats">
+          <div class="attack">3</div>
+          <div class="health">2</div>
+        </div>
+      </div>
+      <ul class="anatomy-list">
+        <li><strong>Mana Cost</strong> (blue circle, top-left): The amount of mana required to play this card</li>
+        <li><strong>Card Art</strong> (center): Visual representation of the card</li>
+        <li><strong>Name</strong> (below art): The card's name</li>
+        <li><strong>Card Text</strong> (bottom center): Keywords and special abilities</li>
+        <li><strong>Attack</strong> (gold circle, bottom-left): Damage dealt when attacking (creatures only)</li>
+        <li><strong>Health</strong> (red circle, bottom-right): Amount of damage needed to destroy (creatures only)</li>
+      </ul>
+    </div>
+
+    <h2>Card Types</h2>
+
+    <h3>Creatures</h3>
+    <p>Creatures are your main fighting force. Play them onto the board, and they can attack enemy creatures or the enemy hero. Creatures have Attack and Health stats.</p>
+    <ul>
+      <li>Creatures cannot attack the turn they are played (they have "summoning sickness") unless they have <strong>Charge</strong></li>
+      <li>When a creature attacks, both creatures deal damage to each other simultaneously</li>
+      <li>Creatures with 0 or less health are destroyed</li>
+    </ul>
+
+    <h3>Spells</h3>
+    <p>Spells have an immediate effect when played and then are discarded. They can deal damage, heal, buff your creatures, draw cards, and more.</p>
+    <ul>
+      <li>Some spells require a target - click on a valid target after playing</li>
+      <li>Spells resolve instantly and cannot be interrupted</li>
+    </ul>
+
+    <h2>Keywords</h2>
+
+    <p>Keywords are special abilities that appear on cards. Understanding these is essential for strategic play.</p>
+
+    <div class="keyword-card">
+      <h4><span class="keyword-badge charge">Charge</span></h4>
+      <p>Creatures with Charge can attack immediately when played, ignoring summoning sickness. This makes them excellent for surprise attacks or removing threats right away.</p>
+      <p><em>Example: Tyrannosaurus Rex (8 mana, 8/6 with Charge) - A devastating finisher that can deal 8 damage the turn it's played.</em></p>
+    </div>
+
+    <div class="keyword-card">
+      <h4><span class="keyword-badge guard">Guard</span></h4>
+      <p>Creatures with Guard must be attacked before you can attack other targets. Your opponent cannot attack your hero or other creatures while you have a Guard creature on the board.</p>
+      <p><em>Example: Triceratops (5 mana, 3/7 with Guard) - A sturdy defender that protects your hero and weaker creatures.</em></p>
+    </div>
+
+    <div class="keyword-card">
+      <h4><span class="keyword-badge venomous">Venomous</span></h4>
+      <p>Creatures with Venomous instantly destroy any creature they damage, regardless of that creature's remaining health. Even 1 damage from a Venomous creature is fatal.</p>
+      <p><em>Example: Dilophosaurus (2 mana, 3/2 with Venomous) - Can trade with any creature regardless of size.</em></p>
+    </div>
+
+    <div class="keyword-card">
+      <h4><span class="keyword-badge armored">Armored X</span></h4>
+      <p>Armored creatures reduce all incoming damage by X. This makes them much harder to kill and excellent at surviving combat. Armored 1 reduces damage by 1, Armored 2 reduces by 2, etc.</p>
+      <p><em>Example: Ankylosaurus (6 mana, 2/8 with Guard and Armored 2) - Takes 2 less damage from every attack, making its effective health even higher.</em></p>
+    </div>
+
+    <div class="keyword-card">
+      <h4><span class="keyword-badge extinct">Extinct</span></h4>
+      <p>Extinct is a death trigger - the effect activates when the creature dies. This can summon new creatures, deal damage, or trigger other powerful effects.</p>
+      <p><em>Example: Ancient Egg (1 mana, 0/3 with Extinct: Summon a 3/3 Hatchling) - A defensive card that provides value when destroyed.</em></p>
+    </div>
+
+    <h2>Abilities</h2>
+
+    <h3>Battlecry</h3>
+    <p>Battlecry effects trigger immediately when you play a card from your hand. They do not trigger when a creature is summoned by another effect.</p>
+    <ul>
+      <li><strong>Targeted Battlecry:</strong> Some battlecries require you to choose a target (click on a creature or hero)</li>
+      <li><strong>Automatic Battlecry:</strong> Others affect all targets automatically (like "deal 2 damage to all enemies")</li>
+    </ul>
+    <p><em>Example: Megalodon (7 mana, 7/5) - Battlecry: Destroy an enemy creature. When played, you can remove any enemy creature from the board.</em></p>
+
+    <h3>Triggered Abilities</h3>
+    <p>Some creatures have abilities that trigger during specific game events:</p>
+    <ul>
+      <li><strong>At the start of your turn:</strong> Triggers each time your turn begins</li>
+      <li><strong>At the end of your turn:</strong> Triggers each time your turn ends</li>
+      <li><strong>Whenever you draw a card:</strong> Triggers each time you draw</li>
+      <li><strong>When this takes damage:</strong> Triggers when the creature is damaged</li>
+      <li><strong>When you summon a creature:</strong> Triggers when any creature enters your board</li>
+    </ul>
+    <p><em>Example: Oviraptor (2 mana, 2/2) - Whenever you draw a card, gain +1 Attack. Grows stronger with each card drawn.</em></p>
+
+    <h2>Effect Types</h2>
+
+    <p>Cards can have various effects:</p>
+
+    <ul>
+      <li><strong>Damage:</strong> Deal damage to creatures or heroes</li>
+      <li><strong>Heal:</strong> Restore health to creatures or your hero</li>
+      <li><strong>Buff (+X/+Y):</strong> Increase a creature's Attack and/or Health</li>
+      <li><strong>Debuff (-X/-Y):</strong> Decrease a creature's Attack (cannot go below 0)</li>
+      <li><strong>Draw:</strong> Draw cards from your deck</li>
+      <li><strong>Destroy:</strong> Instantly destroy a creature regardless of health</li>
+      <li><strong>Summon:</strong> Create new creatures on your board</li>
+    </ul>
+
+    <div class="tip-box">
+      <h4>Targeting Tip</h4>
+      <p>When a card says "all enemies," it means all enemy creatures AND the enemy hero. "All enemy creatures" only affects creatures on the board. Pay attention to the exact wording!</p>
+    </div>
+
+    <h2>Factions</h2>
+
+    <p>Each deck is built around a faction, each with a unique playstyle and strengths:</p>
+
+    <div class="faction-grid">
+      <div class="faction-card triassic">
+        <h4>🦎 Triassic</h4>
+        <p><strong>Theme:</strong> Evolution & Growth</p>
+        <p>Focuses on building a wide board and buffing creatures. Features the unique <strong>Evolve</strong> mechanic where creatures transform into more powerful forms when conditions are met.</p>
+        <p><em>Strengths: Board-wide buffs, swarm tactics, scaling power</em></p>
+      </div>
+
+      <div class="faction-card jurassic">
+        <h4>🦖 Jurassic</h4>
+        <p><strong>Theme:</strong> Raw Power & Aggression</p>
+        <p>Features massive creatures with high attack and aggressive abilities. Excels at dealing direct damage and overwhelming opponents quickly.</p>
+        <p><em>Strengths: High damage, Charge creatures, board-wide damage spells</em></p>
+      </div>
+
+      <div class="faction-card cretaceous">
+        <h4>🦕 Cretaceous</h4>
+        <p><strong>Theme:</strong> Intelligence & Flexibility</p>
+        <p>Focuses on card draw and versatile effects. Never runs out of options with numerous ways to refill your hand while maintaining board presence.</p>
+        <p><em>Strengths: Card advantage, flexible removal, consistent gameplay</em></p>
+      </div>
+
+      <div class="faction-card primordial">
+        <h4>🐙 Primordial</h4>
+        <p><strong>Theme:</strong> Control & Removal</p>
+        <p>Ancient sea creatures that specialize in removing threats and controlling the board. Features powerful single-target removal and board clears.</p>
+        <p><em>Strengths: Hard removal, debuffs, defensive creatures</em></p>
+      </div>
+
+      <div class="faction-card iceage">
+        <h4>🦣 Ice Age</h4>
+        <p><strong>Theme:</strong> Resilience & Comeback</p>
+        <p>Sturdy mammals with high health and Armored keyword. Excels at surviving damage and gaining advantages when at lower health.</p>
+        <p><em>Strengths: Armored creatures, healing, high health values</em></p>
+      </div>
+
+      <div class="faction-card neutral">
+        <h4>🦴 Neutral</h4>
+        <p><strong>Theme:</strong> Versatility</p>
+        <p>Neutral cards can be added to any deck and provide utility options that complement any faction's strategy.</p>
+        <p><em>Strengths: Flexible options, universally useful effects</em></p>
+      </div>
+    </div>
+
+    <a href="/" class="back-link">← Return to Stonefire</a>
   </main>
-  <footer style="background:var(--bg-light); color:var(--text-primary); padding:2rem; text-align:center;">
-    <p>© 2025 - 2026 Malinowski Consulting, LLC – Digital Transformation &amp; AI Solutions</p>
-    <p>
-      <a href="tel:2626138904" style="color:inherit; text-decoration:none; font-weight:600;">Give us a call! +1 262-613-8904</a>
-      | League City, TX |
-      <a href="/privacy.html" style="color:inherit; text-decoration:underline; opacity:0.9;">Privacy Policy</a>
-      |
-      <a href="/terms.html" style="color:inherit; text-decoration:underline; opacity:0.9;">Terms of Service</a>
-    </p>
-  </footer>
+
+    <footer id="site-footer">
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="/about.html">About</a>
+                <a href="/privacy.html">Privacy</a>
+                <a href="/terms.html">Terms</a>
+                <a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener"
+                    target="_blank">GitHub Repository</a>
+            </div>
+            <div class="footer-middle">
+                <span>Made with</span>
+                <svg class="heart-icon" viewbox="0 0 24 24" fill="currentColor" width="20" height="20">
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                <span>in</span>
+                <img src="assets/icons/texas.svg" alt="Texas" class="texas-icon" width="24" height="24" loading="lazy">
+                <span>
+                    <strong>Texas</strong>
+                </span>
+            </div>
+            <div class="footer-copy">
+                <div class="footer-links">
+                    <span>© 2025-2026 <a href="https://www.malinowskiconsulting.com">Malinowski Consulting,
+                            LLC</a></span>
+                </div>
+            </div>
+        </div>
+    </footer>
   <script type="module" src="/js/main.js"></script>
 </body>
 </html>

@@ -27,6 +27,18 @@ export function initInput() {
     // Restart button
     document.getElementById('restart-btn').addEventListener('click', handleRestart);
 
+    // Faction button (in header)
+    const factionBtn = document.getElementById('factionBtn');
+    if (factionBtn) {
+        factionBtn.addEventListener('click', () => showFactionSelector());
+    }
+
+    // Mobile faction button (shown in mobile landscape)
+    const mobileFactionBtn = document.getElementById('mobileFactionBtn');
+    if (mobileFactionBtn) {
+        mobileFactionBtn.addEventListener('click', () => showFactionSelector());
+    }
+
     // Global click handler for cards and targets
     document.addEventListener('click', handleClick);
 
@@ -193,12 +205,6 @@ function isValidSpellTarget(card, targetPlayerId, targetId, state) {
 function handleHeroClick(heroEl, state) {
     const isEnemy = heroEl.classList.contains('enemy-hero');
     const selection = state.selection;
-
-    // If nothing selected and clicking your own hero, open faction selector
-    if (!selection.type && !isEnemy) {
-        showFactionSelector();
-        return;
-    }
 
     // If we have an attacker selected and clicking enemy hero
     if (selection.type === 'board_creature' && selection.playerId === 'player' && isEnemy) {

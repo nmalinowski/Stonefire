@@ -1,0 +1,579 @@
+/**
+ * Game Start Wizard - Mobile-First Styles
+ * Optimized for iPhone 14 (390×844) and similar devices
+ */
+
+/* ========== Wizard Container ========== */
+.wizard-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.wizard-overlay.hidden {
+    display: none;
+}
+
+/* ========== Progress Indicator ========== */
+.wizard-progress {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px 16px 16px;
+    padding-top: max(20px, env(safe-area-inset-top));
+}
+
+.wizard-progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.wizard-progress-dot.active {
+    background: #4ecdc4;
+    transform: scale(1.2);
+}
+
+.wizard-progress-dot.completed {
+    background: #4ecdc4;
+}
+
+/* ========== Step Container ========== */
+.wizard-steps {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.wizard-step {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+}
+
+.wizard-step.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.wizard-step.prev {
+    transform: translateX(-100%);
+}
+
+/* ========== Step Header ========== */
+.wizard-step-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.wizard-step-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 8px 0;
+}
+
+.wizard-step-subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+/* ========== Name Input Step ========== */
+.wizard-name-input {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    font-size: 1.125rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    text-align: center;
+    transition: border-color 0.2s;
+}
+
+.wizard-name-input:focus {
+    outline: none;
+    border-color: #4ecdc4;
+}
+
+.wizard-name-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* ========== Faction Grid ========== */
+.wizard-faction-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.wizard-faction-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 120px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.wizard-faction-card:active {
+    transform: scale(0.97);
+}
+
+.wizard-faction-card.selected {
+    border-color: var(--faction-color, #4ecdc4);
+    border-width: 3px;
+    background: rgba(78, 205, 196, 0.2);
+    box-shadow: 0 0 25px rgba(78, 205, 196, 0.4), inset 0 0 20px rgba(78, 205, 196, 0.1);
+    transform: scale(1.05);
+}
+
+/* Checkmark badge for selected faction */
+.wizard-faction-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 28px;
+    height: 28px;
+    background: var(--faction-color, #4ecdc4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+
+.wizard-faction-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.wizard-faction-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+}
+
+.wizard-faction-desc {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* Faction-specific colors */
+.wizard-faction-card[data-faction="TRIASSIC"] { --faction-color: #2ecc71; }
+.wizard-faction-card[data-faction="JURASSIC"] { --faction-color: #e74c3c; }
+.wizard-faction-card[data-faction="CRETACEOUS"] { --faction-color: #3498db; }
+.wizard-faction-card[data-faction="PRIMORDIAL"] { --faction-color: #9b59b6; }
+.wizard-faction-card[data-faction="ICE_AGE"] { --faction-color: #00d9ff; }
+.wizard-faction-card[data-faction="NEUTRAL"] { --faction-color: #95a5a6; }
+
+.wizard-faction-card.selected .wizard-faction-icon {
+    filter: drop-shadow(0 0 8px var(--faction-color));
+}
+
+/* ========== Confirmation Step ========== */
+.wizard-confirm-matchup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex: 1;
+}
+
+.wizard-confirm-fighter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.wizard-confirm-icon {
+    font-size: 4rem;
+    margin-bottom: 12px;
+}
+
+.wizard-confirm-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 4px;
+}
+
+.wizard-confirm-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.wizard-confirm-vs {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ========== Navigation Buttons ========== */
+.wizard-nav {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.wizard-btn {
+    flex: 1;
+    padding: 16px 24px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.wizard-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.wizard-btn-primary {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+    color: #fff;
+}
+
+.wizard-btn-primary:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.3);
+    cursor: not-allowed;
+}
+
+.wizard-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.wizard-btn-start {
+    background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+    font-size: 1.25rem;
+}
+
+/* ========== Landscape Adjustments ========== */
+@media (orientation: landscape) and (max-height: 500px) {
+    .wizard-progress {
+        padding: 12px 16px 8px;
+    }
+
+    .wizard-step {
+        padding: 12px 24px;
+    }
+
+    .wizard-step-header {
+        margin-bottom: 12px;
+    }
+
+    .wizard-step-title {
+        font-size: 1.25rem;
+    }
+
+    .wizard-faction-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .wizard-faction-card {
+        padding: 12px 8px;
+        min-height: 80px;
+    }
+
+    .wizard-faction-icon {
+        font-size: 1.75rem;
+        margin-bottom: 4px;
+    }
+
+    .wizard-faction-name {
+        font-size: 0.875rem;
+    }
+
+    .wizard-faction-desc {
+        display: none;
+    }
+
+    .wizard-confirm-icon {
+        font-size: 2.5rem;
+    }
+
+    .wizard-nav {
+        padding: 8px 24px;
+    }
+
+    .wizard-btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+}
+
+/* ========== Larger Phones (iPhone Plus/Max) ========== */
+@media (min-width: 414px) and (orientation: portrait) {
+    .wizard-faction-grid {
+        gap: 16px;
+    }
+
+    .wizard-faction-card {
+        padding: 24px 16px;
+        min-height: 140px;
+    }
+
+    .wizard-faction-icon {
+        font-size: 3rem;
+    }
+}
+
+/* ========== Tablet Portrait ========== */
+@media (min-width: 768px) and (orientation: portrait) {
+    .wizard-step {
+        padding: 24px 48px;
+    }
+
+    .wizard-faction-grid {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+}
+
+/* ========== Faction Selector (Mid-Game) ========== */
+.faction-selector-content {
+    max-width: 700px;
+    width: calc(100% - 32px);
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.faction-selector-warning {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.faction-selector-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.faction-selector-panel {
+    flex: 1;
+}
+
+.faction-selector-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.faction-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.faction-selector-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 70px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.faction-selector-card:active {
+    transform: scale(0.97);
+}
+
+.faction-selector-card.selected {
+    border-color: var(--faction-color, #4ecdc4);
+    border-width: 3px;
+    background: rgba(78, 205, 196, 0.25);
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.4), inset 0 0 15px rgba(78, 205, 196, 0.1);
+    transform: scale(1.05);
+}
+
+/* Checkmark badge for selected faction */
+.faction-selector-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    background: var(--faction-color, #4ecdc4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Faction-specific colors for selector */
+.faction-selector-card[data-faction="TRIASSIC"] { --faction-color: #2ecc71; }
+.faction-selector-card[data-faction="JURASSIC"] { --faction-color: #e74c3c; }
+.faction-selector-card[data-faction="CRETACEOUS"] { --faction-color: #3498db; }
+.faction-selector-card[data-faction="PRIMORDIAL"] { --faction-color: #9b59b6; }
+.faction-selector-card[data-faction="ICE_AGE"] { --faction-color: #00d9ff; }
+.faction-selector-card[data-faction="NEUTRAL"] { --faction-color: #95a5a6; }
+
+.faction-selector-icon {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.faction-selector-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+}
+
+.faction-selector-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.faction-selector-actions .wizard-btn {
+    min-width: 100px;
+}
+
+/* Mobile portrait - 2 columns */
+@media (max-width: 480px) {
+    .faction-selector-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .faction-selector-card {
+        min-height: 60px;
+        padding: 10px 6px;
+    }
+
+    .faction-selector-icon {
+        font-size: 1.25rem;
+    }
+
+    .faction-selector-name {
+        font-size: 0.7rem;
+    }
+}
+
+/* Landscape - side by side panels */
+@media (orientation: landscape) and (max-height: 500px) {
+    /* Ensure faction selector overlay is above everything on mobile */
+    #faction-selector {
+        z-index: 10001;
+    }
+
+    .faction-selector-content {
+        max-width: 90vw;
+        max-height: 85vh;
+        padding: 0.75rem;
+    }
+
+    .faction-selector-content h2 {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .faction-selector-panels {
+        flex-direction: row;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .faction-selector-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+
+    .faction-selector-card {
+        min-height: 45px;
+        padding: 6px 4px;
+        /* Ensure touch events work */
+        touch-action: manipulation;
+    }
+
+    .faction-selector-icon {
+        font-size: 1.1rem;
+        margin-bottom: 2px;
+    }
+
+    .faction-selector-name {
+        font-size: 0.6rem;
+    }
+
+    .faction-selector-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .faction-selector-warning {
+        margin-bottom: 0.35rem;
+        font-size: 0.7rem;
+    }
+
+    .faction-selector-actions {
+        margin-top: 0.5rem;
+    }
+
+    .faction-selector-actions .wizard-btn {
+        min-width: 80px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+}

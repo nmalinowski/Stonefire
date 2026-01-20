@@ -10,16 +10,22 @@ import { store, actions, events } from './state.js';
  * @param {Object} effect - The effect definition
  * @param {string} sourcePlayer - 'player' | 'enemy'
  * @param {Object} target - Target information { player, id }
+ * @param {Object} context - Additional context (e.g., attacker info for TAKES_DAMAGE)
  */
-export function processEffect(effect, sourcePlayer, target) {
-    if (!effect) return;
+export function processEffect(effect, sourcePlayer, target, context = {}) {
+    if (!effect) {
+        console.log('[DEBUG] processEffect called with null/undefined effect');
+        return;
+    }
+
+    console.log('[DEBUG] processEffect:', effect.type, 'source:', sourcePlayer, 'target:', target, 'full effect:', effect);
 
     const state = store.getState();
     const opponent = sourcePlayer === 'player' ? 'enemy' : 'player';
 
     switch (effect.type) {
         case 'damage':
-            processDamageEffect(effect, sourcePlayer, opponent, target, state);
+            processDamageEffect(effect, sourcePlayer, opponent, target, state, context);
             break;
 
         case 'heal':
@@ -64,7 +70,7 @@ export function processEffect(effect, sourcePlayer, target) {
 
         case 'multiple':
             // Process multiple effects in sequence
-            effect.effects.forEach(e => processEffect(e, sourcePlayer, target));
+            effect.effects.forEach(e => processEffect(e, sourcePlayer, target, context));
             break;
 
         default:
@@ -75,7 +81,7 @@ export function processEffect(effect, sourcePlayer, target) {
 /**
  * Process damage effect
  */
-function processDamageEffect(effect, sourcePlayer, opponent, target, state) {
+function processDamageEffect(effect, sourcePlayer, opponent, target, state, context = {}) {
     const amount = effect.amount;
 
     switch (effect.target) {
@@ -83,6 +89,14 @@ function processDamageEffect(effect, sourcePlayer, opponent, target, state) {
             // Requires target selection
             if (target) {
                 store.dispatch(actions.dealDamage(target.player, target.id, amount));
+            }
+            break;
+
+        case 'attacker':
+            // Damage the attacker (for TAKES_DAMAGE triggered abilities like Kentrosaurus)
+            if (context.attacker) {
+                console.log('[DEBUG] Damaging attacker:', context.attacker);
+                store.dispatch(actions.dealDamage(context.attacker.player, context.attacker.id, amount));
             }
             break;
 
@@ -141,6 +155,13 @@ function processHealEffect(effect, sourcePlayer, opponent, target, state) {
     const amount = effect.amount;
 
     switch (effect.target) {
+        case 'self':
+            // Heal the creature itself (for triggered abilities)
+            if (target && target.id !== 'hero') {
+                store.dispatch(actions.heal(target.player, target.id, amount));
+            }
+            break;
+
         case 'target':
             if (target) {
                 store.dispatch(actions.heal(target.player, target.id, amount));
@@ -193,6 +214,7 @@ function processBuffEffect(effect, sourcePlayer, opponent, target, state) {
     };
 
     switch (effect.target) {
+        case 'self':
         case 'target':
             if (target && target.id !== 'hero') {
                 applyBuff(target.player, target.id);
@@ -335,23 +357,28 @@ function processSummonEffect(effect, sourcePlayer) {
     // Check board space
     const count = Math.min(effect.count || 1, 7 - board.length);
 
-    for (let i = 0; i < count; i++) {
-        if (board.length >= 7) break;
+    console.log('[DEBUG] processSummonEffect: summoning', count, 'creatures for', sourcePlayer);
 
-        // Create token creature
+    for (let i = 0; i < count; i++) {
+        // Re-check board space after each summon
+        const currentState = store.getState();
+        if (currentState[sourcePlayer].board.length >= 7) break;
+
+        // Create token creature with default values for missing properties
         const token = {
             ...effect.creature,
             instanceId: `token_${Date.now()}_${i}`,
-            currentAttack: effect.creature.attack,
-            currentHealth: effect.creature.health,
-            maxHealth: effect.creature.health,
-            canAttack: effect.creature.keywords?.includes('charge'),
-            hasAttacked: false,
-            summoningSick: !effect.creature.keywords?.includes('charge')
+            type: 'creature',
+            text: effect.creature.text || '',
+            icon: effect.creature.icon || '🦴',
+            faction: effect.creature.faction || 'neutral',
+            cost: effect.creature.cost || 0
         };
 
-        // Dispatch directly to add to board
-        store.dispatch(actions.playCard(sourcePlayer, token.instanceId, null));
+        console.log('[DEBUG] Summoning token:', token.name, token);
+
+        // Use summonCreature action to add directly to board
+        store.dispatch(actions.summonCreature(sourcePlayer, token));
 
         events.emit('CREATURE_SUMMONED', { player: sourcePlayer, creature: token });
     }
@@ -486,10 +513,32 @@ function evaluateComparison(a, operator, b) {
 
 /**
  * Check for triggered effects (turn start, turn end, etc.)
+ * @param {string} trigger - The trigger type (TURN_START, TURN_END, CARD_DRAWN, TAKES_DAMAGE, CREATURE_SUMMONED)
+ * @param {Object} context - Context about the trigger (player, attacker, creature, etc.)
  */
 export function checkTriggeredEffects(trigger, context) {
     const state = store.getState();
 
+    console.log('[DEBUG] checkTriggeredEffects:', trigger, context);
+
+    // For creature-specific triggers (TAKES_DAMAGE), only check that specific creature
+    if (trigger === 'TAKES_DAMAGE' && context.creature) {
+        const playerKey = context.creature.player;
+        const creature = state[playerKey].board.find(c => c?.instanceId === context.creature.id);
+
+        if (!creature) return;
+
+        creature.abilities?.forEach(ability => {
+            if (ability.trigger === trigger) {
+                console.log('[DEBUG] TAKES_DAMAGE ability firing for', creature.name, ':', ability);
+                const effectTarget = { player: playerKey, id: creature.instanceId };
+                processEffect(ability.effect, playerKey, effectTarget, context);
+            }
+        });
+        return;
+    }
+
+    // For board-wide triggers (TURN_START, TURN_END, CARD_DRAWN, CREATURE_SUMMONED)
     ['player', 'enemy'].forEach(playerKey => {
         state[playerKey].board.forEach(creature => {
             if (!creature) return;
@@ -498,11 +547,23 @@ export function checkTriggeredEffects(trigger, context) {
             creature.abilities?.forEach(ability => {
                 if (ability.trigger === trigger) {
                     // Check if trigger conditions match
-                    if (ability.triggerPlayer && ability.triggerPlayer !== context.player) {
-                        return;
+                    // 'self' means fire when creature's owner takes their turn / draws / summons
+                    // 'opponent' means fire when enemy of creature's owner takes action
+                    if (ability.triggerPlayer) {
+                        if (ability.triggerPlayer === 'self' && context.player !== playerKey) {
+                            return;
+                        }
+                        if (ability.triggerPlayer === 'opponent' && context.player === playerKey) {
+                            return;
+                        }
                     }
 
-                    processEffect(ability.effect, playerKey, null);
+                    console.log('[DEBUG] Triggered ability firing for', creature.name, ':', ability);
+
+                    // Pass creature as target for 'self' targeting effects
+                    const effectTarget = { player: playerKey, id: creature.instanceId };
+
+                    processEffect(ability.effect, playerKey, effectTarget, context);
                 }
             });
         });

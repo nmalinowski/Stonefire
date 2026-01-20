@@ -3,6 +3,26 @@
  * Heuristics for scoring board states and moves
  */
 
+// Current personality modifiers (set externally)
+let personalityModifiers = {
+    TRADE_PREFERENCE: 1.0,
+    BOARD_CONTROL_WEIGHT: 1.0,
+    HEALTH_WEIGHT: 1.0
+};
+
+/**
+ * Set personality modifiers for evaluation
+ */
+export function setEvaluationPersonality(personality) {
+    if (personality) {
+        personalityModifiers = {
+            TRADE_PREFERENCE: personality.TRADE_PREFERENCE || 1.0,
+            BOARD_CONTROL_WEIGHT: personality.BOARD_CONTROL_WEIGHT || 1.0,
+            HEALTH_WEIGHT: personality.HEALTH_WEIGHT || 1.0
+        };
+    }
+}
+
 /**
  * Weights for evaluation heuristics
  */
@@ -45,8 +65,8 @@ export function evaluateBoard(state, forPlayer) {
     const opponent = forPlayer === 'player' ? 'enemy' : 'player';
     let score = 0;
 
-    // Health differential
-    score += state[forPlayer].health * WEIGHTS.HERO_HEALTH;
+    // Health differential (modified by personality)
+    score += state[forPlayer].health * WEIGHTS.HERO_HEALTH * personalityModifiers.HEALTH_WEIGHT;
     score += state[opponent].health * WEIGHTS.ENEMY_HEALTH;
 
     // Check for lethal
@@ -57,9 +77,9 @@ export function evaluateBoard(state, forPlayer) {
         return -WEIGHTS.LETHAL_BONUS;
     }
 
-    // Board presence
-    score += evaluateBoardPresence(state[forPlayer].board);
-    score -= evaluateBoardPresence(state[opponent].board);
+    // Board presence (modified by personality)
+    score += evaluateBoardPresence(state[forPlayer].board) * personalityModifiers.BOARD_CONTROL_WEIGHT;
+    score -= evaluateBoardPresence(state[opponent].board) * personalityModifiers.BOARD_CONTROL_WEIGHT;
 
     // Card advantage
     score += state[forPlayer].hand.length * WEIGHTS.HAND_SIZE;
@@ -347,11 +367,11 @@ export function evaluateTrade(attacker, defender) {
 
     if (defenderDies && !attackerDies) {
         // We kill them, we live - favorable
-        score = defenderValue + WEIGHTS.FAVORABLE_TRADE;
+        score = (defenderValue + WEIGHTS.FAVORABLE_TRADE) * personalityModifiers.TRADE_PREFERENCE;
         result = 'favorable';
     } else if (defenderDies && attackerDies) {
         // Both die - evaluate value difference
-        score = defenderValue - attackerValue;
+        score = (defenderValue - attackerValue) * personalityModifiers.TRADE_PREFERENCE;
         if (defenderValue > attackerValue) {
             result = 'favorable';
             score += WEIGHTS.EVEN_TRADE;
@@ -364,11 +384,11 @@ export function evaluateTrade(attacker, defender) {
         }
     } else if (!defenderDies && attackerDies) {
         // We die, they live - unfavorable
-        score = -attackerValue + WEIGHTS.UNFAVORABLE_TRADE;
+        score = (-attackerValue + WEIGHTS.UNFAVORABLE_TRADE) * personalityModifiers.TRADE_PREFERENCE;
         result = 'unfavorable';
     } else {
         // Neither dies - just damage
-        score = attackerDamage - defenderDamage;
+        score = (attackerDamage - defenderDamage) * personalityModifiers.TRADE_PREFERENCE;
         result = 'neutral';
     }
 

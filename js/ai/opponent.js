@@ -5,32 +5,83 @@
 
 import { store, events } from '../game/state.js';
 import { playCard, attack, endTurn, canPlayCard, canCreatureAttack, getValidAttackTargets } from '../game/engine.js';
-import { evaluateBoard, evaluatePlay, evaluateAttack, hasLethal, calculatePotentialDamage } from './evaluation.js';
+import { evaluateBoard, evaluatePlay, evaluateAttack, hasLethal, calculatePotentialDamage, setEvaluationPersonality } from './evaluation.js';
 import { wait } from '../ui/animations.js';
+import { getPersonality, getTaunt, shouldTaunt, TAUNT_TRIGGERS } from './personality.js';
 
-// AI configuration
-const AI_CONFIG = {
-    THINK_DELAY: 800,      // Delay before making a move (ms)
-    ACTION_DELAY: 600,     // Delay between actions (ms)
-    AGGRESSION: 0.6,       // 0 = defensive, 1 = aggressive
-    RANDOMNESS: 0.1        // Chance to make suboptimal plays
+// Current AI personality (set based on enemy faction)
+let currentPersonality = null;
+
+// AI configuration (defaults, overridden by personality)
+let AI_CONFIG = {
+    THINK_DELAY: 800,
+    ACTION_DELAY: 600,
+    AGGRESSION: 0.6,
+    RANDOMNESS: 0.1
 };
+
+/**
+ * Set AI personality based on faction
+ */
+export function setAIPersonality(faction) {
+    currentPersonality = getPersonality(faction);
+    AI_CONFIG = {
+        THINK_DELAY: currentPersonality.THINK_DELAY,
+        ACTION_DELAY: currentPersonality.ACTION_DELAY,
+        AGGRESSION: currentPersonality.AGGRESSION,
+        RANDOMNESS: currentPersonality.RANDOMNESS
+    };
+    // Also update evaluation weights
+    setEvaluationPersonality(currentPersonality);
+    console.log(`[AI] Personality set to ${currentPersonality.name} (${currentPersonality.style})`);
+}
+
+/**
+ * Emit a taunt if conditions are met
+ */
+function emitTaunt(trigger, extraData = {}) {
+    if (!currentPersonality) return;
+    if (!shouldTaunt(trigger)) return;
+
+    const taunt = getTaunt(currentPersonality.name, trigger);
+    if (taunt) {
+        events.emit('AI_TAUNT', {
+            message: taunt,
+            personality: currentPersonality,
+            trigger,
+            ...extraData
+        });
+    }
+}
 
 /**
  * Run the AI's turn
  */
 export async function runAITurn() {
     const state = store.getState();
+    console.log('[AI] runAITurn called, activePlayer:', state.activePlayer, 'gameOver:', state.gameOver);
 
     if (state.activePlayer !== 'enemy' || state.gameOver) {
+        console.log('[AI] Skipping - not enemy turn or game over');
         return;
     }
+
+    // Taunt at turn start
+    emitTaunt(TAUNT_TRIGGERS.TURN_START);
 
     // Wait a moment before starting
     await wait(AI_CONFIG.THINK_DELAY);
 
+    // Check for low health taunt
+    if (state.enemy.health <= 10 && state.enemy.health > 0) {
+        emitTaunt(TAUNT_TRIGGERS.LOW_HEALTH);
+    }
+
     // Check for lethal first
     if (hasLethal(state, 'enemy')) {
+        console.log('[AI] Has lethal! Executing...');
+        emitTaunt(TAUNT_TRIGGERS.HAS_LETHAL);
+        await wait(400);
         await executeLethal();
         return;
     }
@@ -39,6 +90,8 @@ export async function runAITurn() {
     let madeMove = true;
     let iterations = 0;
     const maxIterations = 20; // Safety limit
+
+    console.log('[AI] Starting main loop, hand size:', state.enemy.hand.length, 'mana:', state.enemy.mana);
 
     while (madeMove && iterations < maxIterations) {
         madeMove = false;
@@ -52,6 +105,7 @@ export async function runAITurn() {
         // Try to play cards
         const cardPlayed = await tryPlayCard();
         if (cardPlayed) {
+            console.log('[AI] Played a card');
             madeMove = true;
             await wait(AI_CONFIG.ACTION_DELAY);
             continue;
@@ -60,6 +114,7 @@ export async function runAITurn() {
         // Try to make attacks
         const attacked = await tryAttack();
         if (attacked) {
+            console.log('[AI] Made an attack');
             madeMove = true;
             await wait(AI_CONFIG.ACTION_DELAY);
             continue;
@@ -67,6 +122,7 @@ export async function runAITurn() {
     }
 
     // End turn
+    console.log('[AI] Ending turn after', iterations, 'iterations');
     await wait(AI_CONFIG.ACTION_DELAY);
 
     const finalState = store.getState();
@@ -171,7 +227,9 @@ async function tryPlayCard() {
     const state = store.getState();
     const hand = state.enemy.hand;
     const mana = state.enemy.mana;
-    const boardSpace = 7 - state.enemy.board.length;
+    const boardSpace = 7 - state.enemy.board.filter(c => c).length;
+
+    console.log('[AI] tryPlayCard - hand:', hand.length, 'cards, mana:', mana, 'boardSpace:', boardSpace);
 
     // Get playable cards
     const playableCards = hand.filter(card => {
@@ -179,6 +237,8 @@ async function tryPlayCard() {
         if (card.type === 'creature' && boardSpace <= 0) return false;
         return true;
     });
+
+    console.log('[AI] Playable cards:', playableCards.length, playableCards.map(c => c.name));
 
     if (playableCards.length === 0) return false;
 
@@ -201,6 +261,7 @@ async function tryPlayCard() {
             const target = selectTarget(state, card);
             if (target) {
                 playCard('enemy', card.instanceId, target);
+                emitTaunt(TAUNT_TRIGGERS.CARD_PLAYED);
                 return true;
             }
             continue;
@@ -208,6 +269,7 @@ async function tryPlayCard() {
 
         // Play non-targeted card
         playCard('enemy', card.instanceId);
+        emitTaunt(TAUNT_TRIGGERS.CARD_PLAYED);
         return true;
     }
 
@@ -370,7 +432,19 @@ async function tryAttack() {
     // Execute best attack if score is positive
     const bestAttack = attacks[0];
     if (bestAttack && bestAttack.score > 0) {
+        // Check if this attack will kill the target
+        const targetCreature = bestAttack.target.id !== 'hero'
+            ? state.player.board.find(c => c?.instanceId === bestAttack.target.id)
+            : null;
+        const willKill = targetCreature && bestAttack.attacker.currentAttack >= targetCreature.currentHealth;
+
         attack('enemy', bestAttack.attacker.instanceId, 'player', bestAttack.target.id);
+        emitTaunt(TAUNT_TRIGGERS.ATTACK);
+
+        // Emit kill taunt after a short delay if we killed something
+        if (willKill) {
+            setTimeout(() => emitTaunt(TAUNT_TRIGGERS.KILL), 300);
+        }
         return true;
     }
 
@@ -379,6 +453,7 @@ async function tryAttack() {
     if (faceAttacks.length > 0 && Math.random() < AI_CONFIG.AGGRESSION) {
         const faceAttack = faceAttacks[0];
         attack('enemy', faceAttack.attacker.instanceId, 'player', 'hero');
+        emitTaunt(TAUNT_TRIGGERS.ATTACK);
         return true;
     }
 
@@ -391,9 +466,33 @@ async function tryAttack() {
 export function initAI() {
     events.on('TURN_STARTED', async ({ player }) => {
         if (player === 'enemy') {
+            console.log('[AI] Enemy turn started, AI will act soon...');
             // Add slight delay before AI starts thinking
             await wait(500);
-            runAITurn();
+            try {
+                await runAITurn();
+            } catch (error) {
+                console.error('[AI] Error during AI turn:', error);
+                // Ensure turn ends even if AI errors
+                const state = store.getState();
+                if (state.activePlayer === 'enemy' && !state.gameOver) {
+                    endTurn();
+                }
+            }
+        }
+    });
+
+    // Listen for damage to enemy hero
+    events.on('HERO_DAMAGED', ({ player, amount }) => {
+        if (player === 'enemy' && amount > 0) {
+            emitTaunt(TAUNT_TRIGGERS.TAKE_DAMAGE);
+        }
+    });
+
+    // Listen for game over
+    events.on('GAME_OVER', ({ winner }) => {
+        if (winner === 'enemy') {
+            setTimeout(() => emitTaunt(TAUNT_TRIGGERS.VICTORY), 500);
         }
     });
 }

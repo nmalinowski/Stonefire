@@ -109,7 +109,7 @@ export const CARDS = {
             amount: 1
         },
         targetType: 'any_creature',
-        requiresTarget: false,
+        requiresTarget: true,
         text: 'Battlecry: Deal 1 damage.',
         icon: '🐊'
     },
@@ -504,7 +504,7 @@ export const CARDS = {
             amount: 2
         },
         targetType: 'any_creature',
-        requiresTarget: false,
+        requiresTarget: true,
         text: 'Battlecry: Deal 2 damage to a creature.',
         icon: '🦖'
     },
@@ -656,7 +656,7 @@ export const CARDS = {
             amount: 2
         },
         targetType: 'enemy_creature',
-        requiresTarget: false,
+        requiresTarget: true,
         text: 'Battlecry: Deal 2 damage to an enemy creature.',
         icon: '🦕'
     },
@@ -951,7 +951,7 @@ export const CARDS = {
             target: 'target'
         },
         targetType: 'enemy_creature',
-        requiresTarget: false,
+        requiresTarget: true,
         text: 'Battlecry: Destroy an enemy creature.',
         icon: '🦈'
     },
@@ -1069,7 +1069,7 @@ export const CARDS = {
             target: 'target'
         },
         targetType: 'enemy_creature',
-        requiresTarget: false,
+        requiresTarget: true,
         text: 'Battlecry: Destroy an enemy creature with 3 or less Attack.',
         icon: '🐊'
     },

@@ -262,23 +262,48 @@ function initUIEnhancements() {
         document.body.classList.toggle('fullscreen-mode');
         const isFullscreen = document.body.classList.contains('fullscreen-mode');
 
-        // Try to use native fullscreen API if available
-        if (isFullscreen && document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(() => {
-                // Fallback: CSS-only fullscreen mode already applied
-            });
-        } else if (!isFullscreen && document.exitFullscreen && document.fullscreenElement) {
-            document.exitFullscreen().catch(() => {});
+        if (isFullscreen) {
+            // Try native fullscreen with vendor prefixes
+            const docEl = document.documentElement;
+            const requestFS = docEl.requestFullscreen ||
+                             docEl.webkitRequestFullscreen ||
+                             docEl.mozRequestFullScreen ||
+                             docEl.msRequestFullscreen;
+            if (requestFS) {
+                requestFS.call(docEl).catch(() => {
+                    // Fallback: CSS-only fullscreen mode already applied
+                });
+            }
+        } else {
+            // Exit fullscreen with vendor prefixes
+            const exitFS = document.exitFullscreen ||
+                          document.webkitExitFullscreen ||
+                          document.mozCancelFullScreen ||
+                          document.msExitFullscreen;
+            const fsEl = document.fullscreenElement ||
+                        document.webkitFullscreenElement ||
+                        document.mozFullScreenElement ||
+                        document.msFullscreenElement;
+            if (exitFS && fsEl) {
+                exitFS.call(document).catch(() => {});
+            }
         }
 
-        // Store preference
         localStorage.setItem('stonefire.fullscreen', isFullscreen ? '1' : '0');
     }
 
     function exitFullscreen() {
         document.body.classList.remove('fullscreen-mode');
-        if (document.exitFullscreen && document.fullscreenElement) {
-            document.exitFullscreen().catch(() => {});
+        const exitFS = document.exitFullscreen ||
+                      document.webkitExitFullscreen ||
+                      document.mozCancelFullScreen ||
+                      document.msExitFullscreen;
+        const fsEl = document.fullscreenElement ||
+                    document.webkitFullscreenElement ||
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement;
+        if (exitFS && fsEl) {
+            exitFS.call(document).catch(() => {});
         }
         localStorage.setItem('stonefire.fullscreen', '0');
     }
@@ -297,12 +322,18 @@ function initUIEnhancements() {
         mobileFullscreenBtn.addEventListener('click', toggleFullscreen);
     }
 
-    // Handle native fullscreen exit (Escape key)
-    document.addEventListener('fullscreenchange', () => {
-        if (!document.fullscreenElement) {
-            document.body.classList.remove('fullscreen-mode');
-            localStorage.setItem('stonefire.fullscreen', '0');
-        }
+    // Handle native fullscreen exit (Escape key) - with vendor prefixes
+    ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(event => {
+        document.addEventListener(event, () => {
+            const fsEl = document.fullscreenElement ||
+                        document.webkitFullscreenElement ||
+                        document.mozFullScreenElement ||
+                        document.msFullscreenElement;
+            if (!fsEl) {
+                document.body.classList.remove('fullscreen-mode');
+                localStorage.setItem('stonefire.fullscreen', '0');
+            }
+        });
     });
 
     // Keyboard shortcut: F11 or F to toggle fullscreen
@@ -345,8 +376,15 @@ function initUIEnhancements() {
     let pendingFullscreen = false;
 
     function requestNativeFullscreen() {
-        if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {
+        const docEl = document.documentElement;
+        const fsEl = document.fullscreenElement ||
+                    document.webkitFullscreenElement ||
+                    document.mozFullScreenElement;
+        const requestFS = docEl.requestFullscreen ||
+                         docEl.webkitRequestFullscreen ||
+                         docEl.mozRequestFullScreen;
+        if (requestFS && !fsEl) {
+            requestFS.call(docEl).catch(() => {
                 // Native fullscreen not available, CSS fallback is already applied
             });
         }
@@ -366,11 +404,16 @@ function initUIEnhancements() {
         if (isMobileLandscape) {
             document.body.classList.add('fullscreen-mode');
 
-            // Request native fullscreen - needs user gesture
-            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-                // Try immediately (works if triggered by user gesture like orientationchange from physical rotation)
-                document.documentElement.requestFullscreen().catch(() => {
-                    // If immediate request fails, wait for next user interaction
+            const docEl = document.documentElement;
+            const fsEl = document.fullscreenElement ||
+                        document.webkitFullscreenElement ||
+                        document.mozFullScreenElement;
+            const requestFS = docEl.requestFullscreen ||
+                             docEl.webkitRequestFullscreen ||
+                             docEl.mozRequestFullScreen;
+
+            if (!fsEl && requestFS) {
+                requestFS.call(docEl).catch(() => {
                     pendingFullscreen = true;
                     document.addEventListener('touchstart', handleFullscreenGesture, { once: true });
                     document.addEventListener('click', handleFullscreenGesture, { once: true });
@@ -379,9 +422,15 @@ function initUIEnhancements() {
         } else {
             document.body.classList.remove('fullscreen-mode');
             pendingFullscreen = false;
-            // Exit native fullscreen when returning to portrait
-            if (document.fullscreenElement && document.exitFullscreen) {
-                document.exitFullscreen().catch(() => {});
+
+            const exitFS = document.exitFullscreen ||
+                          document.webkitExitFullscreen ||
+                          document.mozCancelFullScreen;
+            const fsEl = document.fullscreenElement ||
+                        document.webkitFullscreenElement ||
+                        document.mozFullScreenElement;
+            if (fsEl && exitFS) {
+                exitFS.call(document).catch(() => {});
             }
         }
     }
@@ -389,6 +438,24 @@ function initUIEnhancements() {
     window.addEventListener('resize', checkMobileLandscape);
     window.addEventListener('orientationchange', checkMobileLandscape);
     checkMobileLandscape();
+
+    // iOS-specific: Prevent zoom on double-tap and pinch
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    }
 
     // Card magnification for mobile - tap to see larger card
     initCardMagnification();

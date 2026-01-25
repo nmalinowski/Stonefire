@@ -12,6 +12,12 @@ import { Faction } from '../data/cards.js';
 // DOM element cache
 let elements = {};
 
+// Track known hand cards to only animate newly drawn cards
+const knownHandCards = {
+    player: new Set(),
+    enemy: new Set()
+};
+
 /**
  * Initialize the renderer
  */
@@ -127,6 +133,11 @@ function subscribeToEvents() {
     events.on('GAME_OVER', ({ winner }) => {
         showGameOver(winner);
     });
+
+    events.on('GAME_STARTED', () => {
+        knownHandCards.player.clear();
+        knownHandCards.enemy.clear();
+    });
 }
 
 /**
@@ -193,6 +204,16 @@ function renderHands(state) {
 function renderHand(container, cards, playerId, state) {
     container.innerHTML = '';
 
+    // Get current card instanceIds in hand
+    const currentCardIds = new Set(cards.map(card => card.instanceId));
+
+    // Clean up tracking: remove instanceIds no longer in hand
+    for (const instanceId of knownHandCards[playerId]) {
+        if (!currentCardIds.has(instanceId)) {
+            knownHandCards[playerId].delete(instanceId);
+        }
+    }
+
     cards.forEach((card, index) => {
         const canPlay = state.activePlayer === playerId &&
             card.cost <= state[playerId].mana &&
@@ -203,6 +224,14 @@ function renderHand(container, cards, playerId, state) {
             inHand: true,
             playerId
         });
+
+        // Check if this is a new card - only animate newly drawn cards
+        if (!knownHandCards[playerId].has(card.instanceId)) {
+            cardEl.classList.add('card-entering');
+            knownHandCards[playerId].add(card.instanceId);
+            // Remove class after animation completes
+            setTimeout(() => cardEl.classList.remove('card-entering'), 150);
+        }
 
         // Add hover effect positioning
         cardEl.style.setProperty('--card-index', index);

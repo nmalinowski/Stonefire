@@ -5,6 +5,7 @@
 
 import { renderCard } from './cards.js';
 import { canCreatureAttack, getValidAttackTargets, getValidTargets } from '../game/engine.js';
+import { store } from '../game/state.js';
 
 /**
  * Render a board with creatures
@@ -234,5 +235,23 @@ export function animateCreatureLeave(creatureEl) {
         creatureEl.addEventListener('animationend', () => {
             resolve();
         }, { once: true });
+    });
+}
+
+/**
+ * Shake all guard creatures to indicate they must be attacked first
+ */
+export function shakeGuardCreatures(targetPlayer) {
+    const state = store.getState();
+    const guards = state[targetPlayer].board.filter(c =>
+        c && c.keywords?.includes('guard')
+    );
+
+    guards.forEach(guard => {
+        const el = document.querySelector(`[data-instance-id="${guard.instanceId}"]`);
+        if (el) {
+            el.classList.add('guard-warning');
+            setTimeout(() => el.classList.remove('guard-warning'), 500);
+        }
     });
 }

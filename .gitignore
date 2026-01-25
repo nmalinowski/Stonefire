@@ -25,6 +25,7 @@ Gemfile.lock
 # Ignore AI AGENT files
 .claude/*
 .playwright-mcp/*
+docs/plans/*
 *CLAUDE.md
 *AGENTS.md
 *copilot-instructions.md

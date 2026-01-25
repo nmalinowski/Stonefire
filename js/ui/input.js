@@ -4,9 +4,9 @@
  */
 
 import { store, actions, events } from '../game/state.js';
-import { playCard, attack, endTurn, canPlayCard, canCreatureAttack, getValidAttackTargets } from '../game/engine.js';
+import { playCard, attack, endTurn, canPlayCard, canCreatureAttack, getValidAttackTargets, getValidTargets } from '../game/engine.js';
 import { showCardPreview, hideCardPreview } from './cards.js';
-import { highlightAttackTargets, highlightSpellTargets, clearTargetHighlights, clearSelectionHighlights } from './board.js';
+import { highlightAttackTargets, highlightSpellTargets, clearTargetHighlights, clearSelectionHighlights, shakeGuardCreatures } from './board.js';
 import { showAttackArrow, hideAttackArrow, render, showFactionSelector } from './renderer.js';
 
 // Input state
@@ -121,16 +121,30 @@ function handleHandCardClick(instanceId, state) {
 
     const card = state.player.hand.find(c => c.instanceId === instanceId);
 
-    // If card requires target, select it and wait for target
+    // If card requires target, check if we can auto-target
     if (card.requiresTarget) {
-        store.dispatch(actions.setSelection('hand_card', instanceId, 'player'));
-        render(state);
-        // Show valid targets for the selected spell
-        highlightSpellTargets('player', card);
+        const validTargets = getValidTargets('player', card);
+
+        // Auto-target if only one valid target exists
+        if (validTargets.length === 1) {
+            playCard('player', instanceId, validTargets[0]);
+            return;
+        }
+
+        // Multiple targets - require selection
+        if (validTargets.length > 1) {
+            store.dispatch(actions.setSelection('hand_card', instanceId, 'player'));
+            render(state);
+            highlightSpellTargets('player', card);
+            return;
+        }
+
+        // No valid targets - can't play the card
+        console.warn('No valid targets for card');
         return;
     }
 
-    // Play the card directly
+    // Play the card directly (no target needed)
     playCard('player', instanceId);
 }
 
@@ -150,6 +164,13 @@ function handleBoardCreatureClick(instanceId, playerId, state) {
             attack('player', selection.cardId, 'enemy', instanceId);
             clearSelection();
             return;
+        } else {
+            // Invalid target - check if guards are blocking
+            const enemyState = state.enemy;
+            const hasGuards = enemyState.board.some(c => c && c.keywords?.includes('guard'));
+            if (hasGuards) {
+                shakeGuardCreatures('enemy');
+            }
         }
     }
 
@@ -215,6 +236,13 @@ function handleHeroClick(heroEl, state) {
             attack('player', selection.cardId, 'enemy', 'hero');
             clearSelection();
             return;
+        } else {
+            // Can't attack hero - guards blocking
+            const enemyState = state.enemy;
+            const hasGuards = enemyState.board.some(c => c && c.keywords?.includes('guard'));
+            if (hasGuards) {
+                shakeGuardCreatures('enemy');
+            }
         }
     }
 
@@ -407,8 +435,15 @@ function handleKeyDown(e) {
                     if (!card.requiresTarget) {
                         playCard('player', card.instanceId);
                     } else {
-                        store.dispatch(actions.setSelection('hand_card', card.instanceId, 'player'));
-                        render(state);
+                        // Check for auto-target
+                        const validTargets = getValidTargets('player', card);
+                        if (validTargets.length === 1) {
+                            playCard('player', card.instanceId, validTargets[0]);
+                        } else if (validTargets.length > 1) {
+                            store.dispatch(actions.setSelection('hand_card', card.instanceId, 'player'));
+                            render(state);
+                            highlightSpellTargets('player', card);
+                        }
                     }
                 }
             }

@@ -97,7 +97,7 @@ export function animateAttack(attackerEl, targetEl) {
         setTimeout(() => {
             attackerEl.classList.remove('attacking');
             resolve();
-        }, 400);
+        }, 450);
     });
 }
 

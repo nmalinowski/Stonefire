@@ -10,13 +10,10 @@
     min-height: 160px;
     position: relative;
     width: 100%;
+    will-change: contents;
 }
 
-/* Smooth card positioning when hand changes */
-.hand .card {
-    animation: cardSettle 0.15s ease-out;
-}
-
+/* Smooth card entry animation - only for newly drawn cards */
 @keyframes cardSettle {
     from {
         opacity: 0.8;
@@ -26,6 +23,14 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.hand .card.card-entering {
+    animation: cardSettle 0.15s ease-out;
+}
+
+.hand .card {
+    will-change: transform;
 }
 
 .enemy-hand {

@@ -19,45 +19,63 @@
     animation: card-to-board 0.4s ease-out;
 }
 
-/* Attack Animation */
+/* Attack Animation - Enhanced with tilt */
 @keyframes attack-lunge {
     0% {
-        transform: translateY(0);
+        transform: translateY(0) rotate(0deg);
+    }
+    15% {
+        transform: translateY(-15px) rotate(-3deg) scale(1.05);
     }
     30% {
-        transform: translateY(-20px) scale(1.1);
+        transform: translateY(-25px) rotate(0deg) scale(1.12);
     }
-    60% {
-        transform: translateY(30px);
+    50% {
+        transform: translateY(10px) rotate(2deg) scale(1.08);
+    }
+    70% {
+        transform: translateY(35px) rotate(0deg) scale(1.05);
+    }
+    85% {
+        transform: translateY(5px) rotate(-1deg);
     }
     100% {
-        transform: translateY(0);
+        transform: translateY(0) rotate(0deg);
     }
 }
 
 .card.attacking {
-    animation: attack-lunge 0.4s ease-in-out;
+    animation: attack-lunge 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     z-index: 100;
 }
 
-/* Enemy Attack Animation (reverse direction) */
+/* Enemy Attack Animation (reverse direction with tilt) */
 @keyframes attack-lunge-enemy {
     0% {
-        transform: translateY(0);
+        transform: translateY(0) rotate(0deg);
+    }
+    15% {
+        transform: translateY(15px) rotate(3deg) scale(1.05);
     }
     30% {
-        transform: translateY(20px) scale(1.1);
+        transform: translateY(25px) rotate(0deg) scale(1.12);
     }
-    60% {
-        transform: translateY(-30px);
+    50% {
+        transform: translateY(-10px) rotate(-2deg) scale(1.08);
+    }
+    70% {
+        transform: translateY(-35px) rotate(0deg) scale(1.05);
+    }
+    85% {
+        transform: translateY(-5px) rotate(1deg);
     }
     100% {
-        transform: translateY(0);
+        transform: translateY(0) rotate(0deg);
     }
 }
 
 .enemy-board .card.attacking {
-    animation: attack-lunge-enemy 0.4s ease-in-out;
+    animation: attack-lunge-enemy 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Damage Received */
@@ -79,8 +97,39 @@
     }
 }
 
+/* Impact flash on hit */
+@keyframes impact-flash {
+    0% {
+        filter: brightness(1);
+    }
+    20% {
+        filter: brightness(2) saturate(1.5);
+    }
+    100% {
+        filter: brightness(1);
+    }
+}
+
 .card.taking-damage {
-    animation: damage-shake 0.3s ease-out;
+    animation: damage-shake 0.3s ease-out, impact-flash 0.3s ease-out;
+}
+
+/* Guard Warning Shake */
+@keyframes guard-shake {
+    0%, 100% {
+        transform: translateX(0) scale(1);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-4px) scale(1.02);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(4px) scale(1.02);
+    }
+}
+
+.card.guard-warning {
+    animation: guard-shake 0.5s ease-out;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.6) !important;
 }
 
 /* Death Animation */

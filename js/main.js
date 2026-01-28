@@ -11,6 +11,11 @@ import { initAI, setAIPersonality } from './ai/opponent.js';
 import { createStarterDeck, createBalancedDeck, Faction } from './data/cards.js';
 import { initWizard, showWizard } from './ui/wizard.js';
 import { initChatBubble } from './ui/chatBubble.js';
+import { initAuth, onAuthChange } from './services/auth.js';
+import { initAuthModal, showModal as showAuthModal } from './ui/authModal.js';
+import { migrateOldPreferences, fetchAndMergeProfile } from './services/profile.js';
+import { processQueue, onSyncStatusChange } from './services/syncManager.js';
+import { fetchAndMergeStats } from './services/progress.js';
 
 /**
  * Initialize the game
@@ -30,6 +35,41 @@ function init() {
 
     // Initialize wizard
     initWizard();
+
+    // Profile system initialization
+    migrateOldPreferences();
+    initAuthModal();
+
+    // Open auth modal if redirected from profile page
+    if (new URLSearchParams(window.location.search).has('signin')) {
+        showAuthModal();
+        history.replaceState(null, '', window.location.pathname);
+    }
+
+    // Init auth and sync on successful login
+    initAuth().then(async (user) => {
+        if (user) {
+            await fetchAndMergeProfile();
+            await fetchAndMergeStats();
+            processQueue();
+        }
+
+        // Register for future auth changes (after initial sync to avoid double-fire)
+        onAuthChange(async (changedUser) => {
+            if (changedUser) {
+                await fetchAndMergeProfile();
+                await fetchAndMergeStats();
+            }
+        });
+    });
+
+    // Update sync status indicator
+    onSyncStatusChange((status) => {
+        const dot = document.querySelector('.sync-dot');
+        if (dot) {
+            dot.className = 'sync-dot ' + status;
+        }
+    });
 
     // Show the game setup wizard on first load unless already completed
     const setupComplete = localStorage.getItem('stonefire.setupComplete');

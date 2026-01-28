@@ -87,6 +87,7 @@
                 <ul class="primary-nav">
                     <li><a href="rules.html" title="Rules and How to Play">Rules</a></li>
                     <li><a href="about.html" title="About Stonefire">About</a></li>
+                    <li><a href="profile.html" title="Your Profile">Profile</a></li>
                     <li><a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener" target="_blank">Source</a></li>
                 </ul>
             </nav>
@@ -96,16 +97,37 @@
     <main class="privacy-container">
         <h1>Privacy Policy</h1>
         <p>Your privacy is important. This page describes data collection for the Stonefire
-            game and site. Analytics are limited and used to improve gameplay. Contact:
-            webmaster@malinowskiconsulting.com</p>
+            game and site. Contact: webmaster@malinowskiconsulting.com</p>
 
         <h2>Information Collected</h2>
         <p>We collect minimal information required to operate services, and use anonymous, privacy-first analytics. No
             selling of personal data.</p>
 
+        <h2>User Accounts &amp; Cloud Sync</h2>
+        <p>Stonefire offers optional user accounts powered by <a href="https://supabase.com" rel="noopener" target="_blank">Supabase</a>.
+            You can play the game entirely offline without creating an account. All game data is stored locally in your browser by default.</p>
+        <p>If you choose to sign in (via GitHub, Google, or email), the following data may be stored on our servers:</p>
+        <ul>
+            <li><strong>Profile information:</strong> Display name and preferred settings</li>
+            <li><strong>Game progress:</strong> Win/loss statistics per faction</li>
+            <li><strong>Save data:</strong> Your current game state for cross-device sync</li>
+        </ul>
+        <p>Anonymous users are assigned a local session. No personal information is collected until you explicitly sign in.
+            You may delete your account and all associated data at any time.</p>
+
+        <h2>Local Storage</h2>
+        <p>Stonefire uses your browser's localStorage to persist game preferences, player name, faction choices, and save data.
+            This data never leaves your device unless you opt in to cloud sync by signing in.</p>
+
         <h2>Analytics</h2>
-        <p>We may use privacy-friendly analytics (self-hosted or privacy-focused third parties). You can opt-out via
-            browser settings.</p>
+        <p>We use PostHog for privacy-friendly analytics to understand how the game is played and improve the experience.
+            Analytics data is anonymized. You can opt out via browser settings or privacy extensions.</p>
+
+        <h2>Third-Party Services</h2>
+        <ul>
+            <li><strong>Supabase:</strong> Authentication and cloud data storage (optional, user-initiated)</li>
+            <li><strong>PostHog:</strong> Product analytics (anonymized usage data)</li>
+        </ul>
 
         <a href="/" class="back-link">← Return to Stonefire</a>
     </main>
@@ -116,6 +138,7 @@
             <div class="footer-links">
                 <a href="/about.html">About</a>
                 <a href="/rules.html">Rules</a>
+                <a href="/profile.html">Profile</a>
                 <a href="/privacy.html">Privacy</a>
                 <a href="/terms.html">Terms</a>
                 <a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener"

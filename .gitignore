@@ -23,6 +23,7 @@ Gemfile.lock
 
 
 # Ignore AI AGENT files
+tests/screenshots/*
 .claude/*
 .playwright-mcp/*
 docs/plans/*

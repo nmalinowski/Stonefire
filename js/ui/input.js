@@ -227,6 +227,12 @@ function handleHeroClick(heroEl, state) {
     const isEnemy = heroEl.classList.contains('enemy-hero');
     const selection = state.selection;
 
+    // If nothing selected and clicking your own hero, open faction selector
+    if (!selection.type && !isEnemy) {
+        showFactionSelector();
+        return;
+    }
+
     // If we have an attacker selected and clicking enemy hero
     if (selection.type === 'board_creature' && selection.playerId === 'player' && isEnemy) {
         const targets = getValidAttackTargets('player');

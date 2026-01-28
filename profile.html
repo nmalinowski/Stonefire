@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Profile - Stonefire</title>
+    <meta name="description" content="Your Stonefire player profile, stats, and settings.">
+    <link rel="canonical" href="https://stonefire.malinowskiconsulting.com/profile.html">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="icon" href="/assets/icons/triassic.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/profile.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
+</head>
+
+<body class="static-page">
+    <header id="site-header" role="banner">
+        <div class="header-inner">
+            <a href="/" class="header-brand">
+                <span class="header-logo">🦖</span>
+                <span class="header-title">Stonefire ☄️</span>
+            </a>
+            <nav aria-label="Primary" role="navigation">
+                <ul class="primary-nav">
+                    <li><a href="rules.html" title="Rules and How to Play">Rules</a></li>
+                    <li><a href="about.html" title="About Stonefire">About</a></li>
+                    <li><a href="profile.html" title="Your Profile" class="active">Profile</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="profile-container">
+        <h1>Player Profile</h1>
+
+        <!-- Account Section -->
+        <section class="profile-section" id="profile-account">
+            <h2>Account</h2>
+            <div class="profile-card">
+                <div class="profile-field">
+                    <label for="profile-name">Display Name</label>
+                    <div class="profile-field-row">
+                        <input type="text" id="profile-name" class="auth-input" placeholder="Enter your name" maxlength="30">
+                        <button id="save-name-btn" class="btn-small">Save</button>
+                    </div>
+                </div>
+                <div class="profile-field">
+                    <label>Status</label>
+                    <p id="profile-auth-status" class="profile-status">Anonymous</p>
+                </div>
+                <div id="profile-auth-actions" class="profile-actions">
+                    <button id="profile-signin-btn" class="btn-primary">Sign In to Sync</button>
+                </div>
+                <div id="profile-signout-actions" class="profile-actions hidden">
+                    <button id="profile-signout-btn" class="btn-secondary">Sign Out</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Save Game Section -->
+        <section class="profile-section" id="profile-save">
+            <h2>Saved Game</h2>
+            <div class="profile-card">
+                <div id="save-exists" class="hidden">
+                    <p id="save-info">Last saved: --</p>
+                    <div class="profile-actions">
+                        <a href="/" class="btn-primary">Continue Game</a>
+                        <button id="delete-save-btn" class="btn-secondary btn-danger">Delete Save</button>
+                    </div>
+                </div>
+                <div id="no-save">
+                    <p class="profile-empty">No saved game. Start a game to auto-save progress.</p>
+                    <a href="/" class="btn-primary">Play Now</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="profile-section" id="profile-stats">
+            <h2>Statistics</h2>
+            <div class="profile-card">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-games">0</span>
+                        <span class="stat-label">Games Played</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-wins">0</span>
+                        <span class="stat-label">Wins</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-losses">0</span>
+                        <span class="stat-label">Losses</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-winrate">0%</span>
+                        <span class="stat-label">Win Rate</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-streak">0</span>
+                        <span class="stat-label">Current Streak</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-best">0</span>
+                        <span class="stat-label">Best Streak</span>
+                    </div>
+                </div>
+
+                <h3>Faction Performance</h3>
+                <div id="faction-stats" class="faction-stats">
+                    <p class="profile-empty">Play some games to see faction stats.</p>
+                </div>
+            </div>
+        </section>
+
+        <a href="/" class="back-link">← Return to Stonefire</a>
+    </main>
+
+    <footer id="site-footer">
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="/about.html">About</a>
+                <a href="/rules.html">Rules</a>
+                <a href="/profile.html">Profile</a>
+                <a href="/privacy.html">Privacy</a>
+                <a href="/terms.html">Terms</a>
+                <a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener"
+                    target="_blank">GitHub Repository</a>
+            </div>
+            <div class="footer-middle">
+                <span>Made with</span>
+                <svg class="heart-icon" viewbox="0 0 24 24" fill="currentColor" width="20" height="20">
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                <span>in</span>
+                <img src="assets/icons/texas.svg" alt="Texas" class="texas-icon" width="24" height="24" loading="lazy">
+                <span><strong>Texas</strong></span>
+            </div>
+            <div class="footer-copy">
+                <div class="footer-links">
+                    <span>&copy; 2025-2026 <a href="https://www.malinowskiconsulting.com">Malinowski Consulting,
+                            LLC</a></span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initAuth, getCurrentUser, isAuthenticated, onAuthChange, signOut } from '/js/services/auth.js';
+        import { getLocalProfile, updateDisplayName } from '/js/services/profile.js';
+        import { loadLocalSave, deleteSave, hasSavedGame } from '/js/services/saveGame.js';
+        import { getStats } from '/js/services/progress.js';
+
+        async function init() {
+            await initAuth();
+            renderProfile();
+            onAuthChange(() => renderProfile());
+        }
+
+        function renderProfile() {
+            const user = getCurrentUser();
+            const profile = getLocalProfile();
+            const stats = getStats();
+
+            // Account
+            document.getElementById('profile-name').value = profile.display_name || '';
+
+            if (user && !user.is_anonymous) {
+                document.getElementById('profile-auth-status').textContent =
+                    `Signed in as ${user.email || user.user_metadata?.name || 'User'}`;
+                document.getElementById('profile-auth-actions').classList.add('hidden');
+                document.getElementById('profile-signout-actions').classList.remove('hidden');
+            } else {
+                document.getElementById('profile-auth-status').textContent = 'Anonymous (not synced)';
+                document.getElementById('profile-auth-actions').classList.remove('hidden');
+                document.getElementById('profile-signout-actions').classList.add('hidden');
+            }
+
+            // Save game
+            if (hasSavedGame()) {
+                const save = loadLocalSave();
+                const date = new Date(save.savedAt).toLocaleString();
+                document.getElementById('save-info').textContent = `Last saved: ${date}`;
+                document.getElementById('save-exists').classList.remove('hidden');
+                document.getElementById('no-save').classList.add('hidden');
+            }
+
+            // Stats
+            document.getElementById('stat-games').textContent = stats.games_played;
+            document.getElementById('stat-wins').textContent = stats.wins;
+            document.getElementById('stat-losses').textContent = stats.losses;
+            const winRate = stats.games_played > 0
+                ? Math.round((stats.wins / stats.games_played) * 100)
+                : 0;
+            document.getElementById('stat-winrate').textContent = winRate + '%';
+            document.getElementById('stat-streak').textContent = stats.current_streak;
+            document.getElementById('stat-best').textContent = stats.best_streak;
+
+            // Faction stats
+            const factionEl = document.getElementById('faction-stats');
+            const factions = Object.entries(stats.faction_stats || {});
+            if (factions.length > 0) {
+                factionEl.innerHTML = '';
+                factions.forEach(([name, data]) => {
+                    const row = document.createElement('div');
+                    row.className = 'faction-stat-row';
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'faction-stat-name';
+                    nameSpan.textContent = name;
+                    const recordSpan = document.createElement('span');
+                    recordSpan.className = 'faction-stat-record';
+                    recordSpan.textContent = `${data.wins}W / ${data.losses}L (${data.games} games)`;
+                    row.appendChild(nameSpan);
+                    row.appendChild(recordSpan);
+                    factionEl.appendChild(row);
+                });
+            }
+        }
+
+        // Event listeners
+        document.getElementById('save-name-btn')?.addEventListener('click', () => {
+            const name = document.getElementById('profile-name').value.trim();
+            updateDisplayName(name);
+        });
+
+        document.getElementById('delete-save-btn')?.addEventListener('click', async () => {
+            if (confirm('Delete your saved game?')) {
+                await deleteSave();
+                renderProfile();
+            }
+        });
+
+        document.getElementById('profile-signout-btn')?.addEventListener('click', async () => {
+            await signOut();
+            renderProfile();
+        });
+
+        document.getElementById('profile-signin-btn')?.addEventListener('click', () => {
+            window.location.href = '/?signin=1';
+        });
+
+        init();
+    </script>
+</body>
+</html>

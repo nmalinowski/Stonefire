@@ -4,7 +4,6 @@
 :root {
     /* global dimensions */
     --header-height: clamp(44px, 6vh, 56px);
-    --footer-height: 60px;
 
     /* Colors - Faction Based */
     --triassic-green: #4a7c4e;
@@ -23,6 +22,7 @@
     --accent-red: #e74c3c;
     --accent-green: #27ae60;
     --accent-blue: #3498db;
+    --text-muted: #6a6a7a;
 
     /* Mana Colors */
     --mana-available: #5b9bd5;
@@ -45,10 +45,10 @@
     --spacing-lg: 24px;
     --spacing-xl: 32px;
 
-    /* Card Dimensions (fluid for responsive layouts - uses both vw and vh) */
-    --card-width: clamp(60px, min(10vw, 12vh), 130px);
+    /* Card Dimensions (fluid for responsive layouts) */
+    --card-width: clamp(70px, 10vw, 140px);
     --card-height: calc(var(--card-width) * 1.4);
-    --card-width-board: clamp(55px, min(8vw, 10vh), 110px);
+    --card-width-board: clamp(70px, 9vw, 120px);
     --card-height-board: calc(var(--card-width-board) * 1.3);
 
     /* Transitions */
@@ -71,7 +71,7 @@
 
 html, body {
     height: 100%;
-    overflow: hidden; /* prevent scrolling on game page */
+    overflow: auto; /* allow scrolling on mobile */
     scroll-behavior: smooth;
 }
 
@@ -81,33 +81,6 @@ body {
     color: var(--text-primary);
     line-height: 1.4;
     -webkit-font-smoothing:antialiased;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Allow scrolling on static pages with sticky footer */
-html:has(body.static-page) {
-    height: auto;
-    min-height: 100%;
-    overflow: auto;
-}
-
-body.static-page {
-    height: auto;
-    min-height: 100vh;
-    overflow: visible;
-    display: flex;
-    flex-direction: column;
-}
-
-body.static-page main {
-    flex: 1 0 auto;
-    width: 100%;
-}
-
-body.static-page #site-footer {
-    flex-shrink: 0;
-    margin-top: auto;
 }
 
 /* ========================================
@@ -140,11 +113,6 @@ body.static-page #site-footer {
     display: flex;
     align-items: center;
     gap: 8px;
-    text-decoration: none;
-}
-
-a.header-brand:hover .header-title {
-    text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
 }
 
 .header-logo {
@@ -190,10 +158,6 @@ a.header-brand:hover .header-title {
     outline: none;
 }
 
-.primary-nav li a.active {
-    color: var(--accent-gold);
-}
-
 .nav-toggle {
     display: none;
     background: transparent;
@@ -207,11 +171,6 @@ a.header-brand:hover .header-title {
 
 main#main {
     padding-top: var(--header-height);
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
 }
 
 /* Mobile nav */
@@ -266,8 +225,8 @@ main#main {
     border-color: rgba(212,175,55,0.4);
 }
 
-/* Faction change button in header */
-.faction-header-btn {
+/* Profile button in header */
+.profile-header-btn {
     background: transparent;
     border: 1px solid rgba(255,255,255,0.15);
     color: var(--text-secondary);
@@ -276,11 +235,36 @@ main#main {
     cursor: pointer;
     font-size: 1.1rem;
     transition: color var(--transition-fast), border-color var(--transition-fast);
+    position: relative;
 }
 
-.faction-header-btn:hover {
+.profile-header-btn:hover {
     color: var(--accent-gold);
     border-color: rgba(212,175,55,0.4);
+}
+
+/* Sync status dot on profile button */
+.profile-header-btn .sync-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-green);
+}
+
+.profile-header-btn .sync-dot.syncing {
+    background: var(--accent-gold);
+    animation: pulse-target 1s infinite;
+}
+
+.profile-header-btn .sync-dot.offline {
+    background: var(--text-muted);
+}
+
+.profile-header-btn .sync-dot.error {
+    background: var(--accent-red);
 }
 
 /* Fullscreen mode */
@@ -300,7 +284,7 @@ body.fullscreen-mode #game-container {
     min-height: 100dvh;
 }
 
-/* iOS Safari fullscreen fixes */
+/* Exit fullscreen button (shown only in fullscreen mode) /* iOS Safari fullscreen fixes */
 @supports (-webkit-touch-callout: none) {
     body.fullscreen-mode #game-container {
         height: -webkit-fill-available;
@@ -316,13 +300,6 @@ body.fullscreen-mode {
     height: 100%;
 }
 
-/* Show mobile buttons in fullscreen mode since header is hidden */
-body.fullscreen-mode .mobile-faction-btn,
-body.fullscreen-mode .mobile-fullscreen-btn {
-    display: block;
-}
-
-/* Exit fullscreen button (shown only in fullscreen mode) */
 .exit-fullscreen-btn {
     position: fixed;
     top: 8px;
@@ -349,7 +326,7 @@ body.fullscreen-mode .exit-fullscreen-btn {
     background: rgba(30,30,50,0.95);
 }
 
-/* Mobile faction button (shown in mobile landscape when header is hidden) */
+/* Mobile landscape buttons (shown when header is hidden in fullscreen/landscape) */
 .mobile-faction-btn {
     position: fixed;
     top: 8px;
@@ -362,9 +339,8 @@ body.fullscreen-mode .exit-fullscreen-btn {
     border-radius: 6px;
     cursor: pointer;
     font-size: 1.1rem;
-    display: none; /* Hidden by default */
-    transition: background var(--transition-fast), border-color var(--transition-fast);
-    -webkit-tap-highlight-color: transparent;
+    display: none;
+    transition: background var(--transition-fast);
 }
 
 .mobile-faction-btn:hover,
@@ -373,11 +349,10 @@ body.fullscreen-mode .exit-fullscreen-btn {
     border-color: rgba(212,175,55,0.4);
 }
 
-/* Mobile fullscreen button (shown when header is hidden) */
 .mobile-fullscreen-btn {
     position: fixed;
     top: 8px;
-    left: 52px; /* Next to faction button */
+    left: 52px;
     z-index: 9999;
     background: rgba(10,10,18,0.9);
     border: 1px solid rgba(255,255,255,0.15);
@@ -385,16 +360,43 @@ body.fullscreen-mode .exit-fullscreen-btn {
     padding: 6px 10px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 1rem;
-    display: none; /* Hidden by default */
-    transition: background var(--transition-fast), border-color var(--transition-fast);
-    -webkit-tap-highlight-color: transparent;
+    font-size: 1.1rem;
+    display: none;
+    transition: background var(--transition-fast);
 }
 
 .mobile-fullscreen-btn:hover,
 .mobile-fullscreen-btn:active {
     background: rgba(30,30,50,0.95);
     border-color: rgba(212,175,55,0.4);
+}
+
+.mobile-profile-btn {
+    position: fixed;
+    top: 8px;
+    left: 96px;
+    z-index: 9999;
+    background: rgba(10,10,18,0.9);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text-primary);
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: none;
+    transition: background var(--transition-fast);
+}
+
+.mobile-profile-btn:hover,
+.mobile-profile-btn:active {
+    background: rgba(30,30,50,0.95);
+    border-color: rgba(212,175,55,0.4);
+}
+
+body.fullscreen-mode .mobile-faction-btn,
+body.fullscreen-mode .mobile-fullscreen-btn,
+body.fullscreen-mode .mobile-profile-btn {
+    display: block;
 }
 
 /* ========================================
@@ -406,9 +408,6 @@ body.fullscreen-mode .exit-fullscreen-btn {
     border-top: 1px solid rgba(255,255,255,0.06);
     padding: 10px 16px;
     text-align: center;
-    height: var(--footer-height);
-    box-sizing: border-box;
-    flex-shrink: 0;
 }
 
 .footer-inner {
@@ -463,8 +462,170 @@ body.fullscreen-mode .exit-fullscreen-btn {
     }
 }
 
+/* Game Setup modal styles */
+#game-setup .setup-content { max-width: 520px; padding: 1.25rem; border-radius: 10px; }
+#game-setup .setup-steps { display:flex; flex-direction:column; gap:0.5rem; align-items:center; }
+#game-setup .setup-step { width:100%; display:block; }
+#game-setup .setup-step.hidden { display:none; }
+#game-setup .setup-actions { display:flex; gap:0.5rem; justify-content:center; margin-top:0.5rem; }
+
+/* ========================================
+   FACTION SELECTION BUTTONS
+   ======================================== */
+.setup-faction-btn,
+.faction-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    min-width: 100px;
+    background: rgba(30,30,50,0.6);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.setup-faction-btn:hover,
+.faction-btn:hover {
+    background: rgba(40,40,65,0.8);
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+}
+
+.setup-faction-btn .faction-icon,
+.faction-btn .faction-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.setup-faction-btn .faction-name,
+.faction-btn .faction-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+}
+
+/* Selected state - glowing border matching faction color */
+.setup-faction-btn.selected,
+.faction-btn.selected {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.setup-faction-btn.selected::before,
+.faction-btn.selected::before {
+    content: '✓';
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-size: 0.9rem;
+    color: var(--accent-gold);
+    font-weight: bold;
+}
+
+/* Faction-specific colors */
+.setup-faction-btn[data-faction="TRIASSIC"],
+.faction-btn[data-faction="TRIASSIC"] {
+    border-color: rgba(74,124,78,0.3);
+}
+.setup-faction-btn[data-faction="TRIASSIC"].selected,
+.faction-btn[data-faction="TRIASSIC"].selected {
+    background: linear-gradient(135deg, rgba(74,124,78,0.4) 0%, rgba(74,124,78,0.1) 100%);
+    border-color: var(--triassic-green);
+    box-shadow: 0 0 20px rgba(74,124,78,0.4), 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.setup-faction-btn[data-faction="JURASSIC"],
+.faction-btn[data-faction="JURASSIC"] {
+    border-color: rgba(139,58,58,0.3);
+}
+.setup-faction-btn[data-faction="JURASSIC"].selected,
+.faction-btn[data-faction="JURASSIC"].selected {
+    background: linear-gradient(135deg, rgba(139,58,58,0.4) 0%, rgba(139,58,58,0.1) 100%);
+    border-color: var(--jurassic-red);
+    box-shadow: 0 0 20px rgba(139,58,58,0.4), 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.setup-faction-btn[data-faction="CRETACEOUS"],
+.faction-btn[data-faction="CRETACEOUS"] {
+    border-color: rgba(58,90,139,0.3);
+}
+.setup-faction-btn[data-faction="CRETACEOUS"].selected,
+.faction-btn[data-faction="CRETACEOUS"].selected {
+    background: linear-gradient(135deg, rgba(58,90,139,0.4) 0%, rgba(58,90,139,0.1) 100%);
+    border-color: var(--cretaceous-blue);
+    box-shadow: 0 0 20px rgba(58,90,139,0.4), 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.setup-faction-btn[data-faction="PRIMORDIAL"],
+.faction-btn[data-faction="PRIMORDIAL"] {
+    border-color: rgba(107,58,139,0.3);
+}
+.setup-faction-btn[data-faction="PRIMORDIAL"].selected,
+.faction-btn[data-faction="PRIMORDIAL"].selected {
+    background: linear-gradient(135deg, rgba(107,58,139,0.4) 0%, rgba(107,58,139,0.1) 100%);
+    border-color: var(--primordial-purple);
+    box-shadow: 0 0 20px rgba(107,58,139,0.4), 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.setup-faction-btn[data-faction="ICE_AGE"],
+.faction-btn[data-faction="ICE_AGE"] {
+    border-color: rgba(168,180,192,0.3);
+}
+.setup-faction-btn[data-faction="ICE_AGE"].selected,
+.faction-btn[data-faction="ICE_AGE"].selected {
+    background: linear-gradient(135deg, rgba(168,180,192,0.4) 0%, rgba(168,180,192,0.1) 100%);
+    border-color: var(--ice-age-white);
+    box-shadow: 0 0 20px rgba(168,180,192,0.4), 0 8px 20px rgba(0,0,0,0.4);
+}
+
+/* Faction button grid layout */
+.faction-grid,
+.setup-factions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 10px;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+@media (max-width: 400px) {
+    .faction-grid,
+    .setup-factions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .setup-faction-btn,
+    .faction-btn {
+        padding: 10px 8px;
+        min-width: auto;
+    }
+
+    .setup-faction-btn .faction-icon,
+    .faction-btn .faction-icon {
+        font-size: 1.5rem;
+    }
+
+    .setup-faction-btn .faction-name,
+    .faction-btn .faction-name {
+        font-size: 0.65rem;
+    }
+}
+
 /* btn-secondary (used for cancel) */
 .btn-secondary { background: transparent; border: 1px solid rgba(255,255,255,0.06); color: var(--text-primary); padding: 6px 10px; border-radius:6px; }
+
+@media (max-width: 480px) {
+    #game-setup .setup-content { width: calc(100% - 24px); }
+}
 
 /* Rotate overlay */
 .rotate-overlay {
@@ -500,11 +661,11 @@ body.fullscreen-mode .exit-fullscreen-btn {
 
 /* Desktop: fit within viewport with header and footer */
 body:not(.fullscreen-mode):not(.static-page) #game-container {
-    flex: 1;
-    min-height: 0;
+    height: calc(100vh - var(--header-height) - 50px);
+    height: calc(100dvh - var(--header-height) - 50px);
 }
 
-/* Fullscreen mode: take full viewport */
+/* Fullscreen mode: use full viewport */
 body.fullscreen-mode #game-container {
     height: 100vh;
     height: 100dvh;
@@ -512,23 +673,23 @@ body.fullscreen-mode #game-container {
 
 /* Game areas should flex to fill available space */
 #game-container > * {
-    flex-shrink: 1;
+    flex-shrink: 0;
 }
 
 #game-container .board {
     flex: 1 1 auto;
-    min-height: 60px;
+    min-height: 0;
 }
 
 /* Hands should shrink if needed */
 #game-container .hand {
-    flex: 0 1 auto;
-    min-height: 60px;
+    flex-shrink: 1;
+    min-height: 70px;
 }
 
-/* Player info bars should not shrink too much */
+/* Player info bars should not grow */
 #game-container .player-info {
-    flex: 0 0 auto;
+    flex-shrink: 0;
 }
 
 /* Tighten layout for very short viewports to ensure board fits */
@@ -610,14 +771,59 @@ body.fullscreen-mode #game-container {
     .install-btn { padding: 8px 12px; }
 }
 
-/* Force landscape hint for narrow portrait devices */
-@media (max-width: 900px) and (orientation: portrait) {
-    .rotate-overlay { display:flex; }
-    #game-container { filter: blur(2px); pointer-events: none; }
+/* Show rotate hint only on very narrow portrait devices */
+@media (max-width: 480px) and (orientation: portrait) {
+    .rotate-overlay:not(.hidden) { display: flex; }
+    .rotate-overlay.hidden { display: none; }
 }
 
-@media (min-width: 901px) {
+/* Always hide rotate overlay on wider screens or in landscape */
+@media (min-width: 481px), (orientation: landscape) {
     .rotate-overlay { display: none !important; }
+    #game-container { filter: none; pointer-events: auto; }
+}
+
+/* Tablet landscape mode (500-700px height) */
+@media (min-height: 501px) and (max-height: 700px) and (orientation: landscape) {
+    :root {
+        --header-height: 40px;
+        --card-width: clamp(60px, 9vw, 100px);
+        --card-width-board: clamp(55px, 8vw, 90px);
+        --hero-column-width: 70px;
+    }
+
+    #game-container {
+        padding-right: var(--hero-column-width);
+    }
+
+    .hero-portrait {
+        width: 58px;
+        height: 58px;
+        position: fixed;
+        right: 8px;
+    }
+
+    .enemy-hero {
+        top: calc(var(--header-height) + 16px);
+    }
+
+    .player-hero {
+        bottom: 16px;
+    }
+
+    #turn-indicator {
+        top: calc(var(--header-height) + 8px);
+    }
+
+    .hand {
+        min-height: 80px;
+        max-height: 100px;
+    }
+
+    .enemy-hand {
+        min-height: 60px;
+        max-height: 75px;
+    }
 }
 
 /* ========================================
@@ -625,31 +831,36 @@ body.fullscreen-mode #game-container {
    ======================================== */
 @media (max-height: 500px) and (orientation: landscape) {
     :root {
-        --header-height: 0px;
-        --footer-height: 0px;
-        --card-width: clamp(50px, 9vw, 75px);
-        --card-height: calc(var(--card-width) * 1.3);
-        --card-width-board: var(--card-width);
-        --card-height-board: var(--card-height);
-        --spacing-xs: 1px;
-        --spacing-sm: 2px;
-        --spacing-md: 4px;
-        --spacing-lg: 8px;
+        --header-height: 32px;
+        --card-width: clamp(44px, 8vw, 70px);
+        --card-height: calc(var(--card-width) * 1.35);
+        --card-width-board: clamp(40px, 7vw, 60px);
+        --card-height-board: calc(var(--card-width-board) * 1.25);
+        --spacing-xs: 2px;
+        --spacing-sm: 4px;
+        --spacing-md: 8px;
+        --spacing-lg: 12px;
+        /* Hero column width for right-side positioning */
+        --hero-column-width: 56px;
     }
 
     body {
         overflow: hidden;
     }
 
-    /* Hide header and footer in mobile landscape */
-    #site-header,
+    /* Hide header and footer for maximum game area */
+    #site-header {
+        display: none;
+    }
+
     #site-footer {
-        display: none !important;
+        display: none;
     }
 
     /* Show mobile buttons when header is hidden */
     .mobile-faction-btn,
-    .mobile-fullscreen-btn {
+    .mobile-fullscreen-btn,
+    .mobile-profile-btn {
         display: block;
     }
 
@@ -657,93 +868,97 @@ body.fullscreen-mode #game-container {
         padding-top: 0;
     }
 
+    /* Game container fills entire viewport with hero column on right */
     #game-container {
         height: 100vh;
         height: 100dvh;
         min-height: auto;
-        padding: 4px 110px; /* leave room for heroes on sides */
+        padding: 4px;
+        padding-right: var(--hero-column-width);
+        display: grid;
+        grid-template-rows: auto minmax(40px, 1fr) auto auto minmax(40px, 1fr) auto auto;
+        grid-template-columns: 1fr;
+        gap: 2px;
+        position: relative;
     }
 
-    /* Compact player info bars - horizontal layout */
+    /* Player info bars - compact horizontal layout */
     .player-info {
         padding: 2px 8px;
-        gap: 6px;
+        gap: 8px;
         flex-wrap: nowrap;
-        font-size: 0.75rem;
+        min-height: 26px;
+        max-height: 30px;
+        justify-content: flex-start;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
     }
 
     .player-info.enemy {
-        position: absolute;
-        top: 2px;
-        left: 60px;
-        right: 60px;
-        z-index: 90; /* Above enemy hand cards (80-81) */
-        background: rgba(0,0,0,0.7);
-        border-radius: 4px;
+        border-bottom-width: 1px;
     }
 
     .player-info.player {
-        position: absolute;
-        bottom: 2px;
-        left: 60px;
-        right: 60px;
-        z-index: 85; /* Above hand cards */
-        background: rgba(0,0,0,0.85);
-        border-radius: 4px;
-        padding: 4px 8px;
+        border-top-width: 1px;
     }
 
     .health-display, .mana-display, .deck-counter {
-        font-size: 0.7rem;
-        gap: 2px;
+        font-size: 0.8rem;
+        gap: 3px;
     }
 
     .health-icon, .mana-icon, .deck-icon {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
     }
 
-    /* Smaller end turn button */
+    /* End turn button - compact but touch-friendly */
     .end-turn-btn {
-        padding: 2px 8px;
-        font-size: 0.65rem;
-        min-height: 24px;
-        min-width: 50px;
+        padding: 4px 12px;
+        font-size: 0.7rem;
+        min-height: 28px;
+        min-width: 65px;
+        margin-left: auto;
     }
 
-    /* Compact hero portraits - positioned on sides of board */
+    /* Hero portraits - fixed column on right edge */
     .hero-portrait {
-        width: 45px;
-        height: 45px;
+        width: 44px;
+        height: 44px;
         position: fixed;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 100;
+        right: 4px;
+        z-index: 150;
+        border-width: 2px;
     }
 
     .hero-avatar {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
     }
 
-    /* Player hero on the left side */
-    .player-hero {
-        left: 6px;
-        right: auto;
-        bottom: auto;
-    }
-
-    /* Enemy hero on the right side */
+    /* Position heroes - top and bottom of screen */
     .enemy-hero {
-        right: 6px;
-        left: auto;
-        top: 50%;
+        top: 8px;
         bottom: auto;
+        transform: none;
     }
 
-    /* Compact turn indicator */
+    .player-hero {
+        top: auto;
+        bottom: 8px;
+        transform: none;
+    }
+
+    /* Turn indicator - top center, compact */
     #turn-indicator {
-        padding: 2px 6px;
-        top: 50%;
-        transform: translate(-50%, -50%);
+        position: fixed;
+        top: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 2px 10px;
+        font-size: 0.7rem;
+        z-index: 200;
+        background: rgba(12, 13, 20, 0.95);
+        flex-direction: row;
+        gap: 6px;
     }
 
     #turn-text {
@@ -752,65 +967,248 @@ body.fullscreen-mode #game-container {
     }
 
     #turn-number {
-        display: none;
+        font-size: 0.65rem;
     }
 
-    /* Compact hands - allow overflow for visibility */
+    /* Hands - horizontal scrolling with compact height */
     .hand {
         min-height: 50px;
-        padding: 2px;
-        gap: 3px;
-        overflow: visible; /* Allow cards to extend beyond container */
-        position: relative;
-        z-index: 80; /* Above info bars so cards are clickable */
+        max-height: 60px;
+        padding: 2px 4px;
+        gap: 4px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        justify-content: flex-start;
+        align-items: center;
+        -webkit-overflow-scrolling: touch;
     }
 
     .enemy-hand {
-        margin-top: 22px; /* space for enemy info bar */
+        min-height: 40px;
+        max-height: 50px;
     }
 
-    .player-hand {
-        margin-bottom: 30px; /* space for player info bar */
-    }
-
-    /* Cards in hand - allow vertical overflow */
     .hand .card {
-        cursor: pointer;
         flex-shrink: 0;
-        position: relative;
-        z-index: 81;
     }
 
     .player-hand .card:hover {
-        transform: translateY(-8px) scale(1.05);
-        z-index: 90;
+        transform: translateY(-6px) scale(1.03);
     }
 
-    .enemy-hand .card {
-        /* Enemy cards don't need interaction, keep contained */
-    }
-
-    /* Compact boards - ensure clickable even with hand overlap */
+    /* Boards - flex to fill available space */
     .board {
-        padding: 2px;
+        padding: 2px 4px;
         flex: 1;
-        min-height: 50px;
-        position: relative;
-        z-index: 40; /* Below hands so hands show on top */
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .board-slots {
-        gap: 3px;
+        gap: 4px;
         padding: 2px 4px;
+        justify-content: center;
+        flex-wrap: nowrap;
+        overflow-x: auto;
     }
 
     .board-slot {
         width: var(--card-width-board);
         height: var(--card-height-board);
-        pointer-events: auto; /* Ensure board slots remain clickable */
+        flex-shrink: 0;
     }
 
-    /* Smaller card elements */
+    /* Card elements - compact sizing */
+    .card-cost {
+        width: 16px;
+        height: 16px;
+        font-size: 0.65rem;
+    }
+
+    .card-attack, .card-health {
+        width: 14px;
+        height: 14px;
+        font-size: 0.6rem;
+    }
+
+    .card-name {
+        font-size: 0.45rem;
+        padding: 1px 2px;
+    }
+
+    .card-art {
+        font-size: 1.3rem;
+    }
+
+    .card-text {
+        font-size: 0.45rem;
+        padding: 1px;
+        display: none; /* Hide text on very small cards */
+    }
+
+    /* Overlays - responsive sizing */
+    .overlay-content {
+        padding: 12px;
+        max-width: 85vw;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    .overlay-content h1,
+    .overlay-content h2 {
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+    }
+
+    .btn-primary {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        min-height: 32px;
+    }
+
+    /* Turn banner - centered popup */
+    .turn-banner {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    /* Faction selector - compact grid */
+    .faction-grid {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .faction-btn, .setup-faction-btn {
+        padding: 6px 8px;
+        min-width: auto;
+        font-size: 0.7rem;
+    }
+
+    .faction-btn .faction-icon,
+    .setup-faction-btn .faction-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Setup modal compact */
+    #game-setup .setup-content {
+        padding: 10px;
+        max-width: 90vw;
+    }
+
+    .setup-factions {
+        gap: 6px;
+    }
+
+    /* Rotate overlay should be hidden in landscape */
+    .rotate-overlay {
+        display: none !important;
+    }
+
+    /* Exit fullscreen button positioning */
+    .exit-fullscreen-btn {
+        top: 4px;
+        right: calc(var(--hero-column-width) + 4px);
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Extra compact for very short landscape screens (e.g., iPhone SE landscape) */
+@media (max-height: 380px) and (orientation: landscape) {
+    :root {
+        --header-height: 0px;
+        --card-width: clamp(32px, 6vw, 50px);
+        --card-width-board: clamp(30px, 5.5vw, 45px);
+        --hero-column-width: 44px;
+    }
+
+    #game-container {
+        padding-right: var(--hero-column-width);
+        padding: 2px;
+        padding-right: var(--hero-column-width);
+        gap: 1px;
+    }
+
+    .hand {
+        min-height: 42px;
+        max-height: 48px;
+        padding: 1px 2px;
+    }
+
+    .enemy-hand {
+        min-height: 35px;
+        max-height: 42px;
+    }
+
+    .hero-portrait {
+        width: 36px;
+        height: 36px;
+        border-width: 2px;
+    }
+
+    .hero-avatar {
+        font-size: 1rem;
+    }
+
+    .enemy-hero {
+        top: 4px;
+        bottom: auto;
+        transform: none;
+    }
+
+    .player-hero {
+        top: auto;
+        bottom: 4px;
+        transform: none;
+    }
+
+    #turn-indicator {
+        padding: 2px 6px;
+        top: 2px;
+    }
+
+    #turn-text {
+        font-size: 0.6rem;
+    }
+
+    #turn-number {
+        display: none;
+    }
+
+    .player-info {
+        padding: 2px 4px;
+        min-height: 22px;
+        max-height: 24px;
+    }
+
+    .health-display, .mana-display, .deck-counter {
+        font-size: 0.7rem;
+        gap: 2px;
+    }
+
+    .health-icon, .mana-icon, .deck-icon {
+        font-size: 0.75rem;
+    }
+
+    .end-turn-btn {
+        padding: 2px 8px;
+        font-size: 0.6rem;
+        min-height: 22px;
+        min-width: 50px;
+    }
+
+    .board {
+        padding: 1px 2px;
+    }
+
+    .board-slots {
+        gap: 2px;
+        padding: 1px 2px;
+    }
+
     .card-cost {
         width: 14px;
         height: 14px;
@@ -826,130 +1224,168 @@ body.fullscreen-mode #game-container {
     .card-name {
         font-size: 0.4rem;
         padding: 1px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .card-text {
-        display: none; /* hide card text on very small cards */
     }
 
     .card-art {
         font-size: 1rem;
     }
 
-    .card-keywords {
-        font-size: 0.4rem;
-        padding: 1px;
-    }
-
-    /* Adjust overlays */
+    /* Compact overlays */
     .overlay-content {
         padding: 8px;
-        max-width: 85vw;
+        max-width: 90vw;
+        max-height: 90vh;
     }
 
-    .overlay-content h1,
     .overlay-content h2 {
-        font-size: 1.2rem;
+        font-size: 1rem;
         margin-bottom: 6px;
     }
 
     .btn-primary {
-        padding: 6px 12px;
-        font-size: 0.8rem;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        min-height: 28px;
+    }
+
+    .exit-fullscreen-btn {
+        right: calc(var(--hero-column-width) + 2px);
     }
 }
 
-/* Card magnification overlay for mobile */
-.card-magnify-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-}
-
-.card-magnify-overlay.active {
-    opacity: 1;
-    pointer-events: none; /* Don't block clicks - magnified card is just visual */
-}
-
-.card-magnify-overlay .magnified-card {
-    width: 200px;
-    height: 280px;
-    transform: scale(1);
-    transition: transform 0.2s ease;
-}
-
-.card-magnify-overlay .magnified-card .card-text,
-.card-magnify-overlay .magnified-card .card-name {
-    display: block !important;
-    font-size: 0.8rem !important;
-}
-
-.card-magnify-overlay .magnified-card .card-art {
-    font-size: 3rem !important;
-}
-
-.card-magnify-overlay .magnified-card .card-cost {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 1rem !important;
-}
-
-.card-magnify-overlay .magnified-card .card-attack,
-.card-magnify-overlay .magnified-card .card-health {
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 0.9rem !important;
-}
-
-/* Extra compact for very short landscape screens (e.g., iPhone SE landscape) */
-@media (max-height: 380px) and (orientation: landscape) {
+/* Ultra-compact for extremely short screens (height < 320px) */
+@media (max-height: 320px) and (orientation: landscape) {
     :root {
-        --card-width: clamp(42px, 8vw, 60px);
-        --card-width-board: var(--card-width);
+        --header-height: 0px;
+        --card-width: clamp(28px, 5vw, 42px);
+        --card-width-board: clamp(26px, 4.5vw, 38px);
+        --hero-column-width: 38px;
     }
 
-    .hand {
-        min-height: 55px;
+    #game-container {
+        padding: 1px;
+        padding-right: var(--hero-column-width);
+        gap: 1px;
     }
 
     .hero-portrait {
-        width: 40px;
-        height: 40px;
+        width: 30px;
+        height: 30px;
+        border-width: 1px;
     }
 
     .hero-avatar {
-        font-size: 1.2rem;
+        font-size: 0.85rem;
     }
 
-    #turn-indicator {
-        padding: 2px 6px;
+    .enemy-hero {
+        top: 2px;
+        bottom: auto;
+        transform: none;
     }
 
-    #turn-text {
-        font-size: 0.75rem;
+    .player-hero {
+        top: auto;
+        bottom: 2px;
+        transform: none;
     }
 
-    #turn-number {
-        display: none;
+    .hand {
+        min-height: 36px;
+        max-height: 42px;
+        padding: 1px;
+    }
+
+    .enemy-hand {
+        min-height: 30px;
+        max-height: 36px;
     }
 
     .player-info {
-        padding: 2px 6px;
+        padding: 1px 4px;
+        min-height: 18px;
+        max-height: 20px;
+    }
+
+    .health-display, .mana-display, .deck-counter {
+        font-size: 0.6rem;
+        gap: 2px;
+    }
+
+    .health-icon, .mana-icon, .deck-icon {
+        font-size: 0.65rem;
     }
 
     .end-turn-btn {
+        padding: 2px 6px;
+        font-size: 0.5rem;
+        min-height: 18px;
+        min-width: 40px;
+    }
+
+    #turn-indicator {
+        padding: 1px 4px;
+        top: 1px;
+    }
+
+    #turn-text {
+        font-size: 0.5rem;
+    }
+
+    .board {
+        padding: 1px;
+    }
+
+    .board-slots {
+        gap: 1px;
+        padding: 1px;
+    }
+
+    .card-cost {
+        width: 12px;
+        height: 12px;
+        font-size: 0.5rem;
+    }
+
+    .card-attack, .card-health {
+        width: 10px;
+        height: 10px;
+        font-size: 0.45rem;
+    }
+
+    .card-name {
+        display: none; /* Hide names on ultra-small cards */
+    }
+
+    .card-art {
+        font-size: 0.9rem;
+    }
+
+    /* Compact overlays for tiny screens */
+    .overlay-content {
+        padding: 6px;
+        max-width: 95vw;
+        max-height: 95vh;
+    }
+
+    .overlay-content h2 {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+    }
+
+    .btn-primary {
         padding: 3px 8px;
-        font-size: 0.65rem;
+        font-size: 0.7rem;
+        min-height: 24px;
+    }
+
+    .faction-btn, .setup-faction-btn {
+        padding: 4px 6px;
+        font-size: 0.6rem;
+    }
+
+    .exit-fullscreen-btn {
+        display: none; /* Hide on ultra-small screens to save space */
     }
 }
 
@@ -1016,6 +1452,93 @@ body.fullscreen-mode #game-container {
 
     .board-slot {
         flex-shrink: 0;
+    }
+
+    /* Hero portraits - better positioning */
+    .hero-portrait {
+        position: fixed;
+        z-index: 100;
+    }
+
+    .enemy-hero {
+        top: auto;
+        bottom: auto;
+        position: absolute;
+        right: 8px;
+    }
+
+    .player-hero {
+        position: absolute;
+        right: 8px;
+    }
+}
+
+/* ========================================
+   Z-INDEX STACKING ORDER (prevent overlap)
+   ======================================== */
+/* Base layer */
+#game-container { z-index: 1; }
+
+/* Game elements */
+.board { z-index: 10; }
+.hand { z-index: 20; }
+.player-info { z-index: 30; }
+
+/* Interactive overlays */
+.hero-portrait { z-index: 100; }
+#turn-indicator { z-index: 150; }
+.attack-arrow { z-index: 160; }
+#damage-numbers { z-index: 170; }
+
+/* UI overlays */
+.turn-banner { z-index: 500; }
+.overlay { z-index: 1000; }
+.rotate-overlay { z-index: 5000; }
+
+/* Fixed header elements */
+#site-header { z-index: 2000; }
+.exit-fullscreen-btn { z-index: 9999; }
+
+/* ========================================
+   TOUCH-FRIENDLY IMPROVEMENTS
+   ======================================== */
+@media (hover: none) and (pointer: coarse) {
+    /* Touch devices - ensure minimum tap targets */
+    .card {
+        min-width: 44px;
+        min-height: 60px;
+    }
+
+    .board-slot {
+        min-width: 44px;
+        min-height: 60px;
+    }
+
+    .hero-portrait {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .btn-primary, .end-turn-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Remove hover effects that cause issues on touch */
+    .card:hover {
+        transform: none;
+    }
+
+    .player-hand .card:active {
+        transform: translateY(-8px) scale(1.05);
+    }
+
+    /* Improve tap feedback */
+    .card:active,
+    .hero-portrait:active,
+    .btn-primary:active,
+    .end-turn-btn:active {
+        opacity: 0.9;
     }
 }
 
@@ -1130,7 +1653,9 @@ body.fullscreen-mode #game-container {
 
 
 
-/* Compact hero and UI for small screens */
+/* Hero portrait positioning for desktop */
+.hero-portrait { right: 16px; }
+
 @media (max-width: 480px) {
     .hero-portrait { width:60px; height:60px; }
     .hero-avatar { font-size:1.6rem; }
@@ -1192,12 +1717,6 @@ body.fullscreen-mode #game-container {
     color: var(--text-secondary);
 }
 
-#player-deck-count,
-#enemy-deck-count {
-    min-width: 20px;
-    display: inline-block;
-}
-
 /* End Turn Button */
 .end-turn-btn {
     margin-left: auto;
@@ -1247,6 +1766,7 @@ body.fullscreen-mode #game-container {
 }
 
 .hero-portrait:hover {
+    transform: scale(1.05);
     box-shadow: var(--shadow-glow);
 }
 
@@ -1255,45 +1775,20 @@ body.fullscreen-mode #game-container {
     animation: pulse-target 1s infinite;
 }
 
-/* Desktop: heroes on the right side */
 .enemy-hero {
-    top: 120px;
-    right: 40px;
+    top: calc(var(--header-sliver) + 16px);
+    right: 12px;
 }
 
 .player-hero {
-    bottom: 120px;
-    right: 40px;
+    bottom: calc(var(--footer-sliver) + 16px);
+    right: 12px;
 }
 
-/* Smaller screens portrait: heroes on right side */
-@media (max-width: 900px) and (orientation: portrait) {
-    .enemy-hero { top: 80px; right: 16px; }
-    .player-hero { bottom: 80px; right: 16px; }
-}
-
-/* Mobile landscape: heroes on opposite sides of the board */
-@media (max-height: 500px) and (orientation: landscape) {
-    .hero-portrait {
-        position: fixed;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 100;
-        width: 50px;
-        height: 50px;
-    }
-
-    .player-hero {
-        left: 50px;
-        right: auto;
-        bottom: auto;
-    }
-
-    .enemy-hero {
-        right: 50px;
-        left: auto;
-        bottom: auto;
-    }
+/* Use larger offsets on wide screens */
+@media (min-width: 900px) {
+    .enemy-hero { top: 120px; right: 40px; }
+    .player-hero { bottom: 120px; right: 40px; }
 }
 
 .hero-avatar {
@@ -1318,27 +1813,19 @@ body.fullscreen-mode #game-container {
     box-shadow: 0 6px 20px rgba(0,0,0,0.6);
     font-weight: 700;
     text-transform: uppercase;
-    /* Prevent content shift when text changes between "Your Turn" and "Enemy's Turn" */
-    min-width: 140px;
-    text-align: center;
 }
 
-/* Mobile landscape: center turn indicator vertically to avoid overlap with info bars */
-@media (max-height: 500px) and (orientation: landscape) {
-    #turn-indicator {
-        top: 50%;
-        transform: translate(-50%, -50%);
-        padding: 2px 6px;
-    }
+/* Faction selector: selected state */
+.faction-btn.selected {
+    outline: 3px solid rgba(212,175,55,0.9);
+    transform: scale(1.05);
+}
 
-    #turn-text {
-        font-size: 0.7rem;
-        letter-spacing: 0.5px;
-    }
-
-    #turn-number {
-        display: none;
-    }
+.faction-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 6px;
 }
 
 .confirm-hero {
@@ -1378,7 +1865,7 @@ body.fullscreen-mode #game-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 5000; /* Above turn indicator (3000) */
+    z-index: 1000;
 }
 
 .overlay.hidden {
@@ -1456,122 +1943,6 @@ body.fullscreen-mode #game-container {
     opacity: 0.5;
 }
 
-/* AI Chat Bubble */
-.ai-chat-bubble {
-    position: fixed;
-    top: calc(var(--header-height) + 60px);
-    right: 120px;
-    z-index: 4000;
-    max-width: 280px;
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    pointer-events: none;
-}
-
-.ai-chat-bubble.visible {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-}
-
-.chat-bubble-content {
-    position: relative;
-    background: rgba(20, 20, 35, 0.95);
-    border: 2px solid var(--accent-gold);
-    border-radius: 16px;
-    padding: 12px 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.2);
-}
-
-/* Speech bubble tail pointing to enemy hero area */
-.chat-bubble-content::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    right: 30px;
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 10px solid var(--accent-gold);
-}
-
-.chat-bubble-content::before {
-    content: '';
-    position: absolute;
-    bottom: -7px;
-    right: 32px;
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid rgba(20, 20, 35, 0.95);
-    z-index: 1;
-}
-
-.chat-bubble-text {
-    font-size: 0.95rem;
-    color: var(--text-primary);
-    line-height: 1.4;
-    font-style: italic;
-}
-
-/* Personality-specific styling */
-.ai-chat-bubble.personality-triassic .chat-bubble-content {
-    border-color: var(--triassic-green);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(74, 124, 78, 0.3);
-}
-.ai-chat-bubble.personality-triassic .chat-bubble-content::after {
-    border-top-color: var(--triassic-green);
-}
-
-.ai-chat-bubble.personality-jurassic .chat-bubble-content {
-    border-color: var(--jurassic-red);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(139, 58, 58, 0.3);
-}
-.ai-chat-bubble.personality-jurassic .chat-bubble-content::after {
-    border-top-color: var(--jurassic-red);
-}
-
-.ai-chat-bubble.personality-cretaceous .chat-bubble-content {
-    border-color: var(--cretaceous-blue);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(58, 90, 139, 0.3);
-}
-.ai-chat-bubble.personality-cretaceous .chat-bubble-content::after {
-    border-top-color: var(--cretaceous-blue);
-}
-
-.ai-chat-bubble.personality-primordial .chat-bubble-content {
-    border-color: var(--primordial-purple);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(107, 58, 139, 0.3);
-}
-.ai-chat-bubble.personality-primordial .chat-bubble-content::after {
-    border-top-color: var(--primordial-purple);
-}
-
-.ai-chat-bubble.personality-ice-age .chat-bubble-content {
-    border-color: var(--ice-age-white);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(168, 180, 192, 0.3);
-}
-.ai-chat-bubble.personality-ice-age .chat-bubble-content::after {
-    border-top-color: var(--ice-age-white);
-}
-
-/* Hide chat bubble on small viewports */
-@media (max-width: 931px), (max-height: 429px) {
-    .ai-chat-bubble {
-        display: none !important;
-    }
-}
-
-/* Adjust position for different layouts */
-@media (min-width: 932px) and (max-width: 1200px) {
-    .ai-chat-bubble {
-        right: 100px;
-        max-width: 240px;
-    }
-}
-
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
     width: 8px;
@@ -1634,291 +2005,384 @@ body.fullscreen-mode #game-container {
 }
 
 /* ========================================
-   STATIC PAGE STYLES
+   STATIC PAGE LAYOUTS (about, terms, privacy, rules)
    ======================================== */
 
-/* Container for static page content */
-.rules-container,
+/* Sticky footer layout for static pages */
+body.static-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+body.static-page main {
+    flex: 1 0 auto;
+    margin-top: var(--header-height);
+}
+
+body.static-page #site-footer {
+    flex-shrink: 0;
+}
+
+/* Content container for static pages */
+.content-container,
 .about-container,
-.privacy-container,
-.terms-container {
-    max-width: 800px;
+.terms-container,
+.privacy-container {
+    padding: 2rem 1rem;
+    max-width: 900px;
     margin: 0 auto;
-    padding: calc(var(--header-height) + 2rem) 1.5rem 3rem;
     color: var(--text-primary);
-    line-height: 1.7;
 }
 
-.rules-container h1,
+.content-container h1,
 .about-container h1,
-.privacy-container h1,
-.terms-container h1 {
-    font-size: 2rem;
+.terms-container h1,
+.privacy-container h1 {
     color: var(--accent-gold);
-    margin-bottom: 1rem;
-    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--accent-gold);
+    padding-bottom: 0.5rem;
 }
 
-.rules-container h2,
+.content-container h2,
 .about-container h2,
-.privacy-container h2,
-.terms-container h2 {
-    font-size: 1.5rem;
+.terms-container h2,
+.privacy-container h2 {
     color: var(--accent-gold);
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.25rem;
     border-bottom: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-.rules-container h3,
+.content-container h3,
 .about-container h3,
-.privacy-container h3,
-.terms-container h3 {
-    font-size: 1.2rem;
+.terms-container h3,
+.privacy-container h3 {
     color: var(--text-primary);
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+    margin: 1.5rem 0 0.75rem;
 }
 
-.rules-container p,
+.content-container p,
 .about-container p,
-.privacy-container p,
-.terms-container p {
+.terms-container p,
+.privacy-container p {
+    line-height: 1.7;
     margin-bottom: 1rem;
     color: var(--text-secondary);
 }
 
-.rules-container ul,
-.rules-container ol,
-.about-container ul,
-.about-container ol,
-.privacy-container ul,
-.privacy-container ol,
-.terms-container ul,
-.terms-container ol {
-    margin-bottom: 1.5rem;
+.content-container ul, .content-container ol,
+.about-container ul, .about-container ol,
+.terms-container ul, .terms-container ol,
+.privacy-container ul, .privacy-container ol {
+    margin: 1rem 0;
     padding-left: 1.5rem;
 }
 
-.rules-container li,
+.content-container li,
 .about-container li,
-.privacy-container li,
-.terms-container li {
+.terms-container li,
+.privacy-container li {
     margin-bottom: 0.5rem;
+    line-height: 1.6;
     color: var(--text-secondary);
 }
 
-.rules-container strong,
-.about-container strong,
-.privacy-container strong,
-.terms-container strong {
+.content-container a,
+.about-container a,
+.terms-container a,
+.privacy-container a {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.content-container a:hover,
+.about-container a:hover,
+.terms-container a:hover,
+.privacy-container a:hover {
+    text-decoration: underline;
+}
+
+/* Back link styling */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    color: var(--accent-blue);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--accent-blue);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.back-link:hover {
+    background: rgba(52, 152, 219, 0.1);
+    text-decoration: none;
+}
+
+/* ========================================
+   RULES PAGE SPECIFIC STYLES
+   ======================================== */
+
+.rules-container {
+    padding: 2rem 1rem;
+    max-width: 900px;
+    margin: 0 auto;
     color: var(--text-primary);
 }
 
-.rules-container em,
-.about-container em,
-.privacy-container em,
-.terms-container em {
-    color: rgba(255, 255, 255, 0.6);
-    font-style: italic;
+.rules-container h1 {
+    color: var(--accent-gold);
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--accent-gold);
+    padding-bottom: 0.5rem;
 }
 
-/* Tip boxes */
-.tip-box {
-    background: rgba(78, 205, 196, 0.1);
-    border: 1px solid rgba(78, 205, 196, 0.3);
-    border-radius: 8px;
-    padding: 1rem 1.25rem;
-    margin: 1.5rem 0;
+.rules-container h2 {
+    color: var(--accent-gold);
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-.tip-box h4 {
-    color: #4ecdc4;
-    font-size: 1rem;
-    margin: 0 0 0.5rem 0;
+.rules-container h3 {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    margin: 1.5rem 0 0.75rem;
 }
 
-.tip-box p {
-    margin: 0;
-    font-size: 0.95rem;
+.rules-container p {
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
 }
 
-/* Keyword cards */
-.keyword-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    padding: 1.25rem;
+.rules-container ul, .rules-container ol {
     margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.rules-container li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+/* Keyword cards for rules page */
+.keyword-card {
+    background: rgba(30, 30, 50, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
 .keyword-card h4 {
-    margin: 0 0 0.75rem 0;
+    color: var(--accent-gold);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.keyword-card p {
-    margin: 0.5rem 0;
-}
-
-.keyword-card p:last-child {
-    margin-bottom: 0;
-}
-
-/* Keyword badges */
-.keyword-badge {
+/* Keyword badges in rules */
+.rules-container .keyword-badge {
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.keyword-badge.charge {
-    background: rgba(243, 156, 18, 0.2);
-    color: #f39c12;
-    border: 1px solid rgba(243, 156, 18, 0.4);
-}
+.rules-container .keyword-badge.charge { background: #e74c3c; color: white; }
+.rules-container .keyword-badge.guard { background: #a8b4c0; color: #1a1a2e; }
+.rules-container .keyword-badge.venomous { background: #27ae60; color: white; }
+.rules-container .keyword-badge.armored { background: #3498db; color: white; }
+.rules-container .keyword-badge.extinct { background: #9b59b6; color: white; }
 
-.keyword-badge.guard {
-    background: rgba(52, 152, 219, 0.2);
-    color: #3498db;
-    border: 1px solid rgba(52, 152, 219, 0.4);
-}
-
-.keyword-badge.venomous {
-    background: rgba(46, 204, 113, 0.2);
-    color: #2ecc71;
-    border: 1px solid rgba(46, 204, 113, 0.4);
-}
-
-.keyword-badge.armored {
-    background: rgba(149, 165, 166, 0.2);
-    color: #95a5a6;
-    border: 1px solid rgba(149, 165, 166, 0.4);
-}
-
-.keyword-badge.extinct {
-    background: rgba(155, 89, 182, 0.2);
-    color: #9b59b6;
-    border: 1px solid rgba(155, 89, 182, 0.4);
-}
-
-/* Faction grid for rules page */
-.faction-grid {
+/* Faction grid in rules page */
+.rules-container .faction-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1rem;
     margin: 1.5rem 0;
 }
 
-.faction-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
+/* Large screens - force 3 columns */
+@media (min-width: 900px) {
+    .rules-container .faction-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Medium screens - 2 columns */
+@media (min-width: 601px) and (max-width: 899px) {
+    .rules-container .faction-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Small screens - 1 column */
+@media (max-width: 600px) {
+    .rules-container .faction-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+}
+
+/* Faction cards in rules */
+.rules-container .faction-card {
+    background: linear-gradient(135deg, rgba(30, 30, 50, 0.8) 0%, rgba(20, 20, 35, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     padding: 1.25rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.faction-card h4 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.1rem;
+.rules-container .faction-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-.faction-card p {
-    margin: 0.5rem 0;
+.rules-container .faction-card h4 {
+    font-size: 1.15rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rules-container .faction-card p {
+    margin-bottom: 0.5rem;
     font-size: 0.9rem;
 }
 
-.faction-card.triassic { border-color: rgba(46, 204, 113, 0.4); }
-.faction-card.jurassic { border-color: rgba(231, 76, 60, 0.4); }
-.faction-card.cretaceous { border-color: rgba(52, 152, 219, 0.4); }
-.faction-card.primordial { border-color: rgba(155, 89, 182, 0.4); }
-.faction-card.iceage { border-color: rgba(0, 217, 255, 0.4); }
-.faction-card.neutral { border-color: rgba(149, 165, 166, 0.4); }
+.rules-container .faction-card p:last-child {
+    margin-bottom: 0;
+}
 
-.faction-card.triassic h4 { color: #2ecc71; }
-.faction-card.jurassic h4 { color: #e74c3c; }
-.faction-card.cretaceous h4 { color: #3498db; }
-.faction-card.primordial h4 { color: #9b59b6; }
-.faction-card.iceage h4 { color: #00d9ff; }
-.faction-card.neutral h4 { color: #95a5a6; }
+.rules-container .faction-card em {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Faction-specific styling */
+.rules-container .faction-card.triassic {
+    border-left: 4px solid #4a7c4e;
+    background: linear-gradient(135deg, rgba(74, 124, 78, 0.15) 0%, rgba(20, 20, 35, 0.9) 100%);
+}
+.rules-container .faction-card.triassic h4 { color: #6aa870; }
+
+.rules-container .faction-card.jurassic {
+    border-left: 4px solid #8b3a3a;
+    background: linear-gradient(135deg, rgba(139, 58, 58, 0.15) 0%, rgba(20, 20, 35, 0.9) 100%);
+}
+.rules-container .faction-card.jurassic h4 { color: #c45a5a; }
+
+.rules-container .faction-card.cretaceous {
+    border-left: 4px solid #3a5a8b;
+    background: linear-gradient(135deg, rgba(58, 90, 139, 0.15) 0%, rgba(20, 20, 35, 0.9) 100%);
+}
+.rules-container .faction-card.cretaceous h4 { color: #5a8acc; }
+
+.rules-container .faction-card.primordial {
+    border-left: 4px solid #6b3a8b;
+    background: linear-gradient(135deg, rgba(107, 58, 139, 0.15) 0%, rgba(20, 20, 35, 0.9) 100%);
+}
+.rules-container .faction-card.primordial h4 { color: #9b6abb; }
+
+.rules-container .faction-card.iceage {
+    border-left: 4px solid #a8b4c0;
+    background: linear-gradient(135deg, rgba(168, 180, 192, 0.15) 0%, rgba(20, 20, 35, 0.9) 100%);
+}
+.rules-container .faction-card.iceage h4 { color: #c8d4e0; }
+
+.rules-container .faction-card.neutral {
+    border-left: 4px solid #808080;
+    background: linear-gradient(135deg, rgba(128, 128, 128, 0.15) 0%, rgba(20, 20, 35, 0.9) 100%);
+}
+.rules-container .faction-card.neutral h4 { color: #a0a0a0; }
 
 /* Card anatomy diagram */
 .card-anatomy {
     display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
+    gap: 1.5rem;
     align-items: flex-start;
-    margin: 1.5rem 0;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
+    flex-wrap: wrap;
+    margin: 1rem 0;
 }
 
 .card-diagram {
     width: 140px;
-    height: 180px;
-    background: linear-gradient(135deg, #2a2a4e 0%, #1a1a3e 100%);
-    border: 2px solid var(--accent-gold);
-    border-radius: 10px;
+    height: 196px;
+    background: var(--bg-medium);
+    border: 2px solid var(--bg-light);
+    border-radius: 8px;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
     flex-shrink: 0;
 }
 
 .card-diagram .cost {
     position: absolute;
-    top: -8px;
-    left: -8px;
+    top: -2px;
+    left: -2px;
     width: 28px;
     height: 28px;
-    background: #3498db;
+    background: var(--accent-blue);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 0.9rem;
-    color: white;
 }
 
 .card-diagram .art {
+    height: 55%;
+    background: linear-gradient(135deg, #4a7c4e 0%, #2d5a31 100%);
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 2.5rem;
-    margin-bottom: 8px;
 }
 
 .card-diagram .name {
-    font-size: 0.75rem;
-    font-weight: 600;
+    background: rgba(0,0,0,0.7);
+    padding: 4px;
     text-align: center;
-    margin-bottom: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
 }
 
 .card-diagram .text {
-    font-size: 0.65rem;
-    color: var(--text-secondary);
+    padding: 4px;
+    font-size: 0.55rem;
     text-align: center;
+    color: var(--text-secondary);
 }
 
 .card-diagram .stats {
     position: absolute;
-    bottom: -8px;
+    bottom: 0;
     left: 0;
     right: 0;
     display: flex;
     justify-content: space-between;
-    padding: 0 4px;
+    padding: 4px;
 }
 
-.card-diagram .attack,
-.card-diagram .health {
+.card-diagram .attack, .card-diagram .health {
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -1927,74 +2391,54 @@ body.fullscreen-mode #game-container {
     justify-content: center;
     font-weight: bold;
     font-size: 0.8rem;
-    color: white;
 }
 
-.card-diagram .attack {
-    background: var(--accent-gold);
-}
-
-.card-diagram .health {
-    background: #e74c3c;
-}
+.card-diagram .attack { background: var(--accent-gold); color: var(--bg-dark); }
+.card-diagram .health { background: var(--accent-red); color: white; }
 
 .anatomy-list {
     flex: 1;
-    min-width: 250px;
+    min-width: 200px;
 }
 
 .anatomy-list li {
     margin-bottom: 0.75rem;
 }
 
-/* Back link */
-.back-link {
-    display: inline-block;
-    margin-top: 2rem;
-    padding: 0.75rem 1.5rem;
-    background: rgba(78, 205, 196, 0.1);
-    border: 1px solid rgba(78, 205, 196, 0.3);
+.anatomy-list strong {
+    color: var(--accent-gold);
+}
+
+/* Tip boxes */
+.tip-box {
+    background: rgba(39, 174, 96, 0.1);
+    border: 1px solid rgba(39, 174, 96, 0.3);
     border-radius: 8px;
-    color: #4ecdc4;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all var(--transition-fast);
+    padding: 1rem;
+    margin: 1rem 0;
 }
 
-.back-link:hover {
-    background: rgba(78, 205, 196, 0.2);
-    border-color: #4ecdc4;
+.tip-box h4 {
+    color: var(--accent-green);
+    margin-bottom: 0.5rem;
 }
 
-/* Mobile adjustments for static pages */
+/* Rules page responsive */
 @media (max-width: 600px) {
-    .rules-container,
-    .about-container,
-    .privacy-container,
-    .terms-container {
-        padding: calc(var(--header-height) + 1rem) 1rem 2rem;
+    .rules-container {
+        padding: 1rem 0.75rem;
     }
 
-    .rules-container h1,
-    .about-container h1,
-    .privacy-container h1,
-    .terms-container h1 {
+    .rules-container h1 {
         font-size: 1.5rem;
     }
 
-    .rules-container h2,
-    .about-container h2,
-    .privacy-container h2,
-    .terms-container h2 {
+    .rules-container h2 {
         font-size: 1.25rem;
     }
 
     .card-anatomy {
         flex-direction: column;
         align-items: center;
-    }
-
-    .faction-grid {
-        grid-template-columns: 1fr;
     }
 }

@@ -97,11 +97,12 @@
     }
     </script>
 
-    <link rel="stylesheet" href="css/main.css?v=20260121d">
+    <link rel="stylesheet" href="css/main.css?v=20260120">
     <link rel="stylesheet" href="css/board.css?v=20260120">
     <link rel="stylesheet" href="css/cards.css?v=20260120">
     <link rel="stylesheet" href="css/animations.css?v=20260120">
     <link rel="stylesheet" href="css/wizard.css?v=20260120">
+    <link rel="stylesheet" href="css/profile.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -143,6 +144,11 @@
             person_profiles: 'identified_only'
         })
     </script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
+    <!-- Turnstile Captcha -->
+     <link rel="preconnect" href="https://challenges.cloudflare.com">
+     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 
 <body>
@@ -160,13 +166,13 @@
                 <ul id="primaryNav" class="primary-nav">
                     <li><a href="rules.html" title="Rules and How to Play">Rules</a></li>
                     <li><a href="about.html" title="About Stonefire">About</a></li>
+                    <li><a href="profile.html" title="Your Profile">Profile</a></li>
                     <li><a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener"
                             target="_blank">Source</a></li>
                 </ul>
-                <button id="factionBtn" class="faction-header-btn" aria-label="Change factions"
-                    title="Change factions">🎭</button>
                 <button id="fullscreenBtn" class="fullscreen-btn" aria-label="Toggle fullscreen mode"
                     title="Maximize game">⛶</button>
+                <button id="profileBtn" class="profile-header-btn" aria-label="Profile" title="Profile">👤<span class="sync-dot"></span></button>
                 <button id="installBtn" class="install-btn" aria-hidden="true" hidden
                     aria-label="Install Stonefire web app">Install</button>
             </nav>
@@ -176,11 +182,10 @@
     <!-- Exit fullscreen button (shown only in fullscreen mode) -->
     <button id="exitFullscreenBtn" class="exit-fullscreen-btn" aria-label="Exit fullscreen mode">✕ Exit</button>
 
-    <!-- Mobile landscape faction button (shown when header is hidden) -->
+    <!-- Mobile landscape buttons (shown when header is hidden) -->
     <button id="mobileFactionBtn" class="mobile-faction-btn" aria-label="Change factions">🎭</button>
-
-    <!-- Mobile fullscreen button (shown when header is hidden) -->
     <button id="mobileFullscreenBtn" class="mobile-fullscreen-btn" aria-label="Toggle fullscreen">⛶</button>
+    <button id="mobileProfileBtn" class="mobile-profile-btn" aria-label="Profile">👤</button>
 
     <main id="main" role="main">
         <!-- Rotate overlay: shown on narrow portrait devices to suggest rotating for best play experience -->
@@ -288,79 +293,105 @@
                 </div>
             </div>
 
+            <!-- Auth Modal -->
+            <div id="auth-modal" class="overlay hidden">
+                <div class="overlay-content auth-modal-content">
+                    <button class="auth-modal-close" aria-label="Close">✕</button>
+                    <h2>Sign In</h2>
+                    <p class="auth-subtitle">Sync your progress across devices</p>
+
+                    <div class="auth-providers">
+                        <button id="auth-github" class="auth-provider-btn">
+                            <span class="auth-provider-icon">🐙</span>
+                            Continue with GitHub
+                        </button>
+                        <button id="auth-google" class="auth-provider-btn">
+                            <span class="auth-provider-icon">🔍</span>
+                            Continue with Google
+                        </button>
+                    </div>
+
+                    <div class="auth-divider"><span>or</span></div>
+
+                    <div id="auth-email-form" class="auth-email-form">
+                        <input type="email" id="auth-email" placeholder="Email" class="auth-input" autocomplete="email">
+                        <input type="password" id="auth-password" placeholder="Password" class="auth-input" autocomplete="current-password">
+                        <button id="auth-email-submit" class="btn-primary auth-submit-btn">Sign In</button>
+                        <button id="auth-toggle-mode" class="auth-toggle-btn">Don't have an account? Sign Up</button>
+                        <div id="turnstile-container"></div>
+                    </div>
+
+                    <div id="auth-error" class="auth-error hidden"></div>
+                    <div id="auth-loading" class="auth-loading hidden">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Faction Selector Overlay -->
             <div id="faction-selector" class="overlay hidden">
-                <div class="overlay-content faction-selector-content">
-                    <h2>Choose Factions</h2>
-                    <p class="faction-selector-warning">Changing factions will restart the game.</p>
-
-                    <div class="faction-selector-panels">
-                        <!-- Player Panel -->
-                        <div class="faction-selector-panel">
-                            <h3 class="faction-selector-label">Your Faction</h3>
-                            <div class="faction-selector-grid player-options" role="radiogroup" aria-label="Select player faction">
-                                <button class="faction-selector-card" data-target="player" data-faction="TRIASSIC">
-                                    <span class="faction-selector-icon">🦎</span>
-                                    <span class="faction-selector-name">Triassic</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="player" data-faction="JURASSIC">
-                                    <span class="faction-selector-icon">🦕</span>
-                                    <span class="faction-selector-name">Jurassic</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="player" data-faction="CRETACEOUS">
-                                    <span class="faction-selector-icon">🦖</span>
-                                    <span class="faction-selector-name">Cretaceous</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="player" data-faction="PRIMORDIAL">
-                                    <span class="faction-selector-icon">🌋</span>
-                                    <span class="faction-selector-name">Primordial</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="player" data-faction="ICE_AGE">
-                                    <span class="faction-selector-icon">🦣</span>
-                                    <span class="faction-selector-name">Ice Age</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="player" data-faction="NEUTRAL">
-                                    <span class="faction-selector-icon">🥚</span>
-                                    <span class="faction-selector-name">Neutral</span>
-                                </button>
+                <div class="overlay-content">
+                    <h2>Choose factions</h2>
+                    <p style="margin-bottom:1rem;">Changing factions will restart the game.</p>
+                    <div class="faction-grid" style="display:flex;gap:1rem;justify-content:center;margin-bottom:1rem;">
+                        <div class="faction-panel">
+                            <h3 style="margin-bottom:0.5rem;">Player</h3>
+                            <div class="faction-options player-options"
+                                style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
+                                <button class="btn-primary faction-btn" data-target="player"
+                                    data-faction="TRIASSIC"><img class="faction-icon" src="assets/icons/triassic.svg"
+                                        alt="Triassic faction icon" loading="lazy"> Triassic</button>
+                                <button class="btn-primary faction-btn" data-target="player"
+                                    data-faction="JURASSIC"><img class="faction-icon" src="assets/icons/jurassic.svg"
+                                        alt="Jurassic faction icon" loading="lazy"> Jurassic</button>
+                                <button class="btn-primary faction-btn" data-target="player"
+                                    data-faction="CRETACEOUS"><img class="faction-icon"
+                                        src="assets/icons/cretaceous.svg" alt="Cretaceous faction icon" loading="lazy">
+                                    Cretaceous</button>
+                                <button class="btn-primary faction-btn" data-target="player"
+                                    data-faction="PRIMORDIAL"><img class="faction-icon"
+                                        src="assets/icons/primordial.svg" alt="Primordial faction icon" loading="lazy">
+                                    Primordial</button>
+                                <button class="btn-primary faction-btn" data-target="player" data-faction="ICE_AGE"><img
+                                        class="faction-icon" src="assets/icons/ice_age.svg" alt="Ice Age faction icon"
+                                        loading="lazy"> Ice Age</button>
+                                <button class="btn-primary faction-btn" data-target="player" data-faction="NEUTRAL"><img
+                                        class="faction-icon" src="assets/icons/neutral.svg" alt="Neutral faction icon"
+                                        loading="lazy"> Neutral</button>
                             </div>
                         </div>
 
-                        <!-- Enemy Panel -->
-                        <div class="faction-selector-panel">
-                            <h3 class="faction-selector-label">Enemy Faction</h3>
-                            <div class="faction-selector-grid enemy-options" role="radiogroup" aria-label="Select enemy faction">
-                                <button class="faction-selector-card" data-target="enemy" data-faction="TRIASSIC">
-                                    <span class="faction-selector-icon">🦎</span>
-                                    <span class="faction-selector-name">Triassic</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="enemy" data-faction="JURASSIC">
-                                    <span class="faction-selector-icon">🦕</span>
-                                    <span class="faction-selector-name">Jurassic</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="enemy" data-faction="CRETACEOUS">
-                                    <span class="faction-selector-icon">🦖</span>
-                                    <span class="faction-selector-name">Cretaceous</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="enemy" data-faction="PRIMORDIAL">
-                                    <span class="faction-selector-icon">🌋</span>
-                                    <span class="faction-selector-name">Primordial</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="enemy" data-faction="ICE_AGE">
-                                    <span class="faction-selector-icon">🦣</span>
-                                    <span class="faction-selector-name">Ice Age</span>
-                                </button>
-                                <button class="faction-selector-card" data-target="enemy" data-faction="NEUTRAL">
-                                    <span class="faction-selector-icon">🥚</span>
-                                    <span class="faction-selector-name">Neutral</span>
-                                </button>
+                        <div class="faction-panel">
+                            <h3 style="margin-bottom:0.5rem;">Enemy</h3>
+                            <div class="faction-options enemy-options"
+                                style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
+                                <button class="btn-primary faction-btn" data-target="enemy" data-faction="TRIASSIC"><img
+                                        class="faction-icon" src="assets/icons/triassic.svg" alt="Triassic faction icon"
+                                        loading="lazy"> Triassic</button>
+                                <button class="btn-primary faction-btn" data-target="enemy" data-faction="JURASSIC"><img
+                                        class="faction-icon" src="assets/icons/jurassic.svg" alt="Jurassic faction icon"
+                                        loading="lazy"> Jurassic</button>
+                                <button class="btn-primary faction-btn" data-target="enemy"
+                                    data-faction="CRETACEOUS"><img class="faction-icon"
+                                        src="assets/icons/cretaceous.svg" alt="Cretaceous faction icon" loading="lazy">
+                                    Cretaceous</button>
+                                <button class="btn-primary faction-btn" data-target="enemy"
+                                    data-faction="PRIMORDIAL"><img class="faction-icon"
+                                        src="assets/icons/primordial.svg" alt="Primordial faction icon" loading="lazy">
+                                    Primordial</button>
+                                <button class="btn-primary faction-btn" data-target="enemy" data-faction="ICE_AGE"><img
+                                        class="faction-icon" src="assets/icons/ice_age.svg" alt="Ice Age faction icon"
+                                        loading="lazy"> Ice Age</button>
+                                <button class="btn-primary faction-btn" data-target="enemy" data-faction="NEUTRAL"><img
+                                        class="faction-icon" src="assets/icons/neutral.svg" alt="Neutral faction icon"
+                                        loading="lazy"> Neutral</button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="faction-selector-actions">
-                        <button id="faction-cancel" class="wizard-btn wizard-btn-secondary">Cancel</button>
-                        <button id="faction-apply" class="wizard-btn wizard-btn-primary">Apply</button>
+                    <div style="display:flex;gap:0.75rem;justify-content:center;">
+                        <button id="faction-apply" class="btn-primary">Apply</button>
+                        <button id="faction-cancel" class="btn-primary">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -388,133 +419,120 @@
                 </div>
             </div>
 
-            <!-- Game Start Wizard -->
+            <!-- Game Start Wizard (shown on first visit) -->
             <div id="game-wizard" class="wizard-overlay hidden">
+                <!-- Progress dots -->
                 <div class="wizard-progress">
-                    <div class="wizard-progress-dot active" data-step="1"></div>
-                    <div class="wizard-progress-dot" data-step="2"></div>
-                    <div class="wizard-progress-dot" data-step="3"></div>
-                    <div class="wizard-progress-dot" data-step="4"></div>
+                    <div class="wizard-progress-dot active"></div>
+                    <div class="wizard-progress-dot"></div>
+                    <div class="wizard-progress-dot"></div>
+                    <div class="wizard-progress-dot"></div>
                 </div>
 
-                <div class="wizard-steps" aria-live="polite">
-                    <!-- Step 1: Welcome / Name -->
+                <!-- Step container -->
+                <div class="wizard-steps">
+                    <!-- Step 1: Name -->
                     <div class="wizard-step active" data-step="1">
                         <div class="wizard-step-header">
-                            <h2 class="wizard-step-title">Welcome, Hunter</h2>
-                            <p class="wizard-step-subtitle">What shall we call you?</p>
+                            <h2 class="wizard-step-title">What's your name?</h2>
+                            <p class="wizard-step-subtitle">Enter your warrior name</p>
                         </div>
-                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-                            <label for="wizard-name" class="visually-hidden">Player name</label>
-                            <input type="text" id="wizard-name" class="wizard-name-input" placeholder="Enter your name" maxlength="20" autocomplete="off">
-                        </div>
+                        <input id="wizard-name" type="text" class="wizard-name-input" placeholder="Enter your name" autocomplete="off">
                     </div>
 
-                    <!-- Step 2: Player Faction -->
+                    <!-- Step 2: Player faction -->
                     <div class="wizard-step" data-step="2">
                         <div class="wizard-step-header">
-                            <h2 class="wizard-step-title">Choose Your Faction</h2>
-                            <p class="wizard-step-subtitle">Select your prehistoric allegiance</p>
+                            <h2 class="wizard-step-title">Choose your faction</h2>
+                            <p class="wizard-step-subtitle">Each faction has a unique playstyle</p>
                         </div>
-                        <div class="wizard-faction-grid" id="wizard-player-factions" role="radiogroup" aria-label="Select your faction">
-                            <button class="wizard-faction-card" data-faction="TRIASSIC">
-                                <span class="wizard-faction-icon">🦎</span>
-                                <span class="wizard-faction-name">Triassic</span>
-                                <span class="wizard-faction-desc">Early dominance</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="JURASSIC">
-                                <span class="wizard-faction-icon">🦕</span>
-                                <span class="wizard-faction-name">Jurassic</span>
-                                <span class="wizard-faction-desc">Giant beasts</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="CRETACEOUS">
-                                <span class="wizard-faction-icon">🦖</span>
-                                <span class="wizard-faction-name">Cretaceous</span>
-                                <span class="wizard-faction-desc">Apex predators</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="PRIMORDIAL">
-                                <span class="wizard-faction-icon">🌋</span>
-                                <span class="wizard-faction-name">Primordial</span>
-                                <span class="wizard-faction-desc">Ancient power</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="ICE_AGE">
-                                <span class="wizard-faction-icon">🦣</span>
-                                <span class="wizard-faction-name">Ice Age</span>
-                                <span class="wizard-faction-desc">Frozen fury</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="NEUTRAL">
-                                <span class="wizard-faction-icon">🥚</span>
-                                <span class="wizard-faction-name">Neutral</span>
-                                <span class="wizard-faction-desc">Balanced mix</span>
-                            </button>
+                        <div id="wizard-player-factions" class="wizard-faction-grid">
+                            <div class="wizard-faction-card" data-faction="TRIASSIC">
+                                <div class="wizard-faction-icon">🦎</div>
+                                <div class="wizard-faction-name">Triassic</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="JURASSIC">
+                                <div class="wizard-faction-icon">🦕</div>
+                                <div class="wizard-faction-name">Jurassic</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="CRETACEOUS">
+                                <div class="wizard-faction-icon">🦖</div>
+                                <div class="wizard-faction-name">Cretaceous</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="PRIMORDIAL">
+                                <div class="wizard-faction-icon">🌋</div>
+                                <div class="wizard-faction-name">Primordial</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="ICE_AGE">
+                                <div class="wizard-faction-icon">🦣</div>
+                                <div class="wizard-faction-name">Ice Age</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="NEUTRAL">
+                                <div class="wizard-faction-icon">🥚</div>
+                                <div class="wizard-faction-name">Neutral</div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Step 3: Enemy Faction -->
+                    <!-- Step 3: Enemy faction -->
                     <div class="wizard-step" data-step="3">
                         <div class="wizard-step-header">
-                            <h2 class="wizard-step-title">Choose Your Opponent</h2>
-                            <p class="wizard-step-subtitle">Who will you face in battle?</p>
+                            <h2 class="wizard-step-title">Choose your opponent</h2>
+                            <p class="wizard-step-subtitle">Select the faction you want to battle</p>
                         </div>
-                        <div class="wizard-faction-grid" id="wizard-enemy-factions" role="radiogroup" aria-label="Select opponent faction">
-                            <button class="wizard-faction-card" data-faction="TRIASSIC">
-                                <span class="wizard-faction-icon">🦎</span>
-                                <span class="wizard-faction-name">Triassic</span>
-                                <span class="wizard-faction-desc">Early dominance</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="JURASSIC">
-                                <span class="wizard-faction-icon">🦕</span>
-                                <span class="wizard-faction-name">Jurassic</span>
-                                <span class="wizard-faction-desc">Giant beasts</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="CRETACEOUS">
-                                <span class="wizard-faction-icon">🦖</span>
-                                <span class="wizard-faction-name">Cretaceous</span>
-                                <span class="wizard-faction-desc">Apex predators</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="PRIMORDIAL">
-                                <span class="wizard-faction-icon">🌋</span>
-                                <span class="wizard-faction-name">Primordial</span>
-                                <span class="wizard-faction-desc">Ancient power</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="ICE_AGE">
-                                <span class="wizard-faction-icon">🦣</span>
-                                <span class="wizard-faction-name">Ice Age</span>
-                                <span class="wizard-faction-desc">Frozen fury</span>
-                            </button>
-                            <button class="wizard-faction-card" data-faction="NEUTRAL">
-                                <span class="wizard-faction-icon">🥚</span>
-                                <span class="wizard-faction-name">Neutral</span>
-                                <span class="wizard-faction-desc">Balanced mix</span>
-                            </button>
+                        <div id="wizard-enemy-factions" class="wizard-faction-grid">
+                            <div class="wizard-faction-card" data-faction="TRIASSIC">
+                                <div class="wizard-faction-icon">🦎</div>
+                                <div class="wizard-faction-name">Triassic</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="JURASSIC">
+                                <div class="wizard-faction-icon">🦕</div>
+                                <div class="wizard-faction-name">Jurassic</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="CRETACEOUS">
+                                <div class="wizard-faction-icon">🦖</div>
+                                <div class="wizard-faction-name">Cretaceous</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="PRIMORDIAL">
+                                <div class="wizard-faction-icon">🌋</div>
+                                <div class="wizard-faction-name">Primordial</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="ICE_AGE">
+                                <div class="wizard-faction-icon">🦣</div>
+                                <div class="wizard-faction-name">Ice Age</div>
+                            </div>
+                            <div class="wizard-faction-card" data-faction="NEUTRAL">
+                                <div class="wizard-faction-icon">🥚</div>
+                                <div class="wizard-faction-name">Neutral</div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Step 4: Confirmation -->
                     <div class="wizard-step" data-step="4">
                         <div class="wizard-step-header">
-                            <h2 class="wizard-step-title">Ready for Battle!</h2>
-                            <p class="wizard-step-subtitle" id="wizard-player-name-display">Your battle awaits</p>
+                            <h2 class="wizard-step-title" id="wizard-player-name-display">Ready to battle!</h2>
                         </div>
                         <div class="wizard-confirm-matchup">
                             <div class="wizard-confirm-fighter">
-                                <span class="wizard-confirm-icon" id="wizard-confirm-player-icon">🦖</span>
-                                <span class="wizard-confirm-label">You</span>
-                                <span class="wizard-confirm-name" id="wizard-confirm-player-name">Cretaceous</span>
+                                <div class="wizard-confirm-label">Your Faction</div>
+                                <div class="wizard-confirm-icon" id="wizard-confirm-player-icon"></div>
+                                <div class="wizard-confirm-name" id="wizard-confirm-player-name"></div>
                             </div>
-                            <span class="wizard-confirm-vs">VS</span>
+                            <div class="wizard-confirm-vs">VS</div>
                             <div class="wizard-confirm-fighter">
-                                <span class="wizard-confirm-icon" id="wizard-confirm-enemy-icon">🦕</span>
-                                <span class="wizard-confirm-label">Opponent</span>
-                                <span class="wizard-confirm-name" id="wizard-confirm-enemy-name">Jurassic</span>
+                                <div class="wizard-confirm-label">Opponent</div>
+                                <div class="wizard-confirm-icon" id="wizard-confirm-enemy-icon"></div>
+                                <div class="wizard-confirm-name" id="wizard-confirm-enemy-name"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Navigation -->
                 <div class="wizard-nav">
                     <button id="wizard-back" class="wizard-btn wizard-btn-secondary" style="display:none;">Back</button>
-                    <button id="wizard-next" class="wizard-btn wizard-btn-primary">Next</button>
+                    <button id="wizard-next" class="wizard-btn wizard-btn-primary" disabled>Next</button>
                 </div>
             </div>
 
@@ -543,6 +561,7 @@
             <div class="footer-links">
                 <a href="/about.html">About</a>
                 <a href="/rules.html">Rules</a>
+                <a href="/profile.html">Profile</a>
                 <a href="/privacy.html">Privacy</a>
                 <a href="/terms.html">Terms</a>
                 <a href="https://github.com/nmalinowski/Stonefire" title="Project repository" rel="noopener"
@@ -571,6 +590,7 @@
 
     <!-- Scripts -->
     <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/services/cloudflare.js"></script>
 </body>
 
 </html>

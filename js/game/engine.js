@@ -6,6 +6,8 @@
 import { store, actions, events } from './state.js';
 import { resolveCombat } from './combat.js';
 import { processEffect, checkTriggeredEffects } from './effects.js';
+import { saveGame, deleteSave } from '../services/saveGame.js';
+import { recordGameResult } from '../services/progress.js';
 
 // Game configuration
 export const CONFIG = {
@@ -134,6 +136,9 @@ export function endTurn() {
     // Start the next player's turn
     const nextPlayer = currentPlayer === 'player' ? 'enemy' : 'player';
     startTurn(nextPlayer);
+
+    // Auto-save after each turn
+    saveGame();
 }
 
 /**
@@ -312,16 +317,23 @@ export function checkDeaths() {
  */
 export function checkGameOver() {
     const state = store.getState();
+    const factions = (function() { try { return JSON.parse(localStorage.getItem('stonefire.factions') || 'null'); } catch(e) { return null; } })();
+    const playerFaction = (factions && factions.player) || 'UNKNOWN';
+    const enemyFaction = (factions && factions.enemy) || 'UNKNOWN';
 
     if (state.player.health <= 0) {
         store.dispatch(actions.setGameOver('enemy'));
         events.emit('GAME_OVER', { winner: 'enemy' });
+        deleteSave();
+        recordGameResult('loss', playerFaction, enemyFaction);
         return true;
     }
 
     if (state.enemy.health <= 0) {
         store.dispatch(actions.setGameOver('player'));
         events.emit('GAME_OVER', { winner: 'player' });
+        deleteSave();
+        recordGameResult('win', playerFaction, enemyFaction);
         return true;
     }
 

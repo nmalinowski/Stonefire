@@ -110,7 +110,6 @@ stonefire/
 
 ## TODO
 - Replace placeholder emoji's with custom card art
-- User profile for saved preferences and progress tracking
 - Achievements
 - Campaign/story mode
 - Card collection/unlocking, Deck builder UI + Custom Decks

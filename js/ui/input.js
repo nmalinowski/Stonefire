@@ -7,7 +7,8 @@ import { store, actions, events } from '../game/state.js';
 import { playCard, attack, endTurn, canPlayCard, canCreatureAttack, getValidAttackTargets, getValidTargets } from '../game/engine.js';
 import { showCardPreview, hideCardPreview } from './cards.js';
 import { highlightAttackTargets, highlightSpellTargets, clearTargetHighlights, clearSelectionHighlights, shakeGuardCreatures } from './board.js';
-import { showAttackArrow, hideAttackArrow, render, showFactionSelector } from './renderer.js';
+import { showAttackArrow, hideAttackArrow, render } from './renderer.js';
+import { showWizard } from './wizard.js';
 
 // Input state
 let isDragging = false;
@@ -30,13 +31,13 @@ export function initInput() {
     // Faction button (in header)
     const factionBtn = document.getElementById('factionBtn');
     if (factionBtn) {
-        factionBtn.addEventListener('click', () => showFactionSelector());
+        factionBtn.addEventListener('click', () => showWizard());
     }
 
     // Mobile faction button (shown in mobile landscape)
     const mobileFactionBtn = document.getElementById('mobileFactionBtn');
     if (mobileFactionBtn) {
-        mobileFactionBtn.addEventListener('click', () => showFactionSelector());
+        mobileFactionBtn.addEventListener('click', () => showWizard());
     }
 
     // Global click handler for cards and targets
@@ -227,9 +228,9 @@ function handleHeroClick(heroEl, state) {
     const isEnemy = heroEl.classList.contains('enemy-hero');
     const selection = state.selection;
 
-    // If nothing selected and clicking your own hero, open faction selector
+    // If nothing selected and clicking your own hero, open wizard
     if (!selection.type && !isEnemy) {
-        showFactionSelector();
+        showWizard();
         return;
     }
 

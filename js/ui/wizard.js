@@ -233,6 +233,12 @@ export function showWizard() {
         cacheElements();
     }
 
+    // Hide turn indicator while wizard is open
+    const turnIndicator = document.getElementById('turn-indicator');
+    if (turnIndicator) {
+        turnIndicator.classList.add('hidden');
+    }
+
     // Get stored name (with error handling)
     let storedName = '';
     try {
@@ -284,6 +290,12 @@ export function showWizard() {
 export function hideWizard() {
     if (elements && elements.overlay) {
         elements.overlay.classList.add('hidden');
+    }
+
+    // Show turn indicator again
+    const turnIndicator = document.getElementById('turn-indicator');
+    if (turnIndicator) {
+        turnIndicator.classList.remove('hidden');
     }
 }
 

@@ -265,6 +265,20 @@ function renderBoards(state) {
  * Render turn indicator
  */
 function renderTurnIndicator(state) {
+    // Don't show turn indicator if wizard or auth modal is open
+    const wizard = document.getElementById('game-wizard');
+    const authModal = document.getElementById('auth-modal');
+    const wizardOpen = wizard && !wizard.classList.contains('hidden');
+    const authOpen = authModal && !authModal.classList.contains('hidden');
+
+    if (wizardOpen || authOpen) {
+        elements.turnIndicator.classList.add('hidden');
+        return;
+    }
+
+    // Show turn indicator and update content
+    elements.turnIndicator.classList.remove('hidden');
+
     const isPlayerTurn = state.activePlayer === 'player';
 
     elements.turnText.textContent = isPlayerTurn ? 'Your Turn' : "Enemy's Turn";

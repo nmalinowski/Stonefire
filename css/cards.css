@@ -147,6 +147,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0; /* Allow flex shrinking for text-overflow */
 }
 
 /* Card Text/Abilities */
@@ -157,9 +158,12 @@
     text-align: center;
     color: var(--text-secondary);
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    line-clamp: 3;
+    word-break: break-word;
+    hyphens: auto;
 }
 
 /* Card Stats (Attack/Health) - Creatures Only */
@@ -306,6 +310,10 @@
 .card-preview .card-text {
     font-size: 0.85rem;
     padding: var(--spacing-sm);
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    display: block;
+    overflow: visible;
 }
 
 .card-preview .card-cost {

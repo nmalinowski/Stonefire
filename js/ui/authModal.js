@@ -133,10 +133,22 @@ export function showModal() {
     clearError();
     elements.emailInput.value = '';
     elements.passwordInput.value = '';
+
+    // Hide turn indicator while modal is open
+    const turnIndicator = document.getElementById('turn-indicator');
+    if (turnIndicator) {
+        turnIndicator.classList.add('hidden');
+    }
 }
 
 export function hideModal() {
     elements.modal.classList.add('hidden');
+
+    // Show turn indicator again
+    const turnIndicator = document.getElementById('turn-indicator');
+    if (turnIndicator) {
+        turnIndicator.classList.remove('hidden');
+    }
 }
 
 function showError(message) {

@@ -11,6 +11,7 @@
     position: relative;
     width: 100%;
     will-change: contents;
+    overflow-y: visible !important; /* Ensure cards are not clipped vertically */
 }
 
 /* Smooth card entry animation - only for newly drawn cards */
@@ -281,4 +282,34 @@
     }
 
     .hand { min-height: 100px; }
+}
+
+/* Mobile portrait mode - prevent cards from being cut off */
+@media (max-width: 480px) and (orientation: portrait) {
+    .hand {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+        padding: var(--spacing-sm) var(--spacing-md);
+        min-height: 120px;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+
+    .hand::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+
+    .hand .card {
+        flex: 0 0 auto;
+    }
+
+    .player-hand .card:hover {
+        transform: translateY(-10px) scale(1.05);
+    }
+
+    .board-slots {
+        padding: 0 var(--spacing-sm);
+    }
 }

@@ -62,6 +62,7 @@
     visibility: hidden;
     transform: translateX(100%);
     transition: all 0.3s ease;
+    overflow: visible; /* Allow faction card scaling and checkmarks to overflow */
 }
 
 .wizard-step.active {
@@ -122,10 +123,10 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 16px;
-    -webkit-overflow-scrolling: touch;
+    flex: 1 1 0; /* Allow shrinking */
+    min-height: 0; /* Allow flex item to shrink below content size */
+    overflow: visible; /* Allow scaled cards and checkmarks to overflow */
+    padding: 20px; /* Accommodate scaled cards and checkmark badges */
 }
 
 .wizard-faction-card {
@@ -134,13 +135,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px 12px;
+    padding: 16px 12px;
     border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.03);
     cursor: pointer;
     transition: all 0.2s ease;
-    min-height: 120px;
+    min-height: 0; /* Allow cards to shrink for responsive layout */
     -webkit-tap-highlight-color: transparent;
 }
 

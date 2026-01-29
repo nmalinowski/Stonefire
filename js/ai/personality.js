@@ -430,14 +430,14 @@ export function getPersonality(faction) {
  * Taunt probability by trigger type (to avoid spam)
  */
 export const TAUNT_PROBABILITY = {
-    turn_start: 0.2,      // Reduced from 0.4
-    card_played: 0.1,     // Reduced from 0.25
-    attack: 0.1,          // Reduced from 0.2
-    kill: 0.3,            // Reduced from 0.5
-    take_damage: 0.15,    // Reduced from 0.3
-    low_health: 0.4,      // Reduced from 0.7
-    has_lethal: 0.8,      // Reduced from 0.9
-    victory: 1.0          // Keep guaranteed
+    turn_start: 0.35,     // Chance to taunt at turn start
+    card_played: 0.2,     // Chance when playing a card
+    attack: 0.15,         // Chance when attacking
+    kill: 0.45,           // Chance when killing a creature
+    take_damage: 0.25,    // Chance when taking damage
+    low_health: 0.6,      // Chance when at low health
+    has_lethal: 0.9,      // Chance when having lethal
+    victory: 1.0          // Always taunt on victory
 };
 
 /**

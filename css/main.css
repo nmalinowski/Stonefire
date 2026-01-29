@@ -748,6 +748,109 @@ body.fullscreen-mode #game-container {
 /* Blurred game state used when rotate overlay is active */
 .blurred { filter: blur(2px); pointer-events: none; }
 
+/* ========================================
+   AI CHAT BUBBLE
+   ======================================== */
+.ai-chat-bubble {
+    position: fixed;
+    top: calc(var(--header-height) + 80px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    pointer-events: none;
+}
+
+.ai-chat-bubble.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.chat-bubble-content {
+    background: rgba(30, 30, 50, 0.95);
+    border: 2px solid var(--accent-gold);
+    border-radius: 12px;
+    padding: 12px 18px;
+    max-width: 320px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.2);
+    position: relative;
+}
+
+/* Speech bubble tail pointing up (toward enemy portrait area) */
+.chat-bubble-content::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid var(--accent-gold);
+}
+
+.chat-bubble-content::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid rgba(30, 30, 50, 0.95);
+}
+
+.chat-bubble-text {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-style: italic;
+    line-height: 1.4;
+    text-align: center;
+    display: block;
+}
+
+/* Personality-specific colors */
+.ai-chat-bubble.personality-triassic .chat-bubble-content {
+    border-color: var(--triassic-green);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(74, 124, 78, 0.3);
+}
+
+.ai-chat-bubble.personality-jurassic .chat-bubble-content {
+    border-color: var(--jurassic-red);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(139, 58, 58, 0.3);
+}
+
+.ai-chat-bubble.personality-cretaceous .chat-bubble-content {
+    border-color: var(--cretaceous-blue);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(58, 90, 139, 0.3);
+}
+
+.ai-chat-bubble.personality-primordial .chat-bubble-content {
+    border-color: var(--primordial-purple);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(107, 58, 139, 0.3);
+}
+
+.ai-chat-bubble.personality-ice-age .chat-bubble-content {
+    border-color: var(--ice-age-white);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(168, 180, 192, 0.3);
+}
+
+/* Personality tail colors */
+.ai-chat-bubble.personality-triassic .chat-bubble-content::before { border-bottom-color: var(--triassic-green); }
+.ai-chat-bubble.personality-jurassic .chat-bubble-content::before { border-bottom-color: var(--jurassic-red); }
+.ai-chat-bubble.personality-cretaceous .chat-bubble-content::before { border-bottom-color: var(--cretaceous-blue); }
+.ai-chat-bubble.personality-primordial .chat-bubble-content::before { border-bottom-color: var(--primordial-purple); }
+.ai-chat-bubble.personality-ice-age .chat-bubble-content::before { border-bottom-color: var(--ice-age-white); }
+
+/* Hide on small viewports */
+@media (max-width: 931px), (max-height: 429px) {
+    .ai-chat-bubble {
+        display: none;
+    }
+}
+
 /* Turn banner (centered temporary notification) */
 .turn-banner {
     position: fixed;

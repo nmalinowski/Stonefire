@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stonefire-v7';
+const CACHE_NAME = 'stonefire-v9';
 const OFFLINE_URL = '/offline.html';
 
 const ASSETS = [

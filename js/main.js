@@ -297,8 +297,10 @@ function initUIEnhancements() {
     // Fullscreen mode toggle
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+    let manualFullscreen = false; // Track if user manually toggled fullscreen
 
     function toggleFullscreen() {
+        manualFullscreen = !document.body.classList.contains('fullscreen-mode');
         document.body.classList.toggle('fullscreen-mode');
         const isFullscreen = document.body.classList.contains('fullscreen-mode');
 
@@ -310,9 +312,14 @@ function initUIEnhancements() {
                              docEl.mozRequestFullScreen ||
                              docEl.msRequestFullscreen;
             if (requestFS) {
-                requestFS.call(docEl).catch(() => {
+                try {
+                    const result = requestFS.call(docEl);
+                    if (result && result.catch) {
+                        result.catch(() => {});
+                    }
+                } catch (e) {
                     // Fallback: CSS-only fullscreen mode already applied
-                });
+                }
             }
         } else {
             // Exit fullscreen with vendor prefixes
@@ -325,7 +332,12 @@ function initUIEnhancements() {
                         document.mozFullScreenElement ||
                         document.msFullscreenElement;
             if (exitFS && fsEl) {
-                exitFS.call(document).catch(() => {});
+                try {
+                    const result = exitFS.call(document);
+                    if (result && result.catch) {
+                        result.catch(() => {});
+                    }
+                } catch (e) {}
             }
         }
 
@@ -333,6 +345,7 @@ function initUIEnhancements() {
     }
 
     function exitFullscreen() {
+        manualFullscreen = false;
         document.body.classList.remove('fullscreen-mode');
         const exitFS = document.exitFullscreen ||
                       document.webkitExitFullscreen ||
@@ -343,7 +356,12 @@ function initUIEnhancements() {
                     document.mozFullScreenElement ||
                     document.msFullscreenElement;
         if (exitFS && fsEl) {
-            exitFS.call(document).catch(() => {});
+            try {
+                const result = exitFS.call(document);
+                if (result && result.catch) {
+                    result.catch(() => {});
+                }
+            } catch (e) {}
         }
         localStorage.setItem('stonefire.fullscreen', '0');
     }
@@ -362,19 +380,9 @@ function initUIEnhancements() {
         mobileFullscreenBtn.addEventListener('click', toggleFullscreen);
     }
 
-    // Handle native fullscreen exit (Escape key) - with vendor prefixes
-    ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(event => {
-        document.addEventListener(event, () => {
-            const fsEl = document.fullscreenElement ||
-                        document.webkitFullscreenElement ||
-                        document.mozFullScreenElement ||
-                        document.msFullscreenElement;
-            if (!fsEl) {
-                document.body.classList.remove('fullscreen-mode');
-                localStorage.setItem('stonefire.fullscreen', '0');
-            }
-        });
-    });
+    // Note: We intentionally do NOT auto-sync CSS fullscreen with native fullscreen exit.
+    // Native fullscreen may be denied or exit unexpectedly on some browsers.
+    // CSS fullscreen mode is only toggled by explicit user actions (button clicks, F key).
 
     // Keyboard shortcut: F11 or F to toggle fullscreen
     document.addEventListener('keydown', (ev) => {
@@ -459,7 +467,8 @@ function initUIEnhancements() {
                     document.addEventListener('click', handleFullscreenGesture, { once: true });
                 });
             }
-        } else {
+        } else if (!manualFullscreen) {
+            // Only auto-exit fullscreen if it wasn't manually enabled by user
             document.body.classList.remove('fullscreen-mode');
             pendingFullscreen = false;
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stonefire-v9';
+const CACHE_NAME = 'stonefire-v15';
 const OFFLINE_URL = '/offline.html';
 
 const ASSETS = [
@@ -6,9 +6,11 @@ const ASSETS = [
   '/index.html',
   '/privacy.html',
   '/terms.html',
+  '/profile.html',
   '/css/main.css',
   '/css/board.css',
   '/css/cards.css',
+  '/css/profile.css',
   '/js/main.js',
   '/assets/icons/triassic.svg'
 ];

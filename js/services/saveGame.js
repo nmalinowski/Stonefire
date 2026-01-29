@@ -5,7 +5,7 @@
 
 import { getClient, isOnline } from './supabase.js';
 import { getCurrentUser } from './auth.js';
-import { store } from '../game/state.js';
+import { store, events } from '../game/state.js';
 
 const LOCAL_SAVE_KEY = 'stonefire.saveGame';
 
@@ -128,5 +128,42 @@ export async function fetchRemoteSave() {
         return localSave;
     } catch {
         return loadLocalSave();
+    }
+}
+
+/**
+ * Get the best available save (remote if logged in and newer, else local)
+ */
+export async function getBestSave() {
+    const user = getCurrentUser();
+    if (user && !user.is_anonymous) {
+        // Try to get remote save for logged-in users
+        return await fetchRemoteSave();
+    }
+    return loadLocalSave();
+}
+
+/**
+ * Restore a saved game state
+ * @param {object} saveData - Save data with gameState and savedAt
+ * @returns {boolean} - True if restore succeeded
+ */
+export function restoreGame(saveData) {
+    if (!saveData || !saveData.gameState) {
+        console.warn('Invalid save data');
+        return false;
+    }
+
+    try {
+        // Restore the game state
+        store.restoreState(saveData.gameState);
+
+        // Emit event so UI can react
+        events.emit('GAME_RESTORED', { savedAt: saveData.savedAt });
+
+        return true;
+    } catch (e) {
+        console.error('Failed to restore game:', e);
+        return false;
     }
 }

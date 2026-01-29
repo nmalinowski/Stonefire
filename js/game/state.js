@@ -108,9 +108,9 @@ export function generateCardInstanceId() {
     return `card_${++cardInstanceId}`;
 }
 
-// Reset instance ID counter (for new games)
-export function resetCardInstanceId() {
-    cardInstanceId = 0;
+// Reset instance ID counter (for new games or restoring saves)
+export function resetCardInstanceId(startFrom = 0) {
+    cardInstanceId = startFrom;
 }
 
 // Create a card instance from a card definition
@@ -170,6 +170,34 @@ class Store {
         resetCardInstanceId();
         this.state = createInitialState();
         this.subscribers.forEach(callback => callback(this.state, null, { type: 'RESET' }));
+    }
+
+    /**
+     * Restore state from a saved game
+     * @param {object} savedState - The saved game state to restore
+     */
+    restoreState(savedState) {
+        // Find the highest instanceId in the saved state to avoid collisions
+        let maxId = 0;
+        const findMaxId = (obj) => {
+            if (!obj) return;
+            if (typeof obj === 'object') {
+                if (obj.instanceId && typeof obj.instanceId === 'string') {
+                    const num = parseInt(obj.instanceId.replace('card_', ''), 10);
+                    if (!isNaN(num) && num > maxId) maxId = num;
+                }
+                for (const key of Object.keys(obj)) {
+                    findMaxId(obj[key]);
+                }
+            }
+        };
+        findMaxId(savedState);
+
+        // Reset card instance counter to continue from highest saved ID
+        resetCardInstanceId(maxId);
+
+        this.state = deepClone(savedState);
+        this.subscribers.forEach(callback => callback(this.state, null, { type: 'RESTORE' }));
     }
 }
 

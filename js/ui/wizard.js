@@ -98,10 +98,11 @@ function showStep(stepNum) {
  * Update navigation button states
  */
 function updateNavButtons() {
-    const { currentStep, playerName, playerFaction, enemyFaction } = wizardState;
+    const { currentStep, playerName, playerFaction, enemyFaction, factionOnlyMode } = wizardState;
 
-    // Back button visibility
-    elements.backBtn.style.display = currentStep > 1 ? 'block' : 'none';
+    // Back button visibility (hide on step 2 in faction-only mode)
+    const showBack = factionOnlyMode ? currentStep > 2 : currentStep > 1;
+    elements.backBtn.style.display = showBack ? 'block' : 'none';
 
     // Next button state and text
     let canProceed = false;
@@ -116,6 +117,11 @@ function updateNavButtons() {
             break;
         case 3:
             canProceed = enemyFaction !== null;
+            // In faction-only mode, step 3 is the final step
+            if (factionOnlyMode) {
+                buttonText = 'Start Battle!';
+                elements.nextBtn.classList.add('wizard-btn-start');
+            }
             break;
         case 4:
             canProceed = true;
@@ -124,7 +130,7 @@ function updateNavButtons() {
             break;
     }
 
-    if (currentStep !== 4) {
+    if (currentStep !== 4 && !(factionOnlyMode && currentStep === 3)) {
         elements.nextBtn.classList.remove('wizard-btn-start');
     }
 
@@ -180,6 +186,12 @@ function handleFactionSelect(container, faction, isPlayer) {
  * Go to next step
  */
 function nextStep() {
+    // In faction-only mode, skip from step 3 directly to start game
+    if (wizardState.factionOnlyMode && wizardState.currentStep === 3) {
+        startGame();
+        return;
+    }
+
     if (wizardState.currentStep < wizardState.totalSteps) {
         showStep(wizardState.currentStep + 1);
     } else {
@@ -192,7 +204,9 @@ function nextStep() {
  * Go to previous step
  */
 function prevStep() {
-    if (wizardState.currentStep > 1) {
+    // In faction-only mode, don't go back before step 2
+    const minStep = wizardState.factionOnlyMode ? 2 : 1;
+    if (wizardState.currentStep > minStep) {
         showStep(wizardState.currentStep - 1);
     }
 }
@@ -253,7 +267,8 @@ export function showWizard() {
         totalSteps: 4,
         playerName: storedName,
         playerFaction: null,
-        enemyFaction: null
+        enemyFaction: null,
+        factionOnlyMode: false
     };
 
     // Load stored name if present
@@ -297,6 +312,58 @@ export function hideWizard() {
     if (turnIndicator) {
         turnIndicator.classList.remove('hidden');
     }
+}
+
+/**
+ * Show only faction selection (for changing factions mid-game)
+ * Skips name entry and confirmation, goes straight to faction picking
+ */
+export function showFactionSelection() {
+    if (!elements) {
+        cacheElements();
+    }
+
+    // Hide turn indicator while wizard is open
+    const turnIndicator = document.getElementById('turn-indicator');
+    if (turnIndicator) {
+        turnIndicator.classList.add('hidden');
+    }
+
+    // Get stored name (with error handling)
+    let storedName = 'Hunter';
+    try {
+        storedName = localStorage.getItem('stonefire.playerName') || 'Hunter';
+    } catch (e) {
+        // localStorage unavailable
+    }
+
+    // Reset state - start at step 2, skip confirmation (step 4 becomes step 3's next)
+    wizardState = {
+        currentStep: 2,
+        totalSteps: 3, // Only 3 steps: player faction, enemy faction, then start
+        playerName: storedName,
+        playerFaction: null,
+        enemyFaction: null,
+        factionOnlyMode: true // Flag to skip confirmation step
+    };
+
+    // Clear faction selections
+    if (elements.playerFactions) {
+        elements.playerFactions.querySelectorAll('.wizard-faction-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+    }
+    if (elements.enemyFactions) {
+        elements.enemyFactions.querySelectorAll('.wizard-faction-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+    }
+
+    // Show overlay
+    elements.overlay.classList.remove('hidden');
+
+    // Start at step 2 (player faction)
+    showStep(2);
 }
 
 /**

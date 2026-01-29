@@ -267,6 +267,28 @@
 .profile-empty {
     color: var(--text-muted);
     font-style: italic;
+    display: block;
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Save game section layout - ensure vertical stacking */
+#no-save,
+#save-exists {
+    display: block;
+}
+
+#no-save p,
+#save-exists p {
+    display: block;
+    margin-bottom: var(--spacing-md);
+}
+
+#no-save .btn-primary,
+#save-exists .btn-primary,
+#no-save a.btn-primary,
+#save-exists a.btn-primary {
+    display: inline-block;
 }
 
 .btn-small {

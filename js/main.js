@@ -15,7 +15,8 @@ import { initAuth, onAuthChange } from './services/auth.js';
 import { initAuthModal, showModal as showAuthModal } from './ui/authModal.js';
 import { migrateOldPreferences, fetchAndMergeProfile } from './services/profile.js';
 import { processQueue, onSyncStatusChange } from './services/syncManager.js';
-import { fetchAndMergeStats } from './services/progress.js';
+import { fetchAndMergeStats, recordGameResult } from './services/progress.js';
+import { deleteSave, getBestSave, restoreGame, hasSavedGame } from './services/saveGame.js';
 
 /**
  * Initialize the game
@@ -71,19 +72,111 @@ function init() {
         }
     });
 
-    // Show the game setup wizard on first load unless already completed
-    const setupComplete = localStorage.getItem('stonefire.setupComplete');
-    const storedFactions = (function() { try { return JSON.parse(localStorage.getItem('stonefire.factions') || 'null'); } catch(e){return null;} })();
-    if (!setupComplete) {
-        showWizard();
-    } else {
-        // Auto-start with stored factions or sensible defaults
-        const playerFaction = (storedFactions && storedFactions.player) ? storedFactions.player : 'CRETACEOUS';
-        const enemyFaction = (storedFactions && storedFactions.enemy) ? storedFactions.enemy : 'JURASSIC';
-        events.emit('SELECT_FACTION', { playerFaction, enemyFaction });
-    }
+    // Check for saved game and handle startup
+    handleGameStartup();
 
     console.log('Game initialized!');
+}
+
+/**
+ * Handle game startup - check for saves, offer to continue
+ */
+async function handleGameStartup() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldContinue = urlParams.has('continue');
+    const setupComplete = localStorage.getItem('stonefire.setupComplete');
+    const storedFactions = (function() {
+        try { return JSON.parse(localStorage.getItem('stonefire.factions') || 'null'); }
+        catch(e) { return null; }
+    })();
+
+    // Clean up URL if it has continue param
+    if (shouldContinue) {
+        history.replaceState(null, '', window.location.pathname);
+    }
+
+    // If coming from profile page with ?continue, try to restore save immediately
+    if (shouldContinue) {
+        const save = await getBestSave();
+        if (save && restoreGame(save)) {
+            // Restore AI personality based on saved factions
+            if (storedFactions && storedFactions.enemy) {
+                setAIPersonality(storedFactions.enemy);
+            }
+            // Set hero icons
+            const playerFaction = storedFactions?.player || 'CRETACEOUS';
+            const enemyFaction = storedFactions?.enemy || 'JURASSIC';
+            setHeroFactions(playerFaction, enemyFaction);
+            render();
+            return;
+        }
+    }
+
+    // First time setup - show wizard
+    if (!setupComplete) {
+        showWizard();
+        return;
+    }
+
+    // Check if there's a saved game
+    const save = await getBestSave();
+    if (save && !save.gameState.gameOver) {
+        // Show continue/new game prompt
+        showContinuePrompt(save, storedFactions);
+        return;
+    }
+
+    // No valid save - auto-start with stored factions
+    const playerFaction = (storedFactions && storedFactions.player) ? storedFactions.player : 'CRETACEOUS';
+    const enemyFaction = (storedFactions && storedFactions.enemy) ? storedFactions.enemy : 'JURASSIC';
+    events.emit('SELECT_FACTION', { playerFaction, enemyFaction });
+}
+
+/**
+ * Show prompt to continue saved game or start new
+ */
+function showContinuePrompt(save, storedFactions) {
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay continue-modal';
+    overlay.innerHTML = `
+        <div class="modal-content continue-modal-content">
+            <h2>Welcome Back!</h2>
+            <p>You have a saved game from ${new Date(save.savedAt).toLocaleString()}</p>
+            <p class="continue-details">Turn ${save.gameState.turn} • ${save.gameState.player.health} HP</p>
+            <div class="continue-actions">
+                <button id="continue-game-btn" class="btn-primary">Continue Game</button>
+                <button id="new-game-btn" class="btn-secondary">New Game</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Handle continue
+    document.getElementById('continue-game-btn').addEventListener('click', () => {
+        overlay.remove();
+        if (restoreGame(save)) {
+            if (storedFactions && storedFactions.enemy) {
+                setAIPersonality(storedFactions.enemy);
+            }
+            const playerFaction = storedFactions?.player || 'CRETACEOUS';
+            const enemyFaction = storedFactions?.enemy || 'JURASSIC';
+            setHeroFactions(playerFaction, enemyFaction);
+            render();
+        } else {
+            // Restore failed, start new game
+            const playerFaction = (storedFactions && storedFactions.player) ? storedFactions.player : 'CRETACEOUS';
+            const enemyFaction = (storedFactions && storedFactions.enemy) ? storedFactions.enemy : 'JURASSIC';
+            events.emit('SELECT_FACTION', { playerFaction, enemyFaction });
+        }
+    });
+
+    // Handle new game
+    document.getElementById('new-game-btn').addEventListener('click', () => {
+        overlay.remove();
+        deleteSave(); // Clear the old save
+        showWizard(); // Let them pick new factions
+    });
 }
 
 /**
@@ -135,6 +228,21 @@ function setupEventListeners() {
 
         // Update hero icons to match choices (pass keys)
         setHeroFactions(playerFaction, enemyFaction);
+    });
+
+    // Record stats and delete save on game over (always, not just debug mode)
+    events.on('GAME_OVER', ({ winner }) => {
+        // Record stats
+        const factions = (function() {
+            try { return JSON.parse(localStorage.getItem('stonefire.factions') || 'null'); }
+            catch(e) { return null; }
+        })();
+        const playerFaction = (factions && factions.player) || 'UNKNOWN';
+        const enemyFaction = (factions && factions.enemy) || 'UNKNOWN';
+        const result = winner === 'player' ? 'win' : 'loss';
+
+        recordGameResult(result, playerFaction, enemyFaction);
+        deleteSave();
     });
 
     // Log game events (for debugging)

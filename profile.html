@@ -66,7 +66,7 @@
                 <div id="save-exists" class="hidden">
                     <p id="save-info">Last saved: --</p>
                     <div class="profile-actions">
-                        <a href="/" class="btn-primary">Continue Game</a>
+                        <a href="/?continue" class="btn-primary">Continue Game</a>
                         <button id="delete-save-btn" class="btn-secondary btn-danger">Delete Save</button>
                     </div>
                 </div>
@@ -151,19 +151,26 @@
     <script type="module">
         import { initAuth, getCurrentUser, isAuthenticated, onAuthChange, signOut } from '/js/services/auth.js';
         import { getLocalProfile, updateDisplayName } from '/js/services/profile.js';
-        import { loadLocalSave, deleteSave, hasSavedGame } from '/js/services/saveGame.js';
-        import { getStats } from '/js/services/progress.js';
+        import { loadLocalSave, deleteSave, hasSavedGame, getBestSave } from '/js/services/saveGame.js';
+        import { getStats, fetchAndMergeStats } from '/js/services/progress.js';
 
         async function init() {
             await initAuth();
-            renderProfile();
+            await renderProfile();
             onAuthChange(() => renderProfile());
         }
 
-        function renderProfile() {
+        async function renderProfile() {
             const user = getCurrentUser();
             const profile = getLocalProfile();
-            const stats = getStats();
+
+            // Fetch and merge stats if logged in
+            let stats;
+            if (user && !user.is_anonymous) {
+                stats = await fetchAndMergeStats();
+            } else {
+                stats = getStats();
+            }
 
             // Account
             document.getElementById('profile-name').value = profile.display_name || '';
@@ -179,13 +186,16 @@
                 document.getElementById('profile-signout-actions').classList.add('hidden');
             }
 
-            // Save game
-            if (hasSavedGame()) {
-                const save = loadLocalSave();
+            // Save game - check local first, then remote for logged-in users
+            const save = await getBestSave();
+            if (save && save.gameState && !save.gameState.gameOver) {
                 const date = new Date(save.savedAt).toLocaleString();
                 document.getElementById('save-info').textContent = `Last saved: ${date}`;
                 document.getElementById('save-exists').classList.remove('hidden');
                 document.getElementById('no-save').classList.add('hidden');
+            } else {
+                document.getElementById('save-exists').classList.add('hidden');
+                document.getElementById('no-save').classList.remove('hidden');
             }
 
             // Stats

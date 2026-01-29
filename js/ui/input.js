@@ -8,7 +8,7 @@ import { playCard, attack, endTurn, canPlayCard, canCreatureAttack, getValidAtta
 import { showCardPreview, hideCardPreview } from './cards.js';
 import { highlightAttackTargets, highlightSpellTargets, clearTargetHighlights, clearSelectionHighlights, shakeGuardCreatures } from './board.js';
 import { showAttackArrow, hideAttackArrow, render } from './renderer.js';
-import { showWizard } from './wizard.js';
+import { showWizard, showFactionSelection } from './wizard.js';
 
 // Input state
 let isDragging = false;
@@ -28,16 +28,16 @@ export function initInput() {
     // Restart button
     document.getElementById('restart-btn').addEventListener('click', handleRestart);
 
-    // Faction button (in header)
+    // Faction button (in header) - shows only faction selection, not full wizard
     const factionBtn = document.getElementById('factionBtn');
     if (factionBtn) {
-        factionBtn.addEventListener('click', () => showWizard());
+        factionBtn.addEventListener('click', () => showFactionSelection());
     }
 
     // Mobile faction button (shown in mobile landscape)
     const mobileFactionBtn = document.getElementById('mobileFactionBtn');
     if (mobileFactionBtn) {
-        mobileFactionBtn.addEventListener('click', () => showWizard());
+        mobileFactionBtn.addEventListener('click', () => showFactionSelection());
     }
 
     // Global click handler for cards and targets

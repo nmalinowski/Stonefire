@@ -74,11 +74,18 @@ Reduce your opponent's health from 30 to 0.
 ```
 stonefire/
 ├── index.html              # Game entry point
+├── profile.html            # User profile page
+├── about.html, rules.html  # Info pages
+├── privacy.html, terms.html# Legal pages
+├── offline.html            # PWA offline fallback
+├── sw.js                   # Service worker for offline support
 ├── css/
 │   ├── main.css           # Base styles, CSS variables
 │   ├── board.css          # Game board layout
 │   ├── cards.css          # Card component styles
-│   └── animations.css     # Animations and effects
+│   ├── animations.css     # Animations and effects
+│   ├── profile.css        # Profile page styles
+│   └── wizard.css         # Game setup wizard styles
 ├── js/
 │   ├── main.js            # Entry point, initialization
 │   ├── game/
@@ -88,15 +95,28 @@ stonefire/
 │   │   └── effects.js     # Ability/effect processing
 │   ├── ai/
 │   │   ├── opponent.js    # AI decision making
-│   │   └── evaluation.js  # Board state evaluation
+│   │   ├── evaluation.js  # Board state evaluation
+│   │   └── personality.js # Faction-specific AI behaviors & taunts
 │   ├── ui/
 │   │   ├── renderer.js    # State to DOM rendering
 │   │   ├── cards.js       # Card components
 │   │   ├── board.js       # Board rendering
 │   │   ├── input.js       # Click/input handling
-│   │   └── animations.js  # Animation system
+│   │   ├── animations.js  # Animation system
+│   │   ├── wizard.js      # Game setup wizard
+│   │   ├── chatBubble.js  # AI taunt speech bubbles
+│   │   └── authModal.js   # Login/signup modal
+│   ├── services/
+│   │   ├── auth.js        # Authentication (anonymous, OAuth, email)
+│   │   ├── profile.js     # User profile & preferences
+│   │   ├── progress.js    # Game stats tracking
+│   │   ├── saveGame.js    # Save/load game state
+│   │   ├── supabase.js    # Supabase client
+│   │   ├── cloudflare.js  # Cloudflare integration
+│   │   └── syncManager.js # Cross-device sync queue
 │   └── data/
 │       └── cards.js       # Card definitions
+├── tests/                  # Playwright E2E tests
 └── assets/                # Art and icons (placeholder)
 ```
 
@@ -106,7 +126,19 @@ stonefire/
 - **State Management**: Redux-like pattern with immutable updates
 - **Event System**: Pub/sub pattern for game events
 - **Rendering**: State-driven DOM updates
-- **AI**: Heuristic-based decision making with board evaluation
+- **AI**: Heuristic-based decision making with faction-specific personalities
+- **PWA**: Service worker for offline play
+- **Cloud Sync**: Optional Supabase backend for cross-device progress
+
+## Features
+
+- **Game Setup Wizard**: Mobile-friendly step-by-step faction selection
+- **AI Personalities**: Each faction has unique aggression levels and playstyle
+- **AI Taunts**: Faction-themed speech bubbles during gameplay
+- **Save/Load**: Auto-save with cloud sync for logged-in users
+- **Progress Tracking**: Win/loss stats, streaks, per-faction statistics
+- **User Profiles**: Display name, preferences, cloud-synced settings
+- **Authentication**: Anonymous play, or sign in with GitHub/Google/email
 
 ## TODO
 - Replace placeholder emoji's with custom card art

@@ -115,6 +115,34 @@
             </div>
         </section>
 
+        <!-- Achievements Section -->
+        <section class="profile-section" id="profile-achievements">
+            <h2>Achievements</h2>
+            <div class="profile-card">
+                <p class="profile-subtle">Top 5 hardest achievements</p>
+                <div id="achievement-list" class="achievement-list">
+                    <p class="profile-empty">Play games to start unlocking achievements.</p>
+                </div>
+                <div class="profile-actions">
+                    <button id="achievement-more-btn" class="btn-secondary">Show All Achievements</button>
+                </div>
+            </div>
+        </section>
+
+        <div id="achievement-modal" class="achievement-modal hidden" role="dialog" aria-modal="true"
+            aria-labelledby="achievement-modal-title">
+            <div class="achievement-modal-content">
+                <div class="achievement-modal-header">
+                    <h2 id="achievement-modal-title">All Achievements</h2>
+                    <button id="achievement-modal-close" class="btn-secondary">Close</button>
+                </div>
+                <h3>Still Needed</h3>
+                <div id="achievement-modal-locked" class="achievement-list"></div>
+                <h3>Unlocked</h3>
+                <div id="achievement-modal-unlocked" class="achievement-list"></div>
+            </div>
+        </div>
+
         <a href="/" class="back-link">← Return to Stonefire</a>
     </main>
 
@@ -152,7 +180,7 @@
         import { initAuth, getCurrentUser, isAuthenticated, onAuthChange, signOut } from '/js/services/auth.js';
         import { getLocalProfile, updateDisplayName } from '/js/services/profile.js';
         import { loadLocalSave, deleteSave, hasSavedGame, getBestSave } from '/js/services/saveGame.js';
-        import { getStats, fetchAndMergeStats } from '/js/services/progress.js';
+        import { getStats, fetchAndMergeStats, getAchievements } from '/js/services/progress.js';
 
         async function init() {
             await initAuth();
@@ -228,6 +256,76 @@
                     factionEl.appendChild(row);
                 });
             }
+
+            // Achievements
+            const achievements = getAchievements(stats);
+            const achievementList = document.getElementById('achievement-list');
+            const lockedList = document.getElementById('achievement-modal-locked');
+            const unlockedList = document.getElementById('achievement-modal-unlocked');
+            const achievementMoreBtn = document.getElementById('achievement-more-btn');
+
+            const createAchievementCard = (achievement) => {
+                const card = document.createElement('div');
+                card.className = `achievement-card ${achievement.unlocked ? 'unlocked' : 'locked'}`;
+
+                const title = document.createElement('span');
+                title.className = 'achievement-title';
+                title.textContent = achievement.name;
+
+                const description = document.createElement('span');
+                description.className = 'achievement-description';
+                description.textContent = achievement.description;
+
+                const status = document.createElement('span');
+                status.className = 'achievement-status';
+                status.textContent = achievement.unlocked ? 'Unlocked' : 'Locked';
+
+                card.appendChild(title);
+                card.appendChild(description);
+                card.appendChild(status);
+                return card;
+            };
+
+            achievementList.innerHTML = '';
+            lockedList.innerHTML = '';
+            unlockedList.innerHTML = '';
+
+            if (achievements.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'profile-empty';
+                empty.textContent = 'Play games to start unlocking achievements.';
+                achievementList.appendChild(empty);
+                achievementMoreBtn?.classList.add('hidden');
+            } else {
+                achievementMoreBtn?.classList.remove('hidden');
+                const hardest = [...achievements]
+                    .sort((a, b) => b.difficulty - a.difficulty)
+                    .slice(0, 5);
+                hardest.forEach((achievement) => {
+                    achievementList.appendChild(createAchievementCard(achievement));
+                });
+
+                achievements.forEach((achievement) => {
+                    if (achievement.unlocked) {
+                        unlockedList.appendChild(createAchievementCard(achievement));
+                    } else {
+                        lockedList.appendChild(createAchievementCard(achievement));
+                    }
+                });
+
+                if (lockedList.children.length === 0) {
+                    const empty = document.createElement('p');
+                    empty.className = 'profile-empty';
+                    empty.textContent = 'All achievements unlocked. Incredible!';
+                    lockedList.appendChild(empty);
+                }
+                if (unlockedList.children.length === 0) {
+                    const empty = document.createElement('p');
+                    empty.className = 'profile-empty';
+                    empty.textContent = 'No achievements unlocked yet.';
+                    unlockedList.appendChild(empty);
+                }
+            }
         }
 
         // Event listeners
@@ -250,6 +348,24 @@
 
         document.getElementById('profile-signin-btn')?.addEventListener('click', () => {
             window.location.href = '/?signin=1';
+        });
+
+        const achievementModal = document.getElementById('achievement-modal');
+        const achievementMoreBtn = document.getElementById('achievement-more-btn');
+        const achievementModalClose = document.getElementById('achievement-modal-close');
+
+        achievementMoreBtn?.addEventListener('click', () => {
+            achievementModal.classList.remove('hidden');
+        });
+
+        achievementModalClose?.addEventListener('click', () => {
+            achievementModal.classList.add('hidden');
+        });
+
+        achievementModal?.addEventListener('click', (event) => {
+            if (event.target === achievementModal) {
+                achievementModal.classList.add('hidden');
+            }
         });
 
         init();

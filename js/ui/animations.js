@@ -15,6 +15,7 @@ export function showDamageNumber(targetEl, amount, isHeal = false) {
 
     const rect = targetEl.getBoundingClientRect();
     const container = document.getElementById('damage-numbers');
+    if (!container) return;
 
     const numberEl = document.createElement('div');
     numberEl.className = `damage-number ${isHeal ? 'heal' : ''}`;
@@ -233,6 +234,7 @@ export function animateHeroDamage(heroEl) {
  */
 export function screenShake(intensity = 5, duration = 300) {
     const container = document.getElementById('game-container');
+    if (!container) return;
     const startTime = Date.now();
 
     function shake() {

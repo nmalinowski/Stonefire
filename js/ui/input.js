@@ -308,6 +308,7 @@ function handleMouseMove(e) {
 
     const svg = document.getElementById('attack-arrow');
     const line = document.getElementById('arrow-line');
+    const canRenderArrow = svg && line;
 
     // Helper to update hover class tracking
     function setHoverTarget(el) {
@@ -331,21 +332,25 @@ function handleMouseMove(e) {
 
             // If hovering a valid target, snap to it
             const targetEl = e.target.closest('.card.targetable, .hero-portrait.targetable');
-            if (targetEl) {
+            if (targetEl && canRenderArrow) {
                 const targetRect = targetEl.getBoundingClientRect();
                 line.setAttribute('x2', targetRect.left + targetRect.width / 2);
                 line.setAttribute('y2', targetRect.top + targetRect.height / 2);
                 setHoverTarget(targetEl);
-            } else {
+            } else if (canRenderArrow) {
                 line.setAttribute('x2', e.clientX);
                 line.setAttribute('y2', e.clientY);
                 setHoverTarget(null);
             }
 
-            line.setAttribute('x1', startX);
-            line.setAttribute('y1', startY);
+            if (canRenderArrow) {
+                line.setAttribute('x1', startX);
+                line.setAttribute('y1', startY);
+            }
 
-            svg.classList.remove('hidden');
+            if (canRenderArrow) {
+                svg.classList.remove('hidden');
+            }
             return; // early return so spell preview logic below doesn't interfere
         }
     }
@@ -365,21 +370,25 @@ function handleMouseMove(e) {
             }
 
             const targetEl = e.target.closest('.card.targetable, .hero-portrait.targetable');
-            if (targetEl) {
+            if (targetEl && canRenderArrow) {
                 const tr = targetEl.getBoundingClientRect();
                 line.setAttribute('x2', tr.left + tr.width / 2);
                 line.setAttribute('y2', tr.top + tr.height / 2);
                 setHoverTarget(targetEl);
-            } else {
+            } else if (canRenderArrow) {
                 line.setAttribute('x2', e.clientX);
                 line.setAttribute('y2', e.clientY);
                 setHoverTarget(null);
             }
 
-            line.setAttribute('x1', startX);
-            line.setAttribute('y1', startY);
+            if (canRenderArrow) {
+                line.setAttribute('x1', startX);
+                line.setAttribute('y1', startY);
+            }
 
-            svg.classList.remove('hidden');
+            if (canRenderArrow) {
+                svg.classList.remove('hidden');
+            }
             return;
         }
     }
@@ -400,7 +409,9 @@ function handleMouseMove(e) {
     }
 
     // If no relevant selection, hide the arrow and any hover-target
-    svg.classList.add('hidden');
+    if (canRenderArrow) {
+        svg.classList.add('hidden');
+    }
     if (lastHoverTarget) {
         lastHoverTarget.classList.remove('hover-target');
         lastHoverTarget = null;

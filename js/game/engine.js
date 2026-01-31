@@ -106,7 +106,7 @@ export function startTurn(player) {
     store.dispatch(actions.startTurn(player));
 
     // Draw a card (skip on turn 1 for the first player)
-    if (!(state.turn === 0 && player === 'player')) {
+    if (!(state.turn === 1 && player === 'player')) {
         store.dispatch(actions.drawCard(player));
     }
 
@@ -323,7 +323,6 @@ export function checkGameOver() {
 
     if (state.player.health <= 0) {
         store.dispatch(actions.setGameOver('enemy'));
-        events.emit('GAME_OVER', { winner: 'enemy' });
         deleteSave();
         recordGameResult('loss', playerFaction, enemyFaction);
         return true;
@@ -331,7 +330,6 @@ export function checkGameOver() {
 
     if (state.enemy.health <= 0) {
         store.dispatch(actions.setGameOver('player'));
-        events.emit('GAME_OVER', { winner: 'player' });
         deleteSave();
         recordGameResult('win', playerFaction, enemyFaction);
         return true;

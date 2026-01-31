@@ -392,7 +392,7 @@ function processManaEffect(effect, sourcePlayer) {
     const player = state[sourcePlayer];
 
     if (effect.gain) {
-        const newMana = Math.min(10, player.mana + effect.gain);
+        const newMana = Math.min(player.maxMana, player.mana + effect.gain);
         store.dispatch(actions.modifyMana(sourcePlayer, newMana, undefined));
     }
 

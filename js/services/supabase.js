@@ -15,6 +15,10 @@ let client = null;
 export function getClient() {
     if (client) return client;
 
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
     if (typeof window.supabase === 'undefined') {
         console.warn('Supabase SDK not loaded - running in offline mode');
         return null;

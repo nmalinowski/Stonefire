@@ -1627,6 +1627,48 @@ export const CARDS = {
     }
 };
 
+const AlternateArtPools = {
+    factions: {
+        [Faction.TRIASSIC]: ['🦕', '🦖', '🦎', '🐍', '🐊', '🪨'],
+        [Faction.JURASSIC]: ['🦖', '🦕', '🦴', '🦚', '🐲', '🪓'],
+        [Faction.CRETACEOUS]: ['🦕', '🦖', '🐦', '🪶', '🌋', '🪵'],
+        [Faction.PRIMORDIAL]: ['🐙', '🦑', '🦐', '🐟', '🪸', '🌀'],
+        [Faction.ICE_AGE]: ['🦣', '🐺', '❄️', '🧊', '🏔️', '🦌'],
+        [Faction.NEUTRAL]: ['🦴', '🗿', '🔥', '⚡', '🛡️', '🎴']
+    },
+    types: {
+        [CardType.SPELL]: ['✨', '💥', '🪄', '🌪️', '💫', '🔮'],
+        [CardType.RELIC]: ['🛡️', '⚔️', '🔱', '🗝️', '🏺', '📿']
+    }
+};
+
+function hashString(value) {
+    let hash = 0;
+    for (let i = 0; i < value.length; i++) {
+        hash = ((hash << 5) - hash) + value.charCodeAt(i);
+        hash |= 0;
+    }
+    return hash;
+}
+
+function getAlternateArtIcon(card) {
+    const pool = card.type !== CardType.CREATURE
+        ? (AlternateArtPools.types[card.type] || [])
+        : (AlternateArtPools.factions[card.faction] || []);
+    const fallbackPool = AlternateArtPools.factions[Faction.NEUTRAL];
+    const artPool = pool.length > 0 ? pool : fallbackPool;
+    const index = Math.abs(hashString(card.id)) % artPool.length;
+    let altIcon = artPool[index];
+    if (altIcon === card.icon && artPool.length > 1) {
+        altIcon = artPool[(index + 1) % artPool.length];
+    }
+    return altIcon;
+}
+
+Object.values(CARDS).forEach(card => {
+    card.altIcon = getAlternateArtIcon(card);
+});
+
 /**
  * Get card by ID
  */

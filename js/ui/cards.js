@@ -46,11 +46,16 @@ export function renderCard(card, options = {}) {
         cardEl.classList.add('has-guard');
     }
 
+    const { primaryArt, alternateArt } = getCardArt(card);
+
     // Build card structure
     cardEl.innerHTML = `
         <div class="card-inner">
             <div class="card-cost">${card.cost}</div>
-            <div class="card-art">${card.icon || getDefaultIcon(card)}</div>
+            <div class="card-art">
+                <span class="card-art-primary">${primaryArt}</span>
+                <span class="card-art-alt" aria-hidden="true">${alternateArt}</span>
+            </div>
             <div class="card-name">${card.name}</div>
             ${card.text ? `<div class="card-text">${card.text}</div>` : '<div class="card-text"></div>'}
             ${card.type === 'creature' ? renderStats(card) : ''}
@@ -114,6 +119,13 @@ function renderKeywords(card) {
  */
 function formatKeyword(keyword) {
     return keyword.charAt(0).toUpperCase() + keyword.slice(1);
+}
+
+function getCardArt(card) {
+    const primaryArt = card.icon || getDefaultIcon(card);
+    const alternateArt = card.altIcon || primaryArt;
+
+    return { primaryArt, alternateArt };
 }
 
 /**

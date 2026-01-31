@@ -18,9 +18,11 @@ function initTurnstile() {
 }
 
 // Wait for Turnstile library to load
-if (typeof turnstile !== 'undefined') {
-  initTurnstile();
-} else {
-  // Turnstile script calls this when ready (with render=explicit)
-  window.onloadTurnstileCallback = initTurnstile;
+if (typeof window !== 'undefined') {
+  if (typeof turnstile !== 'undefined') {
+    initTurnstile();
+  } else {
+    // Turnstile script calls this when ready (with render=explicit)
+    window.onloadTurnstileCallback = initTurnstile;
+  }
 }

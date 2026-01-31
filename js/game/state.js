@@ -383,7 +383,7 @@ function gameReducer(state, action) {
                     let actualDamage = amount;
                     const armored = creature.keywords?.find(k => k.startsWith('armored'));
                     if (armored) {
-                        const armorValue = parseInt(armored.split('_')[1]) || 0;
+                        const armorValue = parseInt(armored.split('_')[1]) || 1;
                         actualDamage = Math.max(0, amount - armorValue);
                     }
 

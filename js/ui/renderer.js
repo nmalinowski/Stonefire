@@ -6,6 +6,7 @@
 import { store, events } from '../game/state.js';
 import { renderCard, renderCardBack } from './cards.js';
 import { renderBoard } from './board.js';
+import { getValidTargets } from '../game/engine.js';
 import { showDamageNumber, showTurnBanner, animateCardPlay, animateAttack, animateDeath, screenShake, flashElement } from './animations.js';
 import { Faction } from '../data/cards.js';
 
@@ -183,7 +184,7 @@ function updateHealthDisplay(element, current, max) {
     } else if (percentage <= 0.6) {
         element.style.color = '#f39c12';
     } else {
-        element.style.color = '#e74c3c';
+        element.style.color = '#2ecc71';
     }
 }
 
@@ -215,9 +216,10 @@ function renderHand(container, cards, playerId, state) {
     }
 
     cards.forEach((card, index) => {
-        const canPlay = state.activePlayer === playerId &&
-            card.cost <= state[playerId].mana &&
+        const hasManaAndSpace = card.cost <= state[playerId].mana &&
             (card.type !== 'creature' || state[playerId].board.length < 7);
+        const hasValidTargets = !card.requiresTarget || getValidTargets(playerId, card).length > 0;
+        const canPlay = state.activePlayer === playerId && hasManaAndSpace && hasValidTargets;
 
         const cardEl = renderCard(card, {
             playable: canPlay,

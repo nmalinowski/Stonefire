@@ -200,6 +200,7 @@ export function getBoardElement(playerId) {
 export function getEmptySlotPosition(playerId, state) {
     const board = state[playerId].board;
     const boardEl = getBoardElement(playerId);
+    if (!boardEl) return null;
     const slots = boardEl.querySelectorAll('.board-slot');
 
     for (let i = 0; i < slots.length; i++) {

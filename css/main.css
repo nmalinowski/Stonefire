@@ -696,12 +696,14 @@ body.fullscreen-mode .mobile-profile-btn {
 /* Desktop: fill viewport minus header - about/footer below require scrolling */
 body:not(.fullscreen-mode):not(.static-page) #game-container {
     min-height: calc(100vh - var(--header-height));
+    min-height: calc(100svh - var(--header-height));
     min-height: calc(100dvh - var(--header-height));
 }
 
 /* Fullscreen mode: use full viewport */
 body.fullscreen-mode #game-container {
     height: 100vh;
+    height: 100svh;
     height: 100dvh;
 }
 
@@ -891,6 +893,9 @@ body.fullscreen-mode #game-container {
     gap: 0.5rem;
     padding: 0.5rem;
     scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
 }
 .player-hand .card, .enemy-hand .card {
     scroll-snap-align: center;
@@ -899,7 +904,16 @@ body.fullscreen-mode #game-container {
     touch-action: pan-x;
 } 
 
-.board-slots { display:flex; gap:8px; overflow-x:auto; padding: 0.5rem 0.75rem; }
+.board-slots {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0.5rem 0.75rem;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+}
 .board-slot { width: var(--card-width-board); max-width: var(--card-width-board); flex: 0 0 auto; } 
 
 /* Larger tap targets on small screens */

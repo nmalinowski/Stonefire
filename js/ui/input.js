@@ -18,6 +18,14 @@ let dragOffset = { x: 0, y: 0 };
 // Track last hovered target when showing a dynamic spell/attack arrow
 let lastHoverTarget = null;
 
+// Touch preview state
+let touchPreviewTimer = null;
+let touchPreviewActive = false;
+let touchStartPos = null;
+
+const TOUCH_PREVIEW_DELAY = 350;
+const TOUCH_PREVIEW_MOVE_THRESHOLD = 10;
+
 /**
  * Initialize input handlers
  */
@@ -48,6 +56,12 @@ export function initInput() {
 
     // Mouse move for card preview and attack arrow
     document.addEventListener('mousemove', handleMouseMove);
+
+    // Touch/pen hold for card preview
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
+    document.addEventListener('pointercancel', handlePointerUp);
 
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyDown);
@@ -221,6 +235,78 @@ function isValidSpellTarget(card, targetPlayerId, targetId, state) {
     }
 }
 
+function getCardDataFromElement(cardEl, state) {
+    if (!cardEl || cardEl.classList.contains('face-down')) return null;
+    const instanceId = cardEl.dataset.instanceId;
+    const playerId = cardEl.dataset.playerId;
+    if (!instanceId || !playerId) return null;
+    const playerState = state[playerId];
+    if (!playerState) return null;
+
+    if (cardEl.closest('.hand')) {
+        return playerState.hand.find(c => c.instanceId === instanceId) || null;
+    }
+
+    if (cardEl.closest('.board')) {
+        return playerState.board.find(c => c?.instanceId === instanceId) || null;
+    }
+
+    return null;
+}
+
+function getPreviewAnchor(cardEl) {
+    const rect = cardEl.getBoundingClientRect();
+    return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+    };
+}
+
+function clearTouchPreview() {
+    if (touchPreviewTimer) {
+        clearTimeout(touchPreviewTimer);
+        touchPreviewTimer = null;
+    }
+    if (touchPreviewActive) {
+        hideCardPreview();
+    }
+    touchPreviewActive = false;
+    touchStartPos = null;
+}
+
+function handlePointerDown(e) {
+    if (e.pointerType !== 'touch') return;
+    const state = store.getState();
+    const cardEl = e.target.closest('.card:not(.face-down)');
+    if (!cardEl) return;
+
+    const card = getCardDataFromElement(cardEl, state);
+    if (!card) return;
+
+    clearTouchPreview();
+    touchStartPos = { x: e.clientX, y: e.clientY };
+    touchPreviewTimer = setTimeout(() => {
+        const anchor = getPreviewAnchor(cardEl);
+        showCardPreview(card, anchor.x, anchor.y);
+        touchPreviewActive = true;
+    }, TOUCH_PREVIEW_DELAY);
+}
+
+function handlePointerMove(e) {
+    if (e.pointerType !== 'touch' || !touchPreviewTimer || !touchStartPos) return;
+    const deltaX = e.clientX - touchStartPos.x;
+    const deltaY = e.clientY - touchStartPos.y;
+    const distance = Math.hypot(deltaX, deltaY);
+    if (distance > TOUCH_PREVIEW_MOVE_THRESHOLD) {
+        clearTouchPreview();
+    }
+}
+
+function handlePointerUp(e) {
+    if (e.pointerType !== 'touch') return;
+    clearTouchPreview();
+}
+
 /**
  * Handle clicking on a hero portrait
  */
@@ -384,14 +470,10 @@ function handleMouseMove(e) {
         }
     }
 
-    // Card preview on hover (for hand cards)
+    // Card preview on hover (for hand cards and board cards)
     const cardEl = e.target.closest('.card:not(.face-down)');
-    if (cardEl && cardEl.closest('.hand')) {
-        const instanceId = cardEl.dataset.instanceId;
-        const playerId = cardEl.dataset.playerId;
-        const playerState = state[playerId];
-        const card = playerState?.hand.find(c => c.instanceId === instanceId);
-
+    if (cardEl && (cardEl.closest('.hand') || cardEl.closest('.board'))) {
+        const card = getCardDataFromElement(cardEl, state);
         if (card) {
             showCardPreview(card, e.clientX, e.clientY);
         }

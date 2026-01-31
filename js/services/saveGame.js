@@ -6,6 +6,7 @@
 import { getClient, isOnline } from './supabase.js';
 import { getCurrentUser } from './auth.js';
 import { store, events } from '../game/state.js';
+import { registerAchievementTracking } from './progress.js';
 
 const LOCAL_SAVE_KEY = 'stonefire.saveGame';
 
@@ -155,6 +156,8 @@ export function restoreGame(saveData) {
     }
 
     try {
+        registerAchievementTracking();
+
         // Restore the game state
         store.restoreState(saveData.gameState);
 

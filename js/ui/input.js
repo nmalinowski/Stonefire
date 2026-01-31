@@ -22,6 +22,7 @@ let lastHoverTarget = null;
 let touchPreviewTimer = null;
 let touchPreviewActive = false;
 let touchStartPos = null;
+let suppressNextClick = false;
 
 const TOUCH_PREVIEW_DELAY = 350;
 const TOUCH_PREVIEW_MOVE_THRESHOLD = 10;
@@ -71,6 +72,10 @@ export function initInput() {
  * Handle click events
  */
 function handleClick(e) {
+    if (suppressNextClick) {
+        suppressNextClick = false;
+        return;
+    }
     const state = store.getState();
     if (state.gameOver) return;
 
@@ -289,6 +294,7 @@ function handlePointerDown(e) {
         const anchor = getPreviewAnchor(cardEl);
         showCardPreview(card, anchor.x, anchor.y);
         touchPreviewActive = true;
+        suppressNextClick = true;
     }, TOUCH_PREVIEW_DELAY);
 }
 

@@ -357,6 +357,10 @@ export async function recordGameResult(result, playerFaction, enemyFaction) {
     stats.faction_stats[playerFaction][result === 'win' ? 'wins' : 'losses']++;
 
     saveStats(stats);
+    if (syncTimeout) {
+        clearTimeout(syncTimeout);
+        syncTimeout = null;
+    }
     await syncStats(stats);
 }
 
@@ -464,7 +468,7 @@ function scheduleStatsSync(stats) {
 
     syncTimeout = setTimeout(() => {
         syncTimeout = null;
-        syncStats(stats);
+        syncStats(getStats());
     }, 2000);
 }
 

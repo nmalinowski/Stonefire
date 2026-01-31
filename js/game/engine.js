@@ -7,7 +7,7 @@ import { store, actions, events } from './state.js';
 import { resolveCombat } from './combat.js';
 import { processEffect, checkTriggeredEffects } from './effects.js';
 import { saveGame, deleteSave } from '../services/saveGame.js';
-import { recordGameResult } from '../services/progress.js';
+import { recordGameResult, registerAchievementTracking } from '../services/progress.js';
 
 // Game configuration
 export const CONFIG = {
@@ -55,6 +55,7 @@ function registerTriggerListeners() {
 export function startGame(playerDeck, enemyDeck) {
     // Register event listeners for triggered abilities
     registerTriggerListeners();
+    registerAchievementTracking();
 
     // Reset the store
     store.reset();

@@ -31,7 +31,30 @@
           "losses": 0,
           "current_streak": 0,
           "best_streak": 0,
-          "faction_stats": {}
+          "faction_stats": {},
+          "achievement_stats": {
+            "total_spells_cast": 0,
+            "total_creatures_summoned": 0,
+            "total_attacks": 0,
+            "total_damage_to_hero": 0,
+            "total_damage_to_creatures": 0,
+            "total_creatures_killed": 0,
+            "turns_played": 0,
+            "total_healing": 0,
+            "total_cards_played": 0,
+            "total_relics_played": 0,
+            "total_player_creatures_lost": 0,
+            "full_board_turns": 0,
+            "enemy_board_clears": 0,
+            "enemy_board_clears_single_spell": 0,
+            "enemy_board_clears_single_attack": 0,
+            "enemy_board_clears_single_effect": 0,
+            "wins_without_creature_loss": 0,
+            "wins_with_full_board": 0,
+            "wins_low_health": 0,
+            "max_damage_in_turn": 0,
+            "max_heal_in_turn": 0
+          }
       }',
       updated_at TIMESTAMPTZ DEFAULT NOW()
   );

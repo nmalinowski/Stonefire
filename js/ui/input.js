@@ -26,6 +26,7 @@ let suppressNextClick = false;
 
 const TOUCH_PREVIEW_DELAY = 350;
 const TOUCH_PREVIEW_MOVE_THRESHOLD = 10;
+const TOUCH_PREVIEW_SUPPRESS_TIMEOUT = 300;
 
 /**
  * Initialize input handlers
@@ -310,7 +311,13 @@ function handlePointerMove(e) {
 
 function handlePointerUp(e) {
     if (e.pointerType !== 'touch') return;
+    const hadPreview = touchPreviewActive;
     clearTouchPreview();
+    if (hadPreview) {
+        setTimeout(() => {
+            suppressNextClick = false;
+        }, TOUCH_PREVIEW_SUPPRESS_TIMEOUT);
+    }
 }
 
 /**

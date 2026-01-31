@@ -295,6 +295,15 @@ function normalizeStats(stats) {
 }
 
 /**
+ * Safe max that validates both values are numbers
+ */
+function safeMax(a, b) {
+    const numA = typeof a === 'number' && !isNaN(a) ? a : 0;
+    const numB = typeof b === 'number' && !isNaN(b) ? b : 0;
+    return Math.max(numA, numB);
+}
+
+/**
  * Get local stats
  */
 export function getStats() {
@@ -401,11 +410,11 @@ export async function fetchAndMergeStats() {
 
         // Merge: take the higher values (handles simultaneous play)
         const merged = normalizeStats({
-            games_played: Math.max(local.games_played, remote.games_played),
-            wins: Math.max(local.wins, remote.wins),
-            losses: Math.max(local.losses, remote.losses),
-            current_streak: Math.max(local.current_streak, remote.current_streak),
-            best_streak: Math.max(local.best_streak, remote.best_streak),
+            games_played: safeMax(local.games_played, remote.games_played),
+            wins: safeMax(local.wins, remote.wins),
+            losses: safeMax(local.losses, remote.losses),
+            current_streak: safeMax(local.current_streak, remote.current_streak),
+            best_streak: safeMax(local.best_streak, remote.best_streak),
             faction_stats: { ...remote.faction_stats },
             achievement_stats: { ...remote.achievement_stats }
         });
@@ -416,15 +425,15 @@ export async function fetchAndMergeStats() {
                 merged.faction_stats[faction] = local.faction_stats[faction];
             } else {
                 merged.faction_stats[faction] = {
-                    games: Math.max(local.faction_stats[faction].games, merged.faction_stats[faction].games),
-                    wins: Math.max(local.faction_stats[faction].wins, merged.faction_stats[faction].wins),
-                    losses: Math.max(local.faction_stats[faction].losses, merged.faction_stats[faction].losses)
+                    games: safeMax(local.faction_stats[faction].games, merged.faction_stats[faction].games),
+                    wins: safeMax(local.faction_stats[faction].wins, merged.faction_stats[faction].wins),
+                    losses: safeMax(local.faction_stats[faction].losses, merged.faction_stats[faction].losses)
                 };
             }
         }
 
         for (const [key, value] of Object.entries(local.achievement_stats)) {
-            merged.achievement_stats[key] = Math.max(value, merged.achievement_stats[key] || 0);
+            merged.achievement_stats[key] = safeMax(value, merged.achievement_stats[key]);
         }
 
         saveStats(merged);
@@ -446,15 +455,15 @@ function createSessionState() {
 }
 
 function updateAchievementStats(mutator) {
-    const stats = getStats();
-    const didUpdate = mutator(stats);
-    if (didUpdate) {
-        saveStats(stats);
-        scheduleStatsSync(stats);
+    let stats = getStats();
+    const result = mutator(stats);
+    if (result.didUpdate) {
+        saveStats(result.stats);
+        scheduleStatsSync();
     }
 }
 
-function scheduleStatsSync(stats) {
+function scheduleStatsSync() {
     const user = getCurrentUser();
     if (!user || user.is_anonymous || !isOnline()) return;
 
@@ -464,20 +473,34 @@ function scheduleStatsSync(stats) {
 
     syncTimeout = setTimeout(() => {
         syncTimeout = null;
-        syncStats(stats);
+        syncStats(getStats());
     }, 2000);
 }
 
 function setMaxStat(stats, key, value) {
     if (value > stats.achievement_stats[key]) {
-        stats.achievement_stats[key] = value;
-        return true;
+        return {
+            stats: {
+                ...stats,
+                achievement_stats: {
+                    ...stats.achievement_stats,
+                    [key]: value
+                }
+            },
+            updated: true
+        };
     }
-    return false;
+    return { stats, updated: false };
 }
 
 function incrementStat(stats, key, amount = 1) {
-    stats.achievement_stats[key] = (stats.achievement_stats[key] || 0) + amount;
+    return {
+        ...stats,
+        achievement_stats: {
+            ...stats.achievement_stats,
+            [key]: (stats.achievement_stats[key] || 0) + amount
+        }
+    };
 }
 
 export function registerAchievementTracking() {
@@ -488,26 +511,28 @@ export function registerAchievementTracking() {
     store.subscribe((state, prevState, action) => {
         if (!action || !action.type) return;
 
-        if (action.type === ActionTypes.START_GAME) {
+        // Reset session state for new, reset, or restored games
+        if (action.type === ActionTypes.START_GAME || action.type === 'RESTORE' || action.type === 'RESET') {
             sessionState = createSessionState();
             return;
         }
 
-        updateAchievementStats((stats) => {
+        updateAchievementStats((initialStats) => {
+            let stats = initialStats;
             let didUpdate = false;
 
             if (!prevState?.gameOver && state.gameOver) {
                 if (state.winner === 'player') {
                     if (!sessionState.playerHadCreatureDeath) {
-                        incrementStat(stats, 'wins_without_creature_loss');
+                        stats = incrementStat(stats, 'wins_without_creature_loss');
                         didUpdate = true;
                     }
                     if (state.player.board.length === MAX_BOARD_SIZE) {
-                        incrementStat(stats, 'wins_with_full_board');
+                        stats = incrementStat(stats, 'wins_with_full_board');
                         didUpdate = true;
                     }
                     if (state.player.health <= LOW_HEALTH_THRESHOLD) {
-                        incrementStat(stats, 'wins_low_health');
+                        stats = incrementStat(stats, 'wins_low_health');
                         didUpdate = true;
                     }
                 }
@@ -521,7 +546,7 @@ export function registerAchievementTracking() {
                         sessionState.turnEnemyBoardStart = prevState?.enemy?.board?.length || 0;
                         sessionState.turnFullBoardRecorded = false;
                         sessionState.currentAction = null;
-                        incrementStat(stats, 'turns_played');
+                        stats = incrementStat(stats, 'turns_played');
                         didUpdate = true;
                     }
                     break;
@@ -529,13 +554,17 @@ export function registerAchievementTracking() {
                 case ActionTypes.END_TURN: {
                     if (prevState?.activePlayer === 'player') {
                         if (sessionState.turnEnemyBoardStart > 0 && state.enemy.board.length === 0) {
-                            incrementStat(stats, 'enemy_board_clears');
+                            stats = incrementStat(stats, 'enemy_board_clears');
                             didUpdate = true;
                         }
-                        if (setMaxStat(stats, 'max_damage_in_turn', sessionState.turnDamage)) {
+                        const maxDamageResult = setMaxStat(stats, 'max_damage_in_turn', sessionState.turnDamage);
+                        stats = maxDamageResult.stats;
+                        if (maxDamageResult.updated) {
                             didUpdate = true;
                         }
-                        if (setMaxStat(stats, 'max_heal_in_turn', sessionState.turnHealing)) {
+                        const maxHealResult = setMaxStat(stats, 'max_heal_in_turn', sessionState.turnHealing);
+                        stats = maxHealResult.stats;
+                        if (maxHealResult.updated) {
                             didUpdate = true;
                         }
                     }
@@ -547,11 +576,11 @@ export function registerAchievementTracking() {
                             (card) => card.instanceId === action.payload.cardId
                         );
                         if (playedCard) {
-                            incrementStat(stats, 'total_cards_played');
+                            stats = incrementStat(stats, 'total_cards_played');
                             didUpdate = true;
 
                             if (playedCard.type === 'spell') {
-                                incrementStat(stats, 'total_spells_cast');
+                                stats = incrementStat(stats, 'total_spells_cast');
                                 sessionState.currentAction = {
                                     type: 'spell',
                                     enemyBoardBefore: prevState.enemy.board.length,
@@ -561,7 +590,7 @@ export function registerAchievementTracking() {
                             }
 
                             if (playedCard.type === 'creature') {
-                                incrementStat(stats, 'total_creatures_summoned');
+                                stats = incrementStat(stats, 'total_creatures_summoned');
                                 sessionState.currentAction = {
                                     type: playedCard.battlecry || playedCard.effect ? 'effect' : 'creature',
                                     enemyBoardBefore: prevState.enemy.board.length,
@@ -571,7 +600,7 @@ export function registerAchievementTracking() {
                             }
 
                             if (playedCard.type === 'relic') {
-                                incrementStat(stats, 'total_relics_played');
+                                stats = incrementStat(stats, 'total_relics_played');
                                 sessionState.currentAction = {
                                     type: 'relic',
                                     enemyBoardBefore: prevState.enemy.board.length,
@@ -585,14 +614,14 @@ export function registerAchievementTracking() {
                 }
                 case ActionTypes.SUMMON_CREATURE: {
                     if (action.payload.player === 'player') {
-                        incrementStat(stats, 'total_creatures_summoned');
+                        stats = incrementStat(stats, 'total_creatures_summoned');
                         didUpdate = true;
                     }
                     break;
                 }
                 case ActionTypes.ATTACK: {
                     if (action.payload.attackerPlayer === 'player') {
-                        incrementStat(stats, 'total_attacks');
+                        stats = incrementStat(stats, 'total_attacks');
                         sessionState.currentAction = {
                             type: 'attack',
                             enemyBoardBefore: prevState.enemy.board.length,
@@ -605,9 +634,9 @@ export function registerAchievementTracking() {
                 case ActionTypes.DEAL_DAMAGE: {
                     if (action.payload.targetPlayer === 'enemy') {
                         if (action.payload.targetId === 'hero') {
-                            incrementStat(stats, 'total_damage_to_hero', action.payload.amount);
+                            stats = incrementStat(stats, 'total_damage_to_hero', action.payload.amount);
                         } else {
-                            incrementStat(stats, 'total_damage_to_creatures', action.payload.amount);
+                            stats = incrementStat(stats, 'total_damage_to_creatures', action.payload.amount);
                         }
                         sessionState.turnDamage += action.payload.amount;
                         didUpdate = true;
@@ -616,7 +645,7 @@ export function registerAchievementTracking() {
                 }
                 case ActionTypes.HEAL: {
                     if (action.payload.targetPlayer === 'player') {
-                        incrementStat(stats, 'total_healing', action.payload.amount);
+                        stats = incrementStat(stats, 'total_healing', action.payload.amount);
                         sessionState.turnHealing += action.payload.amount;
                         didUpdate = true;
                     }
@@ -624,11 +653,11 @@ export function registerAchievementTracking() {
                 }
                 case ActionTypes.DESTROY_CREATURE: {
                     if (action.payload.player === 'enemy') {
-                        incrementStat(stats, 'total_creatures_killed');
+                        stats = incrementStat(stats, 'total_creatures_killed');
                         didUpdate = true;
                     }
                     if (action.payload.player === 'player') {
-                        incrementStat(stats, 'total_player_creatures_lost');
+                        stats = incrementStat(stats, 'total_player_creatures_lost');
                         sessionState.playerHadCreatureDeath = true;
                         didUpdate = true;
                     }
@@ -641,7 +670,7 @@ export function registerAchievementTracking() {
             if (action.type === ActionTypes.PLAY_CARD || action.type === ActionTypes.SUMMON_CREATURE) {
                 if (action.payload.player === 'player' && state.player.board.length === MAX_BOARD_SIZE) {
                     if (!sessionState.turnFullBoardRecorded) {
-                        incrementStat(stats, 'full_board_turns');
+                        stats = incrementStat(stats, 'full_board_turns');
                         sessionState.turnFullBoardRecorded = true;
                         didUpdate = true;
                     }
@@ -651,22 +680,22 @@ export function registerAchievementTracking() {
             if (sessionState.currentAction && !sessionState.currentAction.counted) {
                 if (sessionState.currentAction.enemyBoardBefore > 0 && state.enemy.board.length === 0) {
                     if (sessionState.currentAction.type === 'spell') {
-                        incrementStat(stats, 'enemy_board_clears_single_spell');
+                        stats = incrementStat(stats, 'enemy_board_clears_single_spell');
                         didUpdate = true;
                     }
                     if (sessionState.currentAction.type === 'attack') {
-                        incrementStat(stats, 'enemy_board_clears_single_attack');
+                        stats = incrementStat(stats, 'enemy_board_clears_single_attack');
                         didUpdate = true;
                     }
                     if (sessionState.currentAction.type === 'effect') {
-                        incrementStat(stats, 'enemy_board_clears_single_effect');
+                        stats = incrementStat(stats, 'enemy_board_clears_single_effect');
                         didUpdate = true;
                     }
                     sessionState.currentAction.counted = true;
                 }
             }
 
-            return didUpdate;
+            return { stats, didUpdate };
         });
     });
 }

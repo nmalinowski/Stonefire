@@ -23,6 +23,7 @@ let touchPreviewTimer = null;
 let touchPreviewActive = false;
 let touchStartPos = null;
 let suppressNextClick = false;
+let touchPreviewShown = false;
 
 const TOUCH_PREVIEW_DELAY = 350;
 const TOUCH_PREVIEW_MOVE_THRESHOLD = 10;
@@ -75,6 +76,7 @@ export function initInput() {
 function handleClick(e) {
     if (suppressNextClick) {
         suppressNextClick = false;
+        touchPreviewShown = false;
         return;
     }
     const state = store.getState();
@@ -296,6 +298,7 @@ function handlePointerDown(e) {
         showCardPreview(card, anchor.x, anchor.y);
         touchPreviewActive = true;
         suppressNextClick = true;
+        touchPreviewShown = true;
     }, TOUCH_PREVIEW_DELAY);
 }
 
@@ -311,9 +314,10 @@ function handlePointerMove(e) {
 
 function handlePointerUp(e) {
     if (e.pointerType !== 'touch') return;
-    const hadPreview = touchPreviewActive;
+    const hadPreview = touchPreviewShown;
     clearTouchPreview();
     if (hadPreview) {
+        touchPreviewShown = false;
         setTimeout(() => {
             suppressNextClick = false;
         }, TOUCH_PREVIEW_SUPPRESS_TIMEOUT);

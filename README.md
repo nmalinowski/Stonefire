@@ -142,7 +142,6 @@ stonefire/
 
 ## TODO
 - Replace placeholder emoji's with custom card art
-- Achievements
 - Campaign/story mode
 - Card collection/unlocking, Deck builder UI + Custom Decks
 - Sound effects

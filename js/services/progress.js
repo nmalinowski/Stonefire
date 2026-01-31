@@ -670,3 +670,14 @@ export function registerAchievementTracking() {
         });
     });
 }
+
+export function hydrateAchievementTrackingState(state) {
+    if (!sessionState) {
+        sessionState = createSessionState();
+    }
+
+    const playerGraveyardCount = state?.player?.graveyard?.length || 0;
+    if (playerGraveyardCount > 0) {
+        sessionState.playerHadCreatureDeath = true;
+    }
+}

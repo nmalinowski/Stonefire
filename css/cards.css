@@ -286,8 +286,9 @@
 /* Card Preview (larger view on hover) */
 .card-preview {
     position: fixed;
-    width: 200px;
-    height: 280px;
+    --card-preview-width: clamp(180px, 55vw, 260px);
+    width: var(--card-preview-width);
+    height: calc(var(--card-preview-width) * 1.4);
     z-index: 500;
     pointer-events: none;
     transform: scale(0);

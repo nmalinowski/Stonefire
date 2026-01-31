@@ -182,8 +182,8 @@ export function showCardPreview(card, x, y) {
     document.body.appendChild(activePreview);
 
     // Position the preview
-    const previewWidth = 200;
-    const previewHeight = 280;
+    const previewWidth = activePreview.offsetWidth || 200;
+    const previewHeight = activePreview.offsetHeight || 280;
     const padding = 20;
 
     let posX = x + padding;

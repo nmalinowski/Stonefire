@@ -69,7 +69,7 @@ function resolveCreatureAttack(attackerPlayer, attacker, targetPlayer, defender)
         targetId: defender.instanceId
     });
 
-    // Calculate damage with Armored keyword
+    // Calculate actual damage with Armored keyword (used for triggers/venomous)
     const attackerDamage = calculateDamage(attacker.currentAttack, defender);
     const defenderDamage = calculateDamage(defender.currentAttack, attacker);
 
@@ -77,7 +77,7 @@ function resolveCreatureAttack(attackerPlayer, attacker, targetPlayer, defender)
     store.dispatch(actions.dealDamage(
         targetPlayer,
         defender.instanceId,
-        attackerDamage,
+        attacker.currentAttack,
         attacker.instanceId
     ));
 
@@ -85,7 +85,7 @@ function resolveCreatureAttack(attackerPlayer, attacker, targetPlayer, defender)
     store.dispatch(actions.dealDamage(
         attackerPlayer,
         attacker.instanceId,
-        defenderDamage,
+        defender.currentAttack,
         defender.instanceId
     ));
 

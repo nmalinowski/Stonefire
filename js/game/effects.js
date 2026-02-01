@@ -3,7 +3,7 @@
  * Handles card abilities, spells, and triggered effects
  */
 
-import { store, actions, events } from './state.js';
+import { store, actions, events, generateCardInstanceId } from './state.js';
 
 /**
  * Process a card effect
@@ -367,7 +367,7 @@ function processSummonEffect(effect, sourcePlayer) {
         // Create token creature with default values for missing properties
         const token = {
             ...effect.creature,
-            instanceId: `token_${Date.now()}_${i}`,
+            instanceId: generateCardInstanceId(),
             type: 'creature',
             text: effect.creature.text || '',
             icon: effect.creature.icon || '🦴',

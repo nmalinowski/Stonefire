@@ -33,9 +33,10 @@ export function initRenderer() {
     })();
 
     if (stored && stored.player) {
+        const storedEnemy = stored.enemy || 'JURASSIC';
         elements.currentHeroFactions.player = stored.player;
-        elements.currentHeroFactions.enemy = stored.enemy || 'JURASSIC';
-        setHeroFactions(stored.player, stored.enemy);
+        elements.currentHeroFactions.enemy = storedEnemy;
+        setHeroFactions(stored.player, storedEnemy);
     }
 }
 
@@ -159,6 +160,10 @@ export function render(state) {
  * Render player info (health, mana, deck count)
  */
 function renderPlayerInfo(state) {
+    if (!elements.playerHealth || !elements.playerMana || !elements.playerDeckCount ||
+        !elements.enemyHealth || !elements.enemyMana || !elements.enemyDeckCount) {
+        return;
+    }
     // Player
     elements.playerHealth.textContent = state.player.health;
     elements.playerMana.textContent = `${state.player.mana}/${state.player.maxMana}`;
@@ -178,6 +183,10 @@ function renderPlayerInfo(state) {
  * Update health display color based on amount
  */
 function updateHealthDisplay(element, current, max) {
+    if (!max || max <= 0) {
+        element.style.color = '';
+        return;
+    }
     const percentage = current / max;
     if (percentage <= 0.3) {
         element.style.color = '#e74c3c';
@@ -192,6 +201,9 @@ function updateHealthDisplay(element, current, max) {
  * Render both hands
  */
 function renderHands(state) {
+    if (!elements.playerHand || !elements.enemyHand) {
+        return;
+    }
     // Player hand (visible)
     renderHand(elements.playerHand, state.player.hand, 'player', state);
 
@@ -203,6 +215,7 @@ function renderHands(state) {
  * Render player's hand
  */
 function renderHand(container, cards, playerId, state) {
+    if (!container) return;
     container.innerHTML = '';
 
     // Get current card instanceIds in hand
@@ -247,6 +260,7 @@ function renderHand(container, cards, playerId, state) {
  * Render enemy's hand (face down)
  */
 function renderEnemyHand(container, cardCount) {
+    if (!container) return;
     container.innerHTML = '';
 
     for (let i = 0; i < cardCount; i++) {
@@ -259,6 +273,9 @@ function renderEnemyHand(container, cardCount) {
  * Render both boards
  */
 function renderBoards(state) {
+    if (!elements.playerBoard || !elements.enemyBoard) {
+        return;
+    }
     renderBoard(elements.playerBoard, state.player.board, 'player', state);
     renderBoard(elements.enemyBoard, state.enemy.board, 'enemy', state);
 }
@@ -267,6 +284,9 @@ function renderBoards(state) {
  * Render turn indicator
  */
 function renderTurnIndicator(state) {
+    if (!elements.turnIndicator || !elements.turnText || !elements.turnNumber || !elements.endTurnBtn) {
+        return;
+    }
     // Don't show turn indicator if wizard or auth modal is open
     const wizard = document.getElementById('game-wizard');
     const authModal = document.getElementById('auth-modal');
@@ -294,6 +314,7 @@ function renderTurnIndicator(state) {
  * Render hero portraits
  */
 function renderHeroes(state) {
+    if (!elements.playerHero || !elements.enemyHero) return;
     // Update targetable state based on selection
     const selection = state.selection;
 
@@ -314,7 +335,9 @@ function renderHeroes(state) {
  */
 function updateInteractiveStates(state) {
     if (state.gameOver) {
-        elements.endTurnBtn.disabled = true;
+        if (elements.endTurnBtn) {
+            elements.endTurnBtn.disabled = true;
+        }
         return;
     }
 
@@ -590,13 +613,15 @@ export function setHeroFactions(playerFactionKeyOrValue, enemyFactionKeyOrValue)
 
     if (playerHero) {
         const avatar = playerHero.querySelector('.hero-avatar');
-        if (avatar) avatar.innerHTML = `<img src="${iconMap[pKey] || iconMap.CRETACEOUS}" class="hero-icon" alt="${labelMap[pKey] || pKey} faction icon" loading="lazy">`;
+        const playerLabel = labelMap[pKey] || labelMap.CRETACEOUS;
+        if (avatar) avatar.innerHTML = `<img src="${iconMap[pKey] || iconMap.CRETACEOUS}" class="hero-icon" alt="${playerLabel} faction icon" loading="lazy">`;
         playerHero.dataset.faction = pKey || '';
     }
 
     if (enemyHero) {
         const avatar = enemyHero.querySelector('.hero-avatar');
-        if (avatar) avatar.innerHTML = `<img src="${iconMap[eKey] || iconMap.JURASSIC}" class="hero-icon" alt="${labelMap[eKey] || eKey} faction icon" loading="lazy">`;
+        const enemyLabel = labelMap[eKey] || labelMap.JURASSIC;
+        if (avatar) avatar.innerHTML = `<img src="${iconMap[eKey] || iconMap.JURASSIC}" class="hero-icon" alt="${enemyLabel} faction icon" loading="lazy">`;
         enemyHero.dataset.faction = eKey || '';
     }
 

@@ -102,12 +102,13 @@ function shuffleDeck(deck) {
 export function startTurn(player) {
     const state = store.getState();
     if (state.gameOver) return;
+    const nextTurn = player === 'player' ? state.turn + 1 : state.turn;
 
     // Dispatch start turn action (increments mana, refreshes crystals)
     store.dispatch(actions.startTurn(player));
 
     // Draw a card (skip on turn 1 for the first player)
-    if (!(state.turn === 1 && player === 'player')) {
+    if (!(nextTurn === 1 && player === 'player')) {
         store.dispatch(actions.drawCard(player));
     }
 
@@ -129,6 +130,10 @@ export function endTurn() {
 
     // Check for end-of-turn triggered effects
     checkTriggeredEffects('TURN_END', { player: currentPlayer });
+
+    if (store.getState().gameOver) {
+        return;
+    }
 
     store.dispatch(actions.endTurn());
 
@@ -179,9 +184,17 @@ export function playCard(player, cardId, target = null) {
     }
 
     // Validate targeting if required
-    if (card.requiresTarget && !target) {
-        console.warn('Card requires a target');
-        return false;
+    if (card.requiresTarget) {
+        if (!target) {
+            console.warn('Card requires a target');
+            return false;
+        }
+        const validTargets = getValidTargets(player, card);
+        const isValidTarget = validTargets.some(t => t.player === target.player && t.id === target.id);
+        if (!isValidTarget) {
+            console.warn('Invalid target');
+            return false;
+        }
     }
 
     // Play the card
@@ -241,13 +254,8 @@ export function attack(attackerPlayer, attackerId, targetPlayer, targetId) {
     }
 
     // Check if can attack
-    if (!attacker.canAttack || attacker.hasAttacked) {
+    if (!canCreatureAttack(attackerPlayer, attackerId)) {
         console.warn('Creature cannot attack');
-        return false;
-    }
-
-    if (attacker.summoningSick && !attacker.keywords?.includes('charge')) {
-        console.warn('Creature has summoning sickness');
         return false;
     }
 
@@ -320,19 +328,18 @@ export function checkGameOver() {
     const state = store.getState();
     const factions = (function() { try { return JSON.parse(localStorage.getItem('stonefire.factions') || 'null'); } catch(e) { return null; } })();
     const playerFaction = (factions && factions.player) || 'UNKNOWN';
-    const enemyFaction = (factions && factions.enemy) || 'UNKNOWN';
 
     if (state.player.health <= 0) {
         store.dispatch(actions.setGameOver('enemy'));
         deleteSave();
-        recordGameResult('loss', playerFaction, enemyFaction);
+        recordGameResult('loss', playerFaction);
         return true;
     }
 
     if (state.enemy.health <= 0) {
         store.dispatch(actions.setGameOver('player'));
         deleteSave();
-        recordGameResult('win', playerFaction, enemyFaction);
+        recordGameResult('win', playerFaction);
         return true;
     }
 
@@ -440,6 +447,7 @@ export function canCreatureAttack(player, creatureId) {
     if (!creature) return false;
 
     if (creature.hasAttacked) return false;
+    if (creature.canAttack === false) return false;
     if (creature.currentAttack <= 0) return false;
     if (creature.summoningSick && !creature.keywords?.includes('charge')) return false;
 
@@ -463,6 +471,11 @@ export function canPlayCard(player, cardId) {
     // Check board space for creatures
     if (card.type === 'creature' && state[player].board.length >= CONFIG.MAX_BOARD_SIZE) {
         return false;
+    }
+
+    if (card.requiresTarget) {
+        const validTargets = getValidTargets(player, card);
+        if (validTargets.length === 0) return false;
     }
 
     return true;

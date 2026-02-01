@@ -241,7 +241,7 @@ function setupEventListeners() {
         const enemyFaction = (factions && factions.enemy) || 'UNKNOWN';
         const result = winner === 'player' ? 'win' : 'loss';
 
-        recordGameResult(result, playerFaction, enemyFaction);
+        recordGameResult(result, playerFaction);
         deleteSave();
     });
 
@@ -322,6 +322,7 @@ function initUIEnhancements() {
     const primaryNav = document.getElementById('primaryNav');
     const installBtn = document.getElementById('installBtn');
     let deferredPrompt = null;
+    let installClickHandler = null;
 
     if (navToggle && primaryNav) {
         // Toggle mobile nav dropdown
@@ -333,7 +334,7 @@ function initUIEnhancements() {
 
         // Close dropdown when clicking outside
         document.addEventListener('click', (ev) => {
-            if (primaryNav.classList.contains('open') && !primaryNav.contains(ev.target) && ev.target !== navToggle) {
+            if (primaryNav.classList.contains('open') && !primaryNav.contains(ev.target) && !navToggle.contains(ev.target)) {
                 primaryNav.classList.remove('open');
                 navToggle.setAttribute('aria-expanded', 'false');
             }
@@ -358,6 +359,9 @@ function initUIEnhancements() {
             installBtn.setAttribute('aria-hidden', 'false');
             installBtn.classList.add('visible');
             // attach click handler
+            if (installClickHandler) {
+                installBtn.removeEventListener('click', installClickHandler);
+            }
             const onInstall = async () => {
                 installBtn.disabled = true;
                 try {
@@ -377,8 +381,12 @@ function initUIEnhancements() {
                 installBtn.hidden = true;
                 installBtn.setAttribute('aria-hidden', 'true');
                 installBtn.disabled = false;
-                installBtn.removeEventListener('click', onInstall);
+                if (installClickHandler) {
+                    installBtn.removeEventListener('click', installClickHandler);
+                }
+                installClickHandler = null;
             };
+            installClickHandler = onInstall;
             installBtn.addEventListener('click', onInstall);
         }
     });
@@ -693,7 +701,6 @@ function initCardMagnification() {
 
     // For touch devices: long-press to magnify (only hand cards)
     let longPressTimer = null;
-    let longPressCard = null;
 
     document.addEventListener('touchstart', (ev) => {
         // ev.target might be a text node, so check it's an Element
@@ -702,7 +709,6 @@ function initCardMagnification() {
         const card = ev.target.closest('.player-hand .card');
         if (!card) return;
 
-        longPressCard = card;
         longPressTimer = setTimeout(() => {
             showMagnifiedCard(card);
         }, 500); // 500ms long press
@@ -713,7 +719,6 @@ function initCardMagnification() {
             clearTimeout(longPressTimer);
             longPressTimer = null;
         }
-        longPressCard = null;
         hideMagnifiedCard();
     }, { passive: true });
 
@@ -725,4 +730,3 @@ function initCardMagnification() {
         }
     }, { passive: true });
 }
-

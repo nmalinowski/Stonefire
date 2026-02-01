@@ -51,6 +51,15 @@ const FACTION_NAMES = {
     iceage: 'Ice Age'
 };
 
+const FACTION_ID_MAP = {
+    TRIASSIC: 'triassic',
+    JURASSIC: 'jurassic',
+    CRETACEOUS: 'cretaceous',
+    PRIMORDIAL: 'primordial',
+    ICE_AGE: 'iceage',
+    NEUTRAL: 'neutral'
+};
+
 const MAX_BOARD_SIZE = 7;
 const LOW_HEALTH_THRESHOLD = 5;
 
@@ -340,10 +349,10 @@ function saveStats(stats) {
  * Record a game result
  * @param {'win'|'loss'} result
  * @param {string} playerFaction
- * @param {string} enemyFaction
  */
-export async function recordGameResult(result, playerFaction, enemyFaction) {
+export async function recordGameResult(result, playerFaction) {
     const stats = getStats();
+    const normalizedFaction = normalizeFactionId(playerFaction);
 
     stats.games_played++;
 
@@ -359,14 +368,21 @@ export async function recordGameResult(result, playerFaction, enemyFaction) {
     }
 
     // Per-faction stats
-    if (!stats.faction_stats[playerFaction]) {
-        stats.faction_stats[playerFaction] = { games: 0, wins: 0, losses: 0 };
+    if (!stats.faction_stats[normalizedFaction]) {
+        stats.faction_stats[normalizedFaction] = { games: 0, wins: 0, losses: 0 };
     }
-    stats.faction_stats[playerFaction].games++;
-    stats.faction_stats[playerFaction][result === 'win' ? 'wins' : 'losses']++;
+    stats.faction_stats[normalizedFaction].games++;
+    stats.faction_stats[normalizedFaction][result === 'win' ? 'wins' : 'losses']++;
 
     saveStats(stats);
     await syncStats(stats);
+}
+
+function normalizeFactionId(faction) {
+    if (!faction) return 'unknown';
+    const mapped = FACTION_ID_MAP[faction.toUpperCase()];
+    if (mapped) return mapped;
+    return faction.toLowerCase().replace(/[^a-z]/g, '') || 'unknown';
 }
 
 /**

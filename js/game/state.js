@@ -239,10 +239,8 @@ function gameReducer(state, action) {
                     if (creature.summoningSick) {
                         creature.summoningSick = false;
                     }
-                    // Update canAttack based on current state (preserve explicit disables)
-                    creature.canAttack = creature.canAttack !== false &&
-                        !creature.summoningSick &&
-                        creature.currentAttack > 0;
+                    // Update canAttack - creature can attack if not sick and has attack power
+                    creature.canAttack = !creature.summoningSick && creature.currentAttack > 0;
                 }
             });
 

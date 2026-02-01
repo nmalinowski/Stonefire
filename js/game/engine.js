@@ -72,11 +72,13 @@ export function startGame(playerDeck, enemyDeck) {
     for (let i = 0; i < CONFIG.STARTING_HAND_SIZE; i++) {
         store.dispatch(actions.drawCard('player'));
     }
+    console.log(`[ENGINE] startGame: Player starting hand = ${store.getState().player.hand.length} cards`);
 
     // Enemy goes second, gets 4 cards
     for (let i = 0; i < CONFIG.STARTING_HAND_SIZE_SECOND; i++) {
         store.dispatch(actions.drawCard('enemy'));
     }
+    console.log(`[ENGINE] startGame: Enemy starting hand = ${store.getState().enemy.hand.length} cards`);
 
     // Start player's first turn
     startTurn('player');
@@ -109,8 +111,11 @@ export function startTurn(player) {
     store.dispatch(actions.startTurn(player));
 
     // Draw a card (skip on turn 1 for the first player)
-    if (!(nextTurn === 1 && player === 'player')) {
+    const shouldDraw = !(nextTurn === 1 && player === 'player');
+    console.log(`[ENGINE] Turn ${nextTurn} for ${player}: shouldDraw=${shouldDraw}, handSize=${store.getState()[player].hand.length}`);
+    if (shouldDraw) {
         store.dispatch(actions.drawCard(player));
+        console.log(`[ENGINE] ${player} drew a card, new handSize=${store.getState()[player].hand.length}`);
     }
 
     // Check for triggered effects at turn start
@@ -442,15 +447,33 @@ export function getValidAttackTargets(attackerPlayer) {
 export function canCreatureAttack(player, creatureId) {
     const state = store.getState();
 
-    if (state.activePlayer !== player) return false;
+    if (state.activePlayer !== player) {
+        console.log('Attack blocked: not active player', { activePlayer: state.activePlayer, player });
+        return false;
+    }
 
     const creature = state[player].board.find(c => c.instanceId === creatureId);
-    if (!creature) return false;
+    if (!creature) {
+        console.log('Attack blocked: creature not found', { creatureId, board: state[player].board.map(c => c?.instanceId) });
+        return false;
+    }
 
-    if (creature.hasAttacked) return false;
-    if (creature.canAttack === false) return false;
-    if (creature.currentAttack <= 0) return false;
-    if (creature.summoningSick && !creature.keywords?.includes('charge')) return false;
+    if (creature.hasAttacked) {
+        console.log('Attack blocked: already attacked', { creatureId });
+        return false;
+    }
+    if (creature.canAttack === false) {
+        console.log('Attack blocked: canAttack is false', { creatureId, creature });
+        return false;
+    }
+    if (creature.currentAttack <= 0) {
+        console.log('Attack blocked: no attack power', { creatureId, currentAttack: creature.currentAttack });
+        return false;
+    }
+    if (creature.summoningSick && !creature.keywords?.includes('charge')) {
+        console.log('Attack blocked: summoning sickness', { creatureId });
+        return false;
+    }
 
     return true;
 }

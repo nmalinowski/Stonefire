@@ -16,6 +16,7 @@ const DEFAULT_STATS = {
     current_streak: 0,
     best_streak: 0,
     faction_stats: {},
+    enemy_faction_stats: {},
     achievement_stats: {}
 };
 
@@ -49,6 +50,15 @@ const FACTION_NAMES = {
     cretaceous: 'Cretaceous',
     primordial: 'Primordial',
     iceage: 'Ice Age'
+};
+
+const FACTION_ID_MAP = {
+    TRIASSIC: 'triassic',
+    JURASSIC: 'jurassic',
+    CRETACEOUS: 'cretaceous',
+    PRIMORDIAL: 'primordial',
+    ICE_AGE: 'iceage',
+    NEUTRAL: 'neutral'
 };
 
 const MAX_BOARD_SIZE = 7;
@@ -290,7 +300,8 @@ function normalizeStats(stats) {
 
     return ensureAchievementStats({
         ...baseStats,
-        faction_stats: baseStats.faction_stats || {}
+        faction_stats: baseStats.faction_stats || {},
+        enemy_faction_stats: baseStats.enemy_faction_stats || {}
     });
 }
 
@@ -363,6 +374,8 @@ function emitNewAchievements(statsBefore, statsAfter) {
 export async function recordGameResult(result, playerFaction, enemyFaction) {
     const statsBefore = getStats();
     const stats = { ...statsBefore };
+    const normalizedFaction = normalizeFactionId(playerFaction);
+    const normalizedEnemyFaction = normalizeFactionId(enemyFaction);
 
     stats.games_played++;
 
@@ -378,15 +391,28 @@ export async function recordGameResult(result, playerFaction, enemyFaction) {
     }
 
     // Per-faction stats
-    if (!stats.faction_stats[playerFaction]) {
-        stats.faction_stats[playerFaction] = { games: 0, wins: 0, losses: 0 };
+    if (!stats.faction_stats[normalizedFaction]) {
+        stats.faction_stats[normalizedFaction] = { games: 0, wins: 0, losses: 0 };
     }
-    stats.faction_stats[playerFaction].games++;
-    stats.faction_stats[playerFaction][result === 'win' ? 'wins' : 'losses']++;
+    stats.faction_stats[normalizedFaction].games++;
+    stats.faction_stats[normalizedFaction][result === 'win' ? 'wins' : 'losses']++;
+
+    if (!stats.enemy_faction_stats[normalizedEnemyFaction]) {
+        stats.enemy_faction_stats[normalizedEnemyFaction] = { games: 0, wins: 0, losses: 0 };
+    }
+    stats.enemy_faction_stats[normalizedEnemyFaction].games++;
+    stats.enemy_faction_stats[normalizedEnemyFaction][result === 'win' ? 'wins' : 'losses']++;
 
     saveStats(stats);
     emitNewAchievements(statsBefore, stats);
     await syncStats(stats);
+}
+
+function normalizeFactionId(faction) {
+    if (!faction) return 'unknown';
+    const mapped = FACTION_ID_MAP[faction.toUpperCase()];
+    if (mapped) return mapped;
+    return faction.toLowerCase().replace(/[^a-z]/g, '') || 'unknown';
 }
 
 /**
@@ -436,6 +462,7 @@ export async function fetchAndMergeStats() {
             current_streak: safeMax(local.current_streak, remote.current_streak),
             best_streak: safeMax(local.best_streak, remote.best_streak),
             faction_stats: { ...remote.faction_stats },
+            enemy_faction_stats: { ...remote.enemy_faction_stats },
             achievement_stats: { ...remote.achievement_stats }
         });
 
@@ -448,6 +475,18 @@ export async function fetchAndMergeStats() {
                     games: safeMax(local.faction_stats[faction].games, merged.faction_stats[faction].games),
                     wins: safeMax(local.faction_stats[faction].wins, merged.faction_stats[faction].wins),
                     losses: safeMax(local.faction_stats[faction].losses, merged.faction_stats[faction].losses)
+                };
+            }
+        }
+
+        for (const faction of Object.keys(local.enemy_faction_stats)) {
+            if (!merged.enemy_faction_stats[faction]) {
+                merged.enemy_faction_stats[faction] = local.enemy_faction_stats[faction];
+            } else {
+                merged.enemy_faction_stats[faction] = {
+                    games: safeMax(local.enemy_faction_stats[faction].games, merged.enemy_faction_stats[faction].games),
+                    wins: safeMax(local.enemy_faction_stats[faction].wins, merged.enemy_faction_stats[faction].wins),
+                    losses: safeMax(local.enemy_faction_stats[faction].losses, merged.enemy_faction_stats[faction].losses)
                 };
             }
         }

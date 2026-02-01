@@ -105,7 +105,8 @@ stonefire/
 │   │   ├── animations.js  # Animation system
 │   │   ├── wizard.js      # Game setup wizard
 │   │   ├── chatBubble.js  # AI taunt speech bubbles
-│   │   └── authModal.js   # Login/signup modal
+│   │   ├── authModal.js   # Login/signup modal
+│   │   └── achievementToast.js # Achievement unlock notifications
 │   ├── services/
 │   │   ├── auth.js        # Authentication (anonymous, OAuth, email)
 │   │   ├── profile.js     # User profile & preferences
@@ -136,7 +137,7 @@ stonefire/
 - **AI Personalities**: Each faction has unique aggression levels and playstyle
 - **AI Taunts**: Faction-themed speech bubbles during gameplay
 - **Save/Load**: Auto-save with cloud sync for logged-in users
-- **Progress Tracking**: Win/loss stats, streaks, per-faction statistics
+- **Progress Tracking**: Win/loss stats, streaks, per-faction statistics, achievement notifications
 - **User Profiles**: Display name, preferences, cloud-synced settings
 - **Authentication**: Anonymous play, or sign in with GitHub/Google/email
 

@@ -213,7 +213,7 @@ function gameReducer(state, action) {
     switch (type) {
         case ActionTypes.START_GAME: {
             const newState = createInitialState();
-            newState.turn = 1;
+            newState.turn = 0;
             newState.player.deck = payload.playerDeck.map(createCardInstance);
             newState.enemy.deck = payload.enemyDeck.map(createCardInstance);
             return newState;
@@ -239,8 +239,10 @@ function gameReducer(state, action) {
                     if (creature.summoningSick) {
                         creature.summoningSick = false;
                     }
-                    // Update canAttack based on current state
-                    creature.canAttack = !creature.summoningSick && creature.currentAttack > 0;
+                    // Update canAttack based on current state (preserve explicit disables)
+                    creature.canAttack = creature.canAttack !== false &&
+                        !creature.summoningSick &&
+                        creature.currentAttack > 0;
                 }
             });
 
@@ -320,6 +322,7 @@ function gameReducer(state, action) {
                 events.emit('SPELL_CAST', { player: payload.player, card, target: payload.target });
             } else if (card.type === 'relic') {
                 // Relic handling
+                player.graveyard.push(card);
                 events.emit('RELIC_PLAYED', { player: payload.player, card });
             }
 
@@ -336,11 +339,11 @@ function gameReducer(state, action) {
             // Add creature directly to board
             const creature = {
                 ...payload.creature,
-                instanceId: payload.creature.instanceId || `token_${Date.now()}`,
-                currentAttack: payload.creature.attack,
-                currentHealth: payload.creature.health,
-                maxHealth: payload.creature.health,
-                canAttack: payload.creature.keywords?.includes('charge'),
+                instanceId: payload.creature.instanceId || generateCardInstanceId(),
+                currentAttack: payload.creature.attack ?? 0,
+                currentHealth: payload.creature.health ?? 0,
+                maxHealth: payload.creature.health ?? 0,
+                canAttack: payload.creature.keywords?.includes('charge') && (payload.creature.attack ?? 0) > 0,
                 hasAttacked: false,
                 summoningSick: !payload.creature.keywords?.includes('charge')
             };
@@ -354,7 +357,10 @@ function gameReducer(state, action) {
             const { attackerId, targetId, attackerPlayer } = payload;
 
             const attacker = findCreature(newState, attackerPlayer, attackerId);
-            if (!attacker || !attacker.canAttack || attacker.hasAttacked) return state;
+            if (!attacker || attacker.hasAttacked) return state;
+            if (attacker.canAttack === false) return state;
+            if (attacker.summoningSick && !attacker.keywords?.includes('charge')) return state;
+            if (attacker.currentAttack <= 0) return state;
 
             attacker.hasAttacked = true;
             attacker.canAttack = false;

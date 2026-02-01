@@ -358,6 +358,7 @@ function gameReducer(state, action) {
 
             const attacker = findCreature(newState, attackerPlayer, attackerId);
             if (!attacker || attacker.hasAttacked) return state;
+            if (attacker.canAttack === false) return state;
             if (attacker.summoningSick && !attacker.keywords?.includes('charge')) return state;
             if (attacker.currentAttack <= 0) return state;
 

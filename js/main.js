@@ -241,7 +241,7 @@ function setupEventListeners() {
         const enemyFaction = (factions && factions.enemy) || 'UNKNOWN';
         const result = winner === 'player' ? 'win' : 'loss';
 
-        recordGameResult(result, playerFaction);
+        recordGameResult(result, playerFaction, enemyFaction);
         deleteSave();
     });
 

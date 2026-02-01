@@ -102,6 +102,7 @@ function shuffleDeck(deck) {
 export function startTurn(player) {
     const state = store.getState();
     if (state.gameOver) return;
+    // Turn count assumes the player goes first (so turn increments on player's starts).
     const nextTurn = player === 'player' ? state.turn + 1 : state.turn;
 
     // Dispatch start turn action (increments mana, refreshes crystals)
@@ -332,14 +333,14 @@ export function checkGameOver() {
     if (state.player.health <= 0) {
         store.dispatch(actions.setGameOver('enemy'));
         deleteSave();
-        recordGameResult('loss', playerFaction);
+        recordGameResult('loss', playerFaction, enemyFaction);
         return true;
     }
 
     if (state.enemy.health <= 0) {
         store.dispatch(actions.setGameOver('player'));
         deleteSave();
-        recordGameResult('win', playerFaction);
+        recordGameResult('win', playerFaction, enemyFaction);
         return true;
     }
 

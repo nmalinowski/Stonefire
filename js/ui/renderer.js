@@ -344,11 +344,13 @@ function updateInteractiveStates(state) {
     const isPlayerTurn = state.activePlayer === 'player';
 
     // Update hand cards
-    const handCards = elements.playerHand.querySelectorAll('.card');
-    handCards.forEach(cardEl => {
-        const canPlay = isPlayerTurn && cardEl.classList.contains('playable');
-        cardEl.style.cursor = canPlay ? 'pointer' : 'default';
-    });
+    if (elements.playerHand) {
+        const handCards = elements.playerHand.querySelectorAll('.card');
+        handCards.forEach(cardEl => {
+            const canPlay = isPlayerTurn && cardEl.classList.contains('playable');
+            cardEl.style.cursor = canPlay ? 'pointer' : 'default';
+        });
+    }
 }
 
 /**

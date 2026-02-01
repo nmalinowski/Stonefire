@@ -77,7 +77,7 @@ function resolveCreatureAttack(attackerPlayer, attacker, targetPlayer, defender)
     store.dispatch(actions.dealDamage(
         targetPlayer,
         defender.instanceId,
-        attacker.currentAttack,
+        attackerDamage,
         attacker.instanceId
     ));
 
@@ -85,7 +85,7 @@ function resolveCreatureAttack(attackerPlayer, attacker, targetPlayer, defender)
     store.dispatch(actions.dealDamage(
         attackerPlayer,
         attacker.instanceId,
-        defender.currentAttack,
+        defenderDamage,
         defender.instanceId
     ));
 

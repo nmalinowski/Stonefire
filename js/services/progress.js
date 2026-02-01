@@ -16,6 +16,7 @@ const DEFAULT_STATS = {
     current_streak: 0,
     best_streak: 0,
     faction_stats: {},
+    enemy_faction_stats: {},
     achievement_stats: {}
 };
 
@@ -299,7 +300,8 @@ function normalizeStats(stats) {
 
     return ensureAchievementStats({
         ...baseStats,
-        faction_stats: baseStats.faction_stats || {}
+        faction_stats: baseStats.faction_stats || {},
+        enemy_faction_stats: baseStats.enemy_faction_stats || {}
     });
 }
 
@@ -349,10 +351,12 @@ function saveStats(stats) {
  * Record a game result
  * @param {'win'|'loss'} result
  * @param {string} playerFaction
+ * @param {string} enemyFaction
  */
-export async function recordGameResult(result, playerFaction) {
+export async function recordGameResult(result, playerFaction, enemyFaction) {
     const stats = getStats();
     const normalizedFaction = normalizeFactionId(playerFaction);
+    const normalizedEnemyFaction = normalizeFactionId(enemyFaction);
 
     stats.games_played++;
 
@@ -373,6 +377,12 @@ export async function recordGameResult(result, playerFaction) {
     }
     stats.faction_stats[normalizedFaction].games++;
     stats.faction_stats[normalizedFaction][result === 'win' ? 'wins' : 'losses']++;
+
+    if (!stats.enemy_faction_stats[normalizedEnemyFaction]) {
+        stats.enemy_faction_stats[normalizedEnemyFaction] = { games: 0, wins: 0, losses: 0 };
+    }
+    stats.enemy_faction_stats[normalizedEnemyFaction].games++;
+    stats.enemy_faction_stats[normalizedEnemyFaction][result === 'win' ? 'wins' : 'losses']++;
 
     saveStats(stats);
     await syncStats(stats);
@@ -432,6 +442,7 @@ export async function fetchAndMergeStats() {
             current_streak: safeMax(local.current_streak, remote.current_streak),
             best_streak: safeMax(local.best_streak, remote.best_streak),
             faction_stats: { ...remote.faction_stats },
+            enemy_faction_stats: { ...remote.enemy_faction_stats },
             achievement_stats: { ...remote.achievement_stats }
         });
 
@@ -444,6 +455,18 @@ export async function fetchAndMergeStats() {
                     games: safeMax(local.faction_stats[faction].games, merged.faction_stats[faction].games),
                     wins: safeMax(local.faction_stats[faction].wins, merged.faction_stats[faction].wins),
                     losses: safeMax(local.faction_stats[faction].losses, merged.faction_stats[faction].losses)
+                };
+            }
+        }
+
+        for (const faction of Object.keys(local.enemy_faction_stats)) {
+            if (!merged.enemy_faction_stats[faction]) {
+                merged.enemy_faction_stats[faction] = local.enemy_faction_stats[faction];
+            } else {
+                merged.enemy_faction_stats[faction] = {
+                    games: safeMax(local.enemy_faction_stats[faction].games, merged.enemy_faction_stats[faction].games),
+                    wins: safeMax(local.enemy_faction_stats[faction].wins, merged.enemy_faction_stats[faction].wins),
+                    losses: safeMax(local.enemy_faction_stats[faction].losses, merged.enemy_faction_stats[faction].losses)
                 };
             }
         }

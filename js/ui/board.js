@@ -4,7 +4,7 @@
  */
 
 import { renderCard } from './cards.js';
-import { canCreatureAttack, getValidAttackTargets, getValidTargets } from '../game/engine.js';
+import { getValidAttackTargets } from '../game/engine.js';
 import { store } from '../game/state.js';
 
 /**
@@ -15,7 +15,9 @@ import { store } from '../game/state.js';
  * @param {Object} state - Current game state
  */
 export function renderBoard(boardEl, creatures, playerId, state) {
+    if (!boardEl) return;
     const slotsContainer = boardEl.querySelector('.board-slots');
+    if (!slotsContainer) return;
     const slots = slotsContainer.querySelectorAll('.board-slot');
 
     // Clear all slots first
@@ -51,8 +53,9 @@ function getCreatureOptions(creature, playerId, state) {
     const canAttack = isPlayerTurn &&
         isPlayerCreature &&
         !creature.hasAttacked &&
-        !creature.summoningSick &&
-        creature.currentAttack > 0;
+        creature.currentAttack > 0 &&
+        creature.canAttack !== false &&
+        (!creature.summoningSick || creature.keywords?.includes('charge'));
 
     // Is this creature selected for attacking?
     const selected = selection.type === 'board_creature' &&
@@ -69,8 +72,7 @@ function getCreatureOptions(creature, playerId, state) {
 
     return {
         onBoard: true,
-        canAttack: canAttack && !creature.keywords?.includes('charge') ||
-                   (canAttack && creature.keywords?.includes('charge') && !creature.summoningSick),
+        canAttack,
         selected,
         targetable,
         summoningSick: creature.summoningSick && !creature.keywords?.includes('charge'),

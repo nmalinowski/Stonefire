@@ -27,7 +27,6 @@ export function saveGame() {
         localStorage.setItem(LOCAL_SAVE_KEY, JSON.stringify(saveData));
     } catch {
         console.warn('Failed to save game locally');
-        return;
     }
 
     // Sync to Supabase
@@ -72,7 +71,8 @@ export async function deleteSave() {
  * Check if a save exists
  */
 export function hasSavedGame() {
-    return loadLocalSave() !== null;
+    const save = loadLocalSave();
+    return !!(save && save.gameState);
 }
 
 /**

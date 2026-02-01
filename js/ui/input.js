@@ -7,13 +7,8 @@ import { store, actions, events } from '../game/state.js';
 import { playCard, attack, endTurn, canPlayCard, canCreatureAttack, getValidAttackTargets, getValidTargets } from '../game/engine.js';
 import { showCardPreview, hideCardPreview } from './cards.js';
 import { highlightAttackTargets, highlightSpellTargets, clearTargetHighlights, clearSelectionHighlights, shakeGuardCreatures } from './board.js';
-import { showAttackArrow, hideAttackArrow, render } from './renderer.js';
+import { hideAttackArrow, render } from './renderer.js';
 import { showWizard, showFactionSelection } from './wizard.js';
-
-// Input state
-let isDragging = false;
-let draggedCard = null;
-let dragOffset = { x: 0, y: 0 };
 
 // Track last hovered target when showing a dynamic spell/attack arrow
 let lastHoverTarget = null;
@@ -74,6 +69,8 @@ export function initInput() {
  * Handle click events
  */
 function handleClick(e) {
+    if (!(e.target instanceof Element)) return;
+    if (e.target.closest('.card-preview')) return;
     if (suppressNextClick) {
         suppressNextClick = false;
         touchPreviewShown = false;
@@ -115,7 +112,6 @@ function handleClick(e) {
 function handleCardClick(cardEl, state) {
     const instanceId = cardEl.dataset.instanceId;
     const playerId = cardEl.dataset.playerId;
-    const selection = state.selection;
 
     // Is this card in hand?
     const inHand = cardEl.closest('.hand') !== null;
@@ -138,7 +134,7 @@ function handleHandCardClick(instanceId, state) {
     if (!canPlayCard('player', instanceId)) {
         // Can't play - just select it to show info
         store.dispatch(actions.setSelection('hand_card', instanceId, 'player'));
-        render(state);
+        render();
         return;
     }
 
@@ -157,7 +153,7 @@ function handleHandCardClick(instanceId, state) {
         // Multiple targets - require selection
         if (validTargets.length > 1) {
             store.dispatch(actions.setSelection('hand_card', instanceId, 'player'));
-            render(state);
+            render();
             highlightSpellTargets('player', card);
             return;
         }
@@ -215,13 +211,13 @@ function handleBoardCreatureClick(instanceId, playerId, state) {
     if (playerId === 'player' && canCreatureAttack('player', instanceId)) {
         store.dispatch(actions.setSelection('board_creature', instanceId, 'player'));
         highlightAttackTargets('player', store.getState());
-        render(state);
+        render();
         return;
     }
 
     // Otherwise just show selection (for info)
     store.dispatch(actions.setSelection('board_creature', instanceId, playerId));
-    render(state);
+    render();
 }
 
 /**
@@ -283,7 +279,7 @@ function clearTouchPreview() {
 }
 
 function handlePointerDown(e) {
-    if (e.pointerType !== 'touch') return;
+    if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
     const state = store.getState();
     const cardEl = e.target.closest('.card:not(.face-down)');
     if (!cardEl) return;
@@ -303,7 +299,7 @@ function handlePointerDown(e) {
 }
 
 function handlePointerMove(e) {
-    if (e.pointerType !== 'touch' || !touchPreviewTimer || !touchStartPos) return;
+    if ((e.pointerType !== 'touch' && e.pointerType !== 'pen') || !touchPreviewTimer || !touchStartPos) return;
     const deltaX = e.clientX - touchStartPos.x;
     const deltaY = e.clientY - touchStartPos.y;
     const distance = Math.hypot(deltaX, deltaY);
@@ -313,7 +309,7 @@ function handlePointerMove(e) {
 }
 
 function handlePointerUp(e) {
-    if (e.pointerType !== 'touch') return;
+    if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
     const hadPreview = touchPreviewShown;
     clearTouchPreview();
     if (hadPreview) {
@@ -406,6 +402,7 @@ function handleRightClick(e) {
  * Handle mouse move
  */
 function handleMouseMove(e) {
+    if (!(e.target instanceof Element)) return;
     const state = store.getState();
     const selection = state.selection;
 
@@ -521,6 +518,20 @@ function handleMouseMove(e) {
  * Handle keyboard shortcuts
  */
 function handleKeyDown(e) {
+    const target = e.target;
+    const isEditableTarget = target && (
+        target.matches('input, textarea, select, [contenteditable="true"]') ||
+        target.closest('[contenteditable="true"]')
+    );
+    if (isEditableTarget) {
+        return;
+    }
+    const wizard = document.getElementById('game-wizard');
+    const authModal = document.getElementById('auth-modal');
+    if ((wizard && !wizard.classList.contains('hidden')) ||
+        (authModal && !authModal.classList.contains('hidden'))) {
+        return;
+    }
     const state = store.getState();
 
     switch (e.key) {
@@ -531,6 +542,7 @@ function handleKeyDown(e) {
         case ' ':
         case 'Enter':
             if (state.activePlayer === 'player' && !state.gameOver) {
+                e.preventDefault();
                 handleEndTurn();
             }
             break;
@@ -558,7 +570,7 @@ function handleKeyDown(e) {
                             playCard('player', card.instanceId, validTargets[0]);
                         } else if (validTargets.length > 1) {
                             store.dispatch(actions.setSelection('hand_card', card.instanceId, 'player'));
-                            render(state);
+                            render();
                             highlightSpellTargets('player', card);
                         }
                     }

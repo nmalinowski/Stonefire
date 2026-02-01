@@ -5,7 +5,7 @@
 
 import { getClient, isOnline } from './supabase.js';
 import { getCurrentUser } from './auth.js';
-import { store, ActionTypes } from '../game/state.js';
+import { store, ActionTypes, events } from '../game/state.js';
 
 const LOCAL_STATS_KEY = 'stonefire.stats';
 
@@ -337,13 +337,32 @@ function saveStats(stats) {
 }
 
 /**
+ * Detect newly unlocked achievements and emit events
+ * @param {Object} statsBefore - Stats before the update
+ * @param {Object} statsAfter - Stats after the update
+ */
+function emitNewAchievements(statsBefore, statsAfter) {
+    const unlockedBefore = new Set(
+        getAchievements(statsBefore).filter(a => a.unlocked).map(a => a.id)
+    );
+
+    const newlyUnlocked = getAchievements(statsAfter)
+        .filter(a => a.unlocked && !unlockedBefore.has(a.id));
+
+    newlyUnlocked.forEach(achievement => {
+        events.emit('ACHIEVEMENT_UNLOCKED', achievement);
+    });
+}
+
+/**
  * Record a game result
  * @param {'win'|'loss'} result
  * @param {string} playerFaction
  * @param {string} enemyFaction
  */
 export async function recordGameResult(result, playerFaction, enemyFaction) {
-    const stats = getStats();
+    const statsBefore = getStats();
+    const stats = { ...statsBefore };
 
     stats.games_played++;
 
@@ -366,6 +385,7 @@ export async function recordGameResult(result, playerFaction, enemyFaction) {
     stats.faction_stats[playerFaction][result === 'win' ? 'wins' : 'losses']++;
 
     saveStats(stats);
+    emitNewAchievements(statsBefore, stats);
     await syncStats(stats);
 }
 
@@ -455,10 +475,11 @@ function createSessionState() {
 }
 
 function updateAchievementStats(mutator) {
-    let stats = getStats();
-    const result = mutator(stats);
+    const statsBefore = getStats();
+    const result = mutator(statsBefore);
     if (result.didUpdate) {
         saveStats(result.stats);
+        emitNewAchievements(statsBefore, result.stats);
         scheduleStatsSync();
     }
 }
@@ -572,6 +593,7 @@ export function registerAchievementTracking() {
                 }
                 case ActionTypes.PLAY_CARD: {
                     if (action.payload.player === 'player') {
+                        // Card is already removed from hand in current state, so use prevState
                         const playedCard = prevState?.player?.hand?.find(
                             (card) => card.instanceId === action.payload.cardId
                         );

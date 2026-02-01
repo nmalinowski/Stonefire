@@ -542,12 +542,27 @@
             <!-- Attack Arrow (for visual feedback) -->
             <svg id="attack-arrow" class="attack-arrow hidden">
                 <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#ff4444" />
+                    <linearGradient id="arrow-gradient" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#ff8c00" />
+                        <stop offset="100%" stop-color="#ff3333" />
+                    </linearGradient>
+                    <filter id="arrow-glow">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                    <marker id="arrowhead" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto">
+                        <polygon points="0 0, 12 5, 0 10, 2 5" fill="#ff3333" />
                     </marker>
                 </defs>
-                <line id="arrow-line" stroke="#ff4444" stroke-width="3" marker-end="url(#arrowhead)" />
+                <path id="arrow-glow-path" stroke="#ff6600" stroke-width="8" fill="none" opacity="0.4" />
+                <path id="arrow-path" stroke="url(#arrow-gradient)" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrowhead)" />
             </svg>
+
+            <!-- Achievement Toast Notifications -->
+            <div id="achievement-toasts" class="achievement-toasts"></div>
 
             <!-- Floating Damage Numbers Container -->
             <div id="damage-numbers"></div>

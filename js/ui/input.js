@@ -30,6 +30,43 @@ const TOUCH_PREVIEW_MOVE_THRESHOLD = 10;
 const TOUCH_PREVIEW_SUPPRESS_TIMEOUT = 300;
 
 /**
+ * Calculate bezier curve path for attack arrow
+ * Creates a dynamic curve that responds to drag direction
+ */
+function calculateArrowPath(x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Minimal curve for very short distances
+    if (distance < 50) {
+        return { d: `M ${x1},${y1} L ${x2},${y2}`, x1, y1, x2, y2 };
+    }
+
+    const midX = (x1 + x2) / 2;
+    const midY = (y1 + y2) / 2;
+
+    // Curve amount scales with distance, capped
+    const curveAmount = Math.min(distance * 0.25, 80);
+
+    // Perpendicular vector (rotated 90 degrees), normalized
+    const perpX = -dy / distance;
+    const perpY = dx / distance;
+
+    // Bias upward (toward top of screen = negative Y)
+    // If dragging mostly horizontal, curve upward
+    // If dragging mostly vertical, curve to consistent side
+    const verticalBias = Math.abs(dy) > Math.abs(dx) ? 0.5 : 1;
+    const cx = midX + perpX * curveAmount * verticalBias;
+    const cy = midY - Math.abs(curveAmount * 0.5); // Always bias upward
+
+    return {
+        d: `M ${x1},${y1} Q ${cx},${cy} ${x2},${y2}`,
+        x1, y1, x2, y2
+    };
+}
+
+/**
  * Initialize input handlers
  */
 export function initInput() {
@@ -410,8 +447,7 @@ function handleMouseMove(e) {
     const selection = state.selection;
 
     const svg = document.getElementById('attack-arrow');
-    const line = document.getElementById('arrow-line');
-    const canRenderArrow = svg && line;
+    const canRenderArrow = svg !== null;
 
     // Helper to update hover class tracking
     function setHoverTarget(el) {
@@ -425,6 +461,28 @@ function handleMouseMove(e) {
         }
     }
 
+    // Helper to render the bezier arrow path
+    function renderArrowPath(startX, startY, endX, endY) {
+        const arrowPath = document.getElementById('arrow-path');
+        const glowPath = document.getElementById('arrow-glow-path');
+        const gradient = document.getElementById('arrow-gradient');
+
+        const { d, x1, y1, x2, y2 } = calculateArrowPath(startX, startY, endX, endY);
+
+        if (arrowPath) arrowPath.setAttribute('d', d);
+        if (glowPath) glowPath.setAttribute('d', d);
+
+        // Update gradient to follow path direction
+        if (gradient) {
+            gradient.setAttribute('x1', x1);
+            gradient.setAttribute('y1', y1);
+            gradient.setAttribute('x2', x2);
+            gradient.setAttribute('y2', y2);
+        }
+
+        svg.classList.remove('hidden');
+    }
+
     // Handle creature attacker selection (existing behavior), but snap to hovered valid target when present
     if (selection.type === 'board_creature' && selection.playerId === 'player') {
         const attackerEl = document.querySelector(`[data-instance-id="${selection.cardId}"]`);
@@ -433,26 +491,22 @@ function handleMouseMove(e) {
             const startX = rect.left + rect.width / 2;
             const startY = rect.top + rect.height / 2;
 
+            let endX = e.clientX;
+            let endY = e.clientY;
+
             // If hovering a valid target, snap to it
             const targetEl = e.target.closest('.card.targetable, .hero-portrait.targetable');
-            if (targetEl && canRenderArrow) {
+            if (targetEl) {
                 const targetRect = targetEl.getBoundingClientRect();
-                line.setAttribute('x2', targetRect.left + targetRect.width / 2);
-                line.setAttribute('y2', targetRect.top + targetRect.height / 2);
+                endX = targetRect.left + targetRect.width / 2;
+                endY = targetRect.top + targetRect.height / 2;
                 setHoverTarget(targetEl);
-            } else if (canRenderArrow) {
-                line.setAttribute('x2', e.clientX);
-                line.setAttribute('y2', e.clientY);
+            } else {
                 setHoverTarget(null);
             }
 
             if (canRenderArrow) {
-                line.setAttribute('x1', startX);
-                line.setAttribute('y1', startY);
-            }
-
-            if (canRenderArrow) {
-                svg.classList.remove('hidden');
+                renderArrowPath(startX, startY, endX, endY);
             }
             return; // early return so spell preview logic below doesn't interfere
         }
@@ -472,25 +526,21 @@ function handleMouseMove(e) {
                 startY = rect.top + rect.height / 2;
             }
 
+            let endX = e.clientX;
+            let endY = e.clientY;
+
             const targetEl = e.target.closest('.card.targetable, .hero-portrait.targetable');
-            if (targetEl && canRenderArrow) {
+            if (targetEl) {
                 const tr = targetEl.getBoundingClientRect();
-                line.setAttribute('x2', tr.left + tr.width / 2);
-                line.setAttribute('y2', tr.top + tr.height / 2);
+                endX = tr.left + tr.width / 2;
+                endY = tr.top + tr.height / 2;
                 setHoverTarget(targetEl);
-            } else if (canRenderArrow) {
-                line.setAttribute('x2', e.clientX);
-                line.setAttribute('y2', e.clientY);
+            } else {
                 setHoverTarget(null);
             }
 
             if (canRenderArrow) {
-                line.setAttribute('x1', startX);
-                line.setAttribute('y1', startY);
-            }
-
-            if (canRenderArrow) {
-                svg.classList.remove('hidden');
+                renderArrowPath(startX, startY, endX, endY);
             }
             return;
         }

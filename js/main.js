@@ -11,6 +11,7 @@ import { initAI, setAIPersonality } from './ai/opponent.js';
 import { createStarterDeck, createBalancedDeck, Faction } from './data/cards.js';
 import { initWizard, showWizard } from './ui/wizard.js';
 import { initChatBubble } from './ui/chatBubble.js';
+import { initAchievementToasts } from './ui/achievementToast.js';
 import { initAuth, onAuthChange } from './services/auth.js';
 import { initAuthModal, showModal as showAuthModal } from './ui/authModal.js';
 import { migrateOldPreferences, fetchAndMergeProfile } from './services/profile.js';
@@ -30,6 +31,7 @@ function init() {
     initInput();
     initAI();
     initChatBubble();
+    initAchievementToasts();
 
     // Set up event listeners
     setupEventListeners();

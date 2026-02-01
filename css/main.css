@@ -2161,6 +2161,22 @@ body.fullscreen-mode #game-container {
     display: none;
 }
 
+/* Attack Arrow - Animated Bezier */
+#arrow-path {
+    stroke-dasharray: 12 6;
+    animation: arrow-flow 0.4s linear infinite;
+}
+
+#arrow-glow-path {
+    filter: url(#arrow-glow);
+}
+
+@keyframes arrow-flow {
+    to {
+        stroke-dashoffset: -18;
+    }
+}
+
 /* Damage Numbers Container */
 #damage-numbers {
     position: fixed;
@@ -2806,4 +2822,85 @@ body.static-page #site-footer {
 
 .continue-actions .btn-secondary:hover {
     background: rgba(255,255,255,0.1);
+}
+
+/* Achievement Toasts */
+.achievement-toasts {
+    position: fixed;
+    top: calc(var(--header-height, 56px) + 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.achievement-toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: rgba(30, 25, 20, 0.95);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.2);
+    animation: toast-in 0.4s ease-out;
+}
+
+.achievement-toast.dismissing {
+    animation: toast-out 0.3s ease-in forwards;
+}
+
+.achievement-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.achievement-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.achievement-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #d4af37;
+}
+
+.achievement-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.achievement-names {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.achievement-names .achievement-name {
+    font-size: 14px;
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes toast-out {
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }
